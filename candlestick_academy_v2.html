@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Candlestick Academy — Maverick Edition v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050a0f;
+  --panel: #0a1520;
+  --panel2: #0d1c2e;
+  --border: #1a3a5c;
+  --accent: #00d4ff;
+  --accent2: #ff6b35;
+  --bull: #00ff88;
+  --bear: #ff3355;
+  --indecision: #ffd700;
+  --continuation: #a78bfa;
+  --ltpro: #00d4ff;
+  --text: #c8e6f5;
+  --text-dim: #4a7a9b;
+  --glow: 0 0 20px rgba(0,212,255,0.3);
+  --glow-bull: 0 0 15px rgba(0,255,136,0.4);
+  --glow-bear: 0 0 15px rgba(255,51,85,0.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.container{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:16px;}
+
+/* HEADER */
+header{text-align:center;padding:30px 16px 24px;border-bottom:1px solid var(--border);margin-bottom:24px;position:relative;}
+header::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:200px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+.title-top{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:5px;color:var(--accent);margin-bottom:6px;opacity:.8;}
+h1{font-family:'Orbitron',sans-serif;font-size:clamp(22px,5vw,44px);font-weight:900;background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;line-height:1.1;}
+.subtitle{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:8px;letter-spacing:3px;}
+
+/* STREAK BANNER */
+.streak-banner{display:flex;align-items:center;justify-content:center;gap:20px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:16px;flex-wrap:wrap;}
+.streak-item{display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:12px;}
+.streak-val{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;}
+.streak-fire{color:#ff6b35;}.streak-total{color:var(--accent);}.streak-best{color:var(--indecision);}
+
+/* NAV TABS */
+.nav-tabs{display:flex;gap:3px;margin-bottom:20px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px;flex-wrap:wrap;}
+.tab-btn{flex:1;min-width:90px;padding:9px 10px;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.tab-btn:hover{color:var(--text);border-color:var(--border);}
+.tab-btn.active{background:var(--panel2);border-color:var(--accent);color:var(--accent);box-shadow:var(--glow);}
+
+/* SECTIONS */
+.section{display:none;animation:fadeIn .3s ease;}
+.section.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* LIBRARY CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
+.candle-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;transition:all .25s;position:relative;overflow:hidden;}
+.candle-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.candle-card.bullish::before{background:linear-gradient(90deg,var(--bull),transparent);}
+.candle-card.bearish::before{background:linear-gradient(90deg,var(--bear),transparent);}
+.candle-card.indecision::before{background:linear-gradient(90deg,var(--indecision),transparent);}
+.candle-card.continuation::before{background:linear-gradient(90deg,var(--continuation),transparent);}
+.candle-card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:var(--glow);}
+.card-header{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.candle-svg{flex-shrink:0;}
+.card-title{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;}
+.card-type{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:3px 8px;border-radius:3px;margin-top:4px;display:inline-block;}
+.bullish .card-type{background:rgba(0,255,136,.15);color:var(--bull);border:1px solid rgba(0,255,136,.3);}
+.bearish .card-type{background:rgba(255,51,85,.15);color:var(--bear);border:1px solid rgba(255,51,85,.3);}
+.indecision .card-type{background:rgba(255,215,0,.15);color:var(--indecision);border:1px solid rgba(255,215,0,.3);}
+.continuation .card-type{background:rgba(167,139,250,.15);color:var(--continuation);border:1px solid rgba(167,139,250,.3);}
+.card-body{font-size:13px;line-height:1.6;color:var(--text);}
+.card-rule{margin-top:10px;padding:10px;background:rgba(0,212,255,.05);border-left:2px solid var(--accent);border-radius:0 4px 4px 0;font-size:12px;color:var(--text-dim);}
+.card-rule strong{color:var(--accent);}
+.structure-list{list-style:none;margin:6px 0;}
+.structure-list li{padding:2px 0 2px 14px;position:relative;font-size:13px;color:var(--text-dim);}
+.structure-list li::before{content:'▸';position:absolute;left:0;color:var(--accent);font-size:10px;}
+.category-header{display:flex;align-items:center;gap:12px;margin:24px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.category-label{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+.category-line{flex:1;height:1px;background:var(--border);}
+.cat-bull{color:var(--bull);}.cat-bear{color:var(--bear);}.cat-indecision{color:var(--indecision);}.cat-continuation{color:var(--continuation);}
+
+/* CHEAT SHEET */
+.cheat-wrap{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;overflow-x:auto;}
+.cheat-table{width:100%;border-collapse:collapse;font-size:13px;min-width:600px;}
+.cheat-table th{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;color:var(--accent);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel2);}
+.cheat-table th.center{text-align:center;}
+.cheat-table td{padding:8px 14px;border-bottom:1px solid rgba(26,58,92,.5);vertical-align:middle;}
+.cheat-table td.center{text-align:center;padding:4px 8px;}
+.cheat-table tr:hover td{background:rgba(0,212,255,.03);}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px;font-family:'Share Tech Mono',monospace;}
+.pill-bull{background:rgba(0,255,136,.15);color:var(--bull);border:1px solid rgba(0,255,136,.3);}
+.pill-bear{background:rgba(255,51,85,.15);color:var(--bear);border:1px solid rgba(255,51,85,.3);}
+.pill-indecision{background:rgba(255,215,0,.15);color:var(--indecision);border:1px solid rgba(255,215,0,.3);}
+.pill-continuation{background:rgba(167,139,250,.15);color:var(--continuation);border:1px solid rgba(167,139,250,.3);}
+
+/* CONTEXT */
+.context-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:600px){.context-grid{grid-template-columns:1fr;}.options-grid{grid-template-columns:1fr;}.cheat-table{font-size:12px;}}
+.context-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.context-card h3{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:1px;margin-bottom:12px;color:var(--accent);}
+.context-rule{display:flex;gap:10px;margin:7px 0;font-size:13px;line-height:1.5;}
+.rule-num{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--accent2);min-width:20px;}
+.alert-box{background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.3);border-radius:8px;padding:16px;margin:20px 0;}
+.alert-box h4{color:var(--accent2);font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:1px;margin-bottom:8px;}
+.alert-box p{font-size:13px;line-height:1.6;color:var(--text);}
+
+/* QUIZ */
+.quiz-container{max-width:680px;margin:0 auto;}
+.quiz-top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.level-selector{display:flex;gap:6px;flex-wrap:wrap;}
+.level-btn{padding:7px 14px;background:var(--panel2);border:1px solid var(--border);border-radius:20px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;cursor:pointer;transition:all .2s;}
+.level-btn:hover{border-color:var(--accent);color:var(--accent);}
+.level-btn.active{background:rgba(0,212,255,.1);border-color:var(--accent);color:var(--accent);}
+
+/* TIMER */
+.timer-toggle{display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);cursor:pointer;}
+.toggle-switch{width:36px;height:20px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;position:relative;cursor:pointer;transition:.2s;}
+.toggle-switch.on{background:rgba(0,212,255,.2);border-color:var(--accent);}
+.toggle-knob{width:14px;height:14px;background:var(--text-dim);border-radius:50%;position:absolute;top:2px;left:2px;transition:.2s;}
+.toggle-switch.on .toggle-knob{left:18px;background:var(--accent);}
+
+.timer-bar-wrap{height:6px;background:var(--panel2);border-radius:3px;margin-bottom:12px;overflow:hidden;border:1px solid var(--border);display:none;}
+.timer-bar-fill{height:100%;border-radius:3px;transition:width .1s linear;background:linear-gradient(90deg,var(--bull),var(--accent));}
+.timer-bar-fill.warning{background:linear-gradient(90deg,var(--indecision),var(--accent2));}
+.timer-bar-fill.danger{background:linear-gradient(90deg,var(--bear),var(--accent2));}
+
+.quiz-progress{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.progress-bar{flex:1;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--bull));border-radius:3px;transition:width .4s ease;}
+.progress-text{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--accent);white-space:nowrap;}
+.score-display{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;}
+.score-green{color:var(--bull);}.score-red{color:var(--bear);}
+
+.quiz-level-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;background:var(--panel2);border:1px solid var(--border);border-radius:20px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent2);margin-bottom:16px;}
+.quiz-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px;}
+.quiz-question{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:#fff;margin-bottom:16px;line-height:1.4;}
+.quiz-scenario{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px;}
+.scenario-item{display:flex;align-items:flex-start;gap:8px;margin:4px 0;color:var(--text-dim);font-size:13px;line-height:1.5;}
+.scenario-bullet{color:var(--accent);font-size:10px;margin-top:3px;flex-shrink:0;}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.option-btn{padding:12px 14px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-align:left;line-height:1.3;}
+.option-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.05);}
+.option-btn.correct{border-color:var(--bull)!important;background:rgba(0,255,136,.1)!important;color:var(--bull)!important;box-shadow:var(--glow-bull);}
+.option-btn.wrong{border-color:var(--bear)!important;background:rgba(255,51,85,.1)!important;color:var(--bear)!important;}
+.option-btn:disabled{cursor:default;}
+.feedback-box{margin-top:14px;padding:14px;border-radius:8px;font-size:13px;line-height:1.6;display:none;}
+.feedback-box.correct-fb{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.3);color:var(--bull);}
+.feedback-box.wrong-fb{background:rgba(255,51,85,.08);border:1px solid rgba(255,51,85,.3);color:var(--bear);}
+.feedback-insight{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.1);color:var(--text);font-size:12px;}
+.quiz-nav{display:flex;justify-content:flex-end;margin-top:12px;}
+.nav-btn{padding:11px 24px;background:transparent;border:1px solid var(--accent);border-radius:6px;color:var(--accent);font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s;}
+.nav-btn:hover{background:rgba(0,212,255,.1);box-shadow:var(--glow);}
+.nav-btn.primary{background:var(--accent);color:var(--bg);}
+.nav-btn.primary:hover{background:#00b8e0;}
+.quiz-complete{text-align:center;padding:36px 24px;background:var(--panel);border:1px solid var(--border);border-radius:12px;}
+.score-big{font-family:'Orbitron',sans-serif;font-size:56px;font-weight:900;line-height:1;margin:14px 0;}
+.score-label{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;color:var(--text-dim);}
+.score-message{font-size:16px;margin:14px 0;color:var(--text);}
+.complete-stats{display:flex;justify-content:center;gap:24px;margin:16px 0;flex-wrap:wrap;}
+.cstat{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text-dim);}
+.cstat span{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;display:block;}
+.restart-btn{margin-top:16px;padding:12px 28px;background:var(--accent);border:none;border-radius:6px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s;}
+.restart-btn:hover{background:#00b8e0;transform:translateY(-2px);}
+
+/* STREAK TRACKER */
+.streak-bar{display:flex;gap:4px;justify-content:center;margin:12px 0;flex-wrap:wrap;}
+.streak-dot{width:14px;height:14px;border-radius:50%;background:var(--panel2);border:1px solid var(--border);transition:.3s;}
+.streak-dot.hit{background:var(--bull);border-color:var(--bull);box-shadow:0 0 6px rgba(0,255,136,.5);}
+.streak-dot.miss{background:var(--bear);border-color:var(--bear);}
+
+/* GITHUB DEPLOY BOX */
+.deploy-box{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:24px;}
+.deploy-box h3{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:1px;color:var(--accent);margin-bottom:12px;}
+.deploy-box p{font-size:13px;line-height:1.7;color:var(--text-dim);}
+.deploy-box code{background:rgba(0,212,255,.1);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="title-top">🛩️ LTPro Academy — Maverick Edition v2</div>
+  <h1>CANDLESTICK<br>MASTER CLASS</h1>
+  <div class="subtitle">// STRUCTURE · CONTEXT · EXECUTION · LTPRO //</div>
+</header>
+
+<!-- STREAK BANNER -->
+<div class="streak-banner">
+  <div class="streak-item">
+    <span>🔥 STREAK</span>
+    <span class="streak-val streak-fire" id="bannerStreak">0</span>
+  </div>
+  <div class="streak-item">
+    <span>🏆 BEST</span>
+    <span class="streak-val streak-best" id="bannerBest">0</span>
+  </div>
+  <div class="streak-item">
+    <span>✅ ALL-TIME CORRECT</span>
+    <span class="streak-val streak-total" id="bannerTotal">0</span>
+  </div>
+  <div class="streak-item">
+    <span>📊 SESSIONS</span>
+    <span class="streak-val" style="color:var(--continuation)" id="bannerSessions">0</span>
+  </div>
+</div>
+
+<nav class="nav-tabs">
+  <button class="tab-btn active" onclick="showSection('library',this)">📚 Library</button>
+  <button class="tab-btn" onclick="showSection('cheatsheet',this)">⚡ Cheat Sheet</button>
+  <button class="tab-btn" onclick="showSection('context',this)">🧠 Context</button>
+  <button class="tab-btn" onclick="showSection('quiz',this)">🎮 Quiz</button>
+</nav>
+
+<!-- ═══════════════ LIBRARY ═══════════════ -->
+<div id="library" class="section active">
+
+  <div class="category-header"><span class="category-label cat-bull">▲ Bullish Reversal</span><div class="category-line"></div></div>
+  <div class="cards-grid">
+
+    <div class="candle-card bullish">
+      <div class="card-header">
+        <svg class="candle-svg" width="44" height="76" viewBox="0 0 44 76"><line x1="22" y1="4" x2="22" y2="18" stroke="#00ff88" stroke-width="2"/><rect x="13" y="18" width="18" height="8" fill="#00ff88" rx="1"/><line x1="22" y1="26" x2="22" y2="70" stroke="#00ff88" stroke-width="2"/></svg>
+        <div><div class="card-title" style="color:var(--bull)">HAMMER</div><span class="card-type">BULLISH REVERSAL</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Small body near the TOP</li><li>Long lower wick = 2–3× the body</li><li>Little to no upper wick</li><li>MUST occur after a downtrend</li></ul>
+        <div class="card-rule"><strong>⚠️ KEY:</strong> Size doesn't make a hammer — structure + location does. Large body = NOT a hammer (your 13:45 lesson).</div>
+      </div>
+    </div>
+
+    <div class="candle-card bullish">
+      <div class="card-header">
+        <svg class="candle-svg" width="44" height="76" viewBox="0 0 44 76"><line x1="22" y1="4" x2="22" y2="32" stroke="#00ff88" stroke-width="2"/><rect x="13" y="32" width="18" height="8" fill="#00ff88" rx="1"/><line x1="22" y1="40" x2="22" y2="48" stroke="#00ff88" stroke-width="2"/></svg>
+        <div><div class="card-title" style="color:var(--bull)">INVERTED HAMMER</div><span class="card-type">BULLISH REVERSAL</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Small body at the BOTTOM</li><li>Long upper wick = 2–3× the body</li><li>Little to no lower wick</li><li>Appears after downtrend</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> Bulls attempted to push higher. Needs confirmation next candle — weaker than hammer alone.</div>
+      </div>
+    </div>
+
+    <div class="candle-card bullish">
+      <div class="card-header">
+        <svg class="candle-svg" width="60" height="76" viewBox="0 0 60 76"><line x1="16" y1="4" x2="16" y2="12" stroke="#ff3355" stroke-width="1.5"/><rect x="9" y="12" width="14" height="14" fill="#ff3355" rx="1"/><line x1="16" y1="26" x2="16" y2="32" stroke="#ff3355" stroke-width="1.5"/><line x1="44" y1="30" x2="44" y2="36" stroke="#00ff88" stroke-width="1.5"/><rect x="36" y="36" width="16" height="28" fill="#00ff88" rx="1"/><line x1="44" y1="64" x2="44" y2="70" stroke="#00ff88" stroke-width="1.5"/></svg>
+        <div><div class="card-title" style="color:var(--bull)">BULLISH ENGULFING</div><span class="card-type">BULLISH REVERSAL</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Large green candle fully covers prior red</li><li>Green body opens below prior close</li><li>Green body closes above prior open</li><li>Appears after downtrend</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> Strong reversal — buyers overwhelmed sellers completely. Higher volume = stronger signal.</div>
+      </div>
+    </div>
+
+    <div class="candle-card bullish">
+      <div class="card-header">
+        <svg class="candle-svg" width="70" height="76" viewBox="0 0 70 76"><line x1="12" y1="4" x2="12" y2="10" stroke="#ff3355" stroke-width="1.5"/><rect x="6" y="10" width="12" height="14" fill="#ff3355" rx="1"/><line x1="12" y1="24" x2="12" y2="30" stroke="#ff3355" stroke-width="1.5"/><line x1="35" y1="30" x2="35" y2="35" stroke="#ffd700" stroke-width="1.5"/><rect x="30" y="35" width="10" height="4" fill="#ffd700" rx="1"/><line x1="35" y1="39" x2="35" y2="44" stroke="#ffd700" stroke-width="1.5"/><line x1="58" y1="22" x2="58" y2="28" stroke="#00ff88" stroke-width="1.5"/><rect x="51" y="28" width="14" height="24" fill="#00ff88" rx="1"/><line x1="58" y1="52" x2="58" y2="70" stroke="#00ff88" stroke-width="1.5"/></svg>
+        <div><div class="card-title" style="color:var(--bull)">MORNING STAR</div><span class="card-type">BULLISH REVERSAL</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>3-candle pattern</li><li>Candle 1: Large bearish red</li><li>Candle 2: Small doji/star — gap down</li><li>Candle 3: Large green closing into red body</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> High-probability reversal. Most reliable at key support levels with volume confirmation.</div>
+      </div>
+    </div>
+
+    <div class="candle-card bullish">
+      <div class="card-header">
+        <svg class="candle-svg" width="44" height="76" viewBox="0 0 44 76"><line x1="22" y1="20" x2="22" y2="28" stroke="#ffd700" stroke-width="2"/><rect x="13" y="28" width="18" height="2" fill="#ffd700" rx="1"/><line x1="22" y1="30" x2="22" y2="68" stroke="#ffd700" stroke-width="2"/></svg>
+        <div><div class="card-title" style="color:var(--bull)">DRAGONFLY DOJI</div><span class="card-type">BULLISH LEAN</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Open, high, close all near same level</li><li>Long lower wick only</li><li>No upper wick</li><li>After downtrend = bullish signal</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> Bears pushed down hard but bulls recovered fully. Strong support defense — watch for follow-through.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="category-header"><span class="category-label cat-bear">▼ Bearish Reversal</span><div class="category-line"></div></div>
+  <div class="cards-grid">
+
+    <div class="candle-card bearish">
+      <div class="card-header">
+        <svg class="candle-svg" width="44" height="76" viewBox="0 0 44 76"><line x1="22" y1="4" x2="22" y2="40" stroke="#ff3355" stroke-width="2"/><rect x="13" y="40" width="18" height="8" fill="#ff3355" rx="1"/><line x1="22" y1="48" x2="22" y2="56" stroke="#ff3355" stroke-width="2"/></svg>
+        <div><div class="card-title" style="color:var(--bear)">SHOOTING STAR</div><span class="card-type">BEARISH REVERSAL</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Small body near the BOTTOM</li><li>Long upper wick = 2–3× the body</li><li>Little to no lower wick</li><li>MUST occur after an uptrend</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> Bulls pushed high but bears rejected — price couldn't hold gains. Classic top signal at resistance.</div>
+      </div>
+    </div>
+
+    <div class="candle-card bearish">
+      <div class="card-header">
+        <svg class="candle-svg" width="44" height="76" viewBox="0 0 44 76"><line x1="22" y1="4" x2="22" y2="12" stroke="#ff3355" stroke-width="2"/><rect x="13" y="12" width="18" height="8" fill="#ff3355" rx="1"/><line x1="22" y1="20" x2="22" y2="52" stroke="#ff3355" stroke-width="2"/></svg>
+        <div><div class="card-title" style="color:var(--bear)">HANGING MAN</div><span class="card-type">BEARISH REVERSAL</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Looks identical to a Hammer</li><li>Small body near top, long lower wick</li><li>CRITICAL: occurs after UPTREND</li><li>Signals bulls losing control</li></ul>
+        <div class="card-rule"><strong>⚠️ KEY:</strong> Same shape as Hammer — context is EVERYTHING. Location determines meaning.</div>
+      </div>
+    </div>
+
+    <div class="candle-card bearish">
+      <div class="card-header">
+        <svg class="candle-svg" width="60" height="76" viewBox="0 0 60 76"><line x1="16" y1="4" x2="16" y2="10" stroke="#00ff88" stroke-width="1.5"/><rect x="9" y="10" width="14" height="20" fill="#00ff88" rx="1"/><line x1="16" y1="30" x2="16" y2="36" stroke="#00ff88" stroke-width="1.5"/><line x1="44" y1="16" x2="44" y2="22" stroke="#ff3355" stroke-width="1.5"/><rect x="36" y="22" width="16" height="30" fill="#ff3355" rx="1"/><line x1="44" y1="52" x2="44" y2="60" stroke="#ff3355" stroke-width="1.5"/></svg>
+        <div><div class="card-title" style="color:var(--bear)">BEARISH ENGULFING</div><span class="card-type">BEARISH REVERSAL</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Large red candle fully covers prior green</li><li>Red body opens above prior close</li><li>Red body closes below prior open</li><li>Appears after uptrend</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> Bears overwhelmed bulls. Most powerful at resistance levels after extended rallies.</div>
+      </div>
+    </div>
+
+    <div class="candle-card bearish">
+      <div class="card-header">
+        <svg class="candle-svg" width="70" height="76" viewBox="0 0 70 76"><line x1="12" y1="4" x2="12" y2="8" stroke="#00ff88" stroke-width="1.5"/><rect x="6" y="8" width="12" height="18" fill="#00ff88" rx="1"/><line x1="12" y1="26" x2="12" y2="32" stroke="#00ff88" stroke-width="1.5"/><line x1="35" y1="22" x2="35" y2="28" stroke="#ffd700" stroke-width="1.5"/><rect x="30" y="28" width="10" height="4" fill="#ffd700" rx="1"/><line x1="35" y1="32" x2="35" y2="38" stroke="#ffd700" stroke-width="1.5"/><line x1="58" y1="10" x2="58" y2="16" stroke="#ff3355" stroke-width="1.5"/><rect x="51" y="16" width="14" height="24" fill="#ff3355" rx="1"/><line x1="58" y1="40" x2="58" y2="70" stroke="#ff3355" stroke-width="1.5"/></svg>
+        <div><div class="card-title" style="color:var(--bear)">EVENING STAR</div><span class="card-type">BEARISH REVERSAL</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>3-candle pattern</li><li>Candle 1: Large bullish green</li><li>Candle 2: Small doji/star — gap up</li><li>Candle 3: Large red closing into green body</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> Mirror of Morning Star. Uptrend exhaustion — high conviction reversal especially at resistance.</div>
+      </div>
+    </div>
+
+    <div class="candle-card bearish">
+      <div class="card-header">
+        <svg class="candle-svg" width="44" height="76" viewBox="0 0 44 76"><line x1="22" y1="4" x2="22" y2="34" stroke="#ffd700" stroke-width="2"/><rect x="13" y="34" width="18" height="2" fill="#ffd700" rx="1"/><line x1="22" y1="36" x2="22" y2="46" stroke="#ffd700" stroke-width="2"/></svg>
+        <div><div class="card-title" style="color:var(--bear)">GRAVESTONE DOJI</div><span class="card-type">BEARISH LEAN</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Open, low, close all near same level</li><li>Long upper wick only</li><li>No lower wick</li><li>After uptrend = bearish signal</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> Bulls pushed high but bears reclaimed. Classic top rejection — powerful at resistance.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="category-header"><span class="category-label cat-indecision">◆ Indecision</span><div class="category-line"></div></div>
+  <div class="cards-grid">
+
+    <div class="candle-card indecision">
+      <div class="card-header">
+        <svg class="candle-svg" width="44" height="76" viewBox="0 0 44 76"><line x1="22" y1="4" x2="22" y2="36" stroke="#ffd700" stroke-width="2"/><rect x="13" y="36" width="18" height="2" fill="#ffd700" rx="1"/><line x1="22" y1="38" x2="22" y2="70" stroke="#ffd700" stroke-width="2"/></svg>
+        <div><div class="card-title" style="color:var(--indecision)">DOJI</div><span class="card-type">INDECISION</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Open and close are virtually equal</li><li>Wicks extend both directions</li><li>Tiny or no real body</li><li>Appears in any trend</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> After strong trend = potential reversal. In chop = noise. Volume confirms significance.</div>
+      </div>
+    </div>
+
+    <div class="candle-card indecision">
+      <div class="card-header">
+        <svg class="candle-svg" width="44" height="76" viewBox="0 0 44 76"><line x1="22" y1="4" x2="22" y2="24" stroke="#ffd700" stroke-width="2"/><rect x="13" y="24" width="18" height="20" fill="#ffd700" rx="1"/><line x1="22" y1="44" x2="22" y2="70" stroke="#ffd700" stroke-width="2"/></svg>
+        <div><div class="card-title" style="color:var(--indecision)">SPINNING TOP</div><span class="card-type">INDECISION</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Small real body (any color)</li><li>Long wicks on BOTH sides</li><li>Body smaller than wicks</li><li>Common in choppy markets</li></ul>
+        <div class="card-rule"><strong>LTPro Rule:</strong> MID-RANGE spinning tops = stay out. This is your "sit on your hands" candle.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="category-header"><span class="category-label cat-continuation">→ Continuation</span><div class="category-line"></div></div>
+  <div class="cards-grid">
+
+    <div class="candle-card continuation">
+      <div class="card-header">
+        <svg class="candle-svg" width="44" height="76" viewBox="0 0 44 76"><rect x="13" y="4" width="18" height="68" fill="#00ff88" rx="1"/></svg>
+        <div><div class="card-title" style="color:var(--continuation)">BULLISH MARUBOZU</div><span class="card-type">CONTINUATION</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Full green body — no wicks</li><li>Opens at low, closes at high</li><li>Pure buyer dominance</li><li>Strong momentum candle</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> Bulls in complete control. In uptrend = continuation. After breakout = high conviction move.</div>
+      </div>
+    </div>
+
+    <div class="candle-card continuation">
+      <div class="card-header">
+        <svg class="candle-svg" width="44" height="76" viewBox="0 0 44 76"><rect x="13" y="4" width="18" height="68" fill="#ff3355" rx="1"/></svg>
+        <div><div class="card-title" style="color:var(--continuation)">BEARISH MARUBOZU</div><span class="card-type">CONTINUATION</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Full red body — no wicks</li><li>Opens at high, closes at low</li><li>Pure seller dominance</li><li>Strong momentum candle</li></ul>
+        <div class="card-rule"><strong>⚠️ YOUR 13:45 CANDLE:</strong> Large red body = bearish continuation, NOT a hammer. Body size ratio was wrong.</div>
+      </div>
+    </div>
+
+    <div class="candle-card continuation">
+      <div class="card-header">
+        <svg class="candle-svg" width="56" height="76" viewBox="0 0 56 76"><line x1="16" y1="4" x2="16" y2="12" stroke="#00ff88" stroke-width="1.5"/><rect x="9" y="12" width="14" height="28" fill="#00ff88" rx="1"/><line x1="16" y1="40" x2="16" y2="48" stroke="#00ff88" stroke-width="1.5"/><line x1="40" y1="22" x2="40" y2="28" stroke="#ff3355" stroke-width="1.5"/><rect x="33" y="28" width="14" height="16" fill="#ff3355" rx="1"/><line x1="40" y1="44" x2="40" y2="50" stroke="#ff3355" stroke-width="1.5"/></svg>
+        <div><div class="card-title" style="color:var(--continuation)">INSIDE BAR / FLAG</div><span class="card-type">CONTINUATION</span></div>
+      </div>
+      <div class="card-body">
+        <ul class="structure-list"><li>Candle fits within prior candle's range</li><li>Small body — any color</li><li>Market pausing, digesting move</li><li>Breakout of range = continuation</li></ul>
+        <div class="card-rule"><strong>Signal:</strong> The "coil before the spring." Your 14:30 chop area = energy building for the 15:30 explosion.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ CHEAT SHEET ═══════════════ -->
+<div id="cheatsheet" class="section">
+  <div class="cheat-wrap">
+    <table class="cheat-table">
+      <thead>
+        <tr><th>PATTERN</th><th class="center">VISUAL</th><th>TYPE</th><th>SIGNAL</th><th>LOCATION REQUIRED</th><th>CONFIRM?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Hammer</strong></td><td class="center"><svg width="24" height="50" viewBox="0 0 24 50"><line x1="12" y1="2" x2="12" y2="10" stroke="#00ff88" stroke-width="2"/><rect x="6" y="10" width="12" height="6" fill="#00ff88" rx="1"/><line x1="12" y1="16" x2="12" y2="47" stroke="#00ff88" stroke-width="2"/></svg></td><td><span class="pill pill-bull">BULLISH</span></td><td>Reversal</td><td>After downtrend / at support</td><td>Yes</td></tr>
+        <tr><td><strong>Inverted Hammer</strong></td><td class="center"><svg width="24" height="50" viewBox="0 0 24 50"><line x1="12" y1="2" x2="12" y2="26" stroke="#00ff88" stroke-width="2"/><rect x="6" y="26" width="12" height="6" fill="#00ff88" rx="1"/><line x1="12" y1="32" x2="12" y2="40" stroke="#00ff88" stroke-width="2"/></svg></td><td><span class="pill pill-bull">BULLISH</span></td><td>Reversal</td><td>After downtrend</td><td>Required</td></tr>
+        <tr><td><strong>Bullish Engulfing</strong></td><td class="center"><svg width="36" height="50" viewBox="0 0 36 50"><line x1="10" y1="2" x2="10" y2="7" stroke="#ff3355" stroke-width="1.5"/><rect x="5" y="7" width="10" height="10" fill="#ff3355" rx="1"/><line x1="10" y1="17" x2="10" y2="22" stroke="#ff3355" stroke-width="1.5"/><line x1="26" y1="20" x2="26" y2="24" stroke="#00ff88" stroke-width="1.5"/><rect x="19" y="24" width="14" height="20" fill="#00ff88" rx="1"/><line x1="26" y1="44" x2="26" y2="48" stroke="#00ff88" stroke-width="1.5"/></svg></td><td><span class="pill pill-bull">BULLISH</span></td><td>Strong Reversal</td><td>After downtrend / at support</td><td>Optional</td></tr>
+        <tr><td><strong>Morning Star</strong></td><td class="center"><svg width="50" height="50" viewBox="0 0 50 50"><line x1="9" y1="2" x2="9" y2="7" stroke="#ff3355" stroke-width="1.5"/><rect x="4" y="7" width="10" height="12" fill="#ff3355" rx="1"/><line x1="9" y1="19" x2="9" y2="24" stroke="#ff3355" stroke-width="1.5"/><line x1="25" y1="24" x2="25" y2="28" stroke="#ffd700" stroke-width="1.5"/><rect x="21" y="28" width="8" height="4" fill="#ffd700" rx="1"/><line x1="25" y1="32" x2="25" y2="36" stroke="#ffd700" stroke-width="1.5"/><line x1="41" y1="16" x2="41" y2="20" stroke="#00ff88" stroke-width="1.5"/><rect x="36" y="20" width="10" height="18" fill="#00ff88" rx="1"/><line x1="41" y1="38" x2="41" y2="48" stroke="#00ff88" stroke-width="1.5"/></svg></td><td><span class="pill pill-bull">BULLISH</span></td><td>High-Prob Reversal</td><td>After downtrend / at support</td><td>Built-in</td></tr>
+        <tr><td><strong>Dragonfly Doji</strong></td><td class="center"><svg width="24" height="50" viewBox="0 0 24 50"><line x1="12" y1="14" x2="12" y2="20" stroke="#ffd700" stroke-width="2"/><rect x="6" y="20" width="12" height="2" fill="#ffd700" rx="1"/><line x1="12" y1="22" x2="12" y2="47" stroke="#ffd700" stroke-width="2"/></svg></td><td><span class="pill pill-bull">BULLISH</span></td><td>Reversal (weak)</td><td>At support / after downtrend</td><td>Yes</td></tr>
+        <tr><td><strong>Shooting Star</strong></td><td class="center"><svg width="24" height="50" viewBox="0 0 24 50"><line x1="12" y1="2" x2="12" y2="28" stroke="#ff3355" stroke-width="2"/><rect x="6" y="28" width="12" height="6" fill="#ff3355" rx="1"/><line x1="12" y1="34" x2="12" y2="42" stroke="#ff3355" stroke-width="2"/></svg></td><td><span class="pill pill-bear">BEARISH</span></td><td>Reversal</td><td>After uptrend / at resistance</td><td>Yes</td></tr>
+        <tr><td><strong>Hanging Man</strong></td><td class="center"><svg width="24" height="50" viewBox="0 0 24 50"><line x1="12" y1="2" x2="12" y2="8" stroke="#ff3355" stroke-width="2"/><rect x="6" y="8" width="12" height="6" fill="#ff3355" rx="1"/><line x1="12" y1="14" x2="12" y2="44" stroke="#ff3355" stroke-width="2"/></svg></td><td><span class="pill pill-bear">BEARISH</span></td><td>Reversal</td><td>After uptrend / at resistance</td><td>Required</td></tr>
+        <tr><td><strong>Bearish Engulfing</strong></td><td class="center"><svg width="36" height="50" viewBox="0 0 36 50"><line x1="10" y1="2" x2="10" y2="7" stroke="#00ff88" stroke-width="1.5"/><rect x="5" y="7" width="10" height="16" fill="#00ff88" rx="1"/><line x1="10" y1="23" x2="10" y2="28" stroke="#00ff88" stroke-width="1.5"/><line x1="26" y1="12" x2="26" y2="16" stroke="#ff3355" stroke-width="1.5"/><rect x="19" y="16" width="14" height="24" fill="#ff3355" rx="1"/><line x1="26" y1="40" x2="26" y2="48" stroke="#ff3355" stroke-width="1.5"/></svg></td><td><span class="pill pill-bear">BEARISH</span></td><td>Strong Reversal</td><td>After uptrend / at resistance</td><td>Optional</td></tr>
+        <tr><td><strong>Evening Star</strong></td><td class="center"><svg width="50" height="50" viewBox="0 0 50 50"><line x1="9" y1="2" x2="9" y2="6" stroke="#00ff88" stroke-width="1.5"/><rect x="4" y="6" width="10" height="14" fill="#00ff88" rx="1"/><line x1="9" y1="20" x2="9" y2="26" stroke="#00ff88" stroke-width="1.5"/><line x1="25" y1="16" x2="25" y2="20" stroke="#ffd700" stroke-width="1.5"/><rect x="21" y="20" width="8" height="4" fill="#ffd700" rx="1"/><line x1="25" y1="24" x2="25" y2="28" stroke="#ffd700" stroke-width="1.5"/><line x1="41" y1="6" x2="41" y2="10" stroke="#ff3355" stroke-width="1.5"/><rect x="36" y="10" width="10" height="20" fill="#ff3355" rx="1"/><line x1="41" y1="30" x2="41" y2="48" stroke="#ff3355" stroke-width="1.5"/></svg></td><td><span class="pill pill-bear">BEARISH</span></td><td>High-Prob Reversal</td><td>After uptrend / at resistance</td><td>Built-in</td></tr>
+        <tr><td><strong>Gravestone Doji</strong></td><td class="center"><svg width="24" height="50" viewBox="0 0 24 50"><line x1="12" y1="2" x2="12" y2="28" stroke="#ffd700" stroke-width="2"/><rect x="6" y="28" width="12" height="2" fill="#ffd700" rx="1"/><line x1="12" y1="30" x2="12" y2="38" stroke="#ffd700" stroke-width="2"/></svg></td><td><span class="pill pill-bear">BEARISH</span></td><td>Reversal (weak)</td><td>At resistance / after uptrend</td><td>Yes</td></tr>
+        <tr><td><strong>Doji</strong></td><td class="center"><svg width="24" height="50" viewBox="0 0 24 50"><line x1="12" y1="2" x2="12" y2="23" stroke="#ffd700" stroke-width="2"/><rect x="6" y="23" width="12" height="2" fill="#ffd700" rx="1"/><line x1="12" y1="25" x2="12" y2="47" stroke="#ffd700" stroke-width="2"/></svg></td><td><span class="pill pill-indecision">INDECISION</span></td><td>Pause / Reversal</td><td>Context dependent</td><td>Always</td></tr>
+        <tr><td><strong>Spinning Top</strong></td><td class="center"><svg width="24" height="50" viewBox="0 0 24 50"><line x1="12" y1="2" x2="12" y2="18" stroke="#ffd700" stroke-width="2"/><rect x="6" y="18" width="12" height="12" fill="#ffd700" rx="1"/><line x1="12" y1="30" x2="12" y2="47" stroke="#ffd700" stroke-width="2"/></svg></td><td><span class="pill pill-indecision">INDECISION</span></td><td>Chop / No trade</td><td>Mid-range = avoid</td><td>N/A</td></tr>
+        <tr><td><strong>Bullish Marubozu</strong></td><td class="center"><svg width="24" height="50" viewBox="0 0 24 50"><rect x="6" y="2" width="12" height="46" fill="#00ff88" rx="1"/></svg></td><td><span class="pill pill-continuation">CONTINUATION</span></td><td>Momentum</td><td>In uptrend / after breakout</td><td>No</td></tr>
+        <tr><td><strong>Bearish Marubozu</strong></td><td class="center"><svg width="24" height="50" viewBox="0 0 24 50"><rect x="6" y="2" width="12" height="46" fill="#ff3355" rx="1"/></svg></td><td><span class="pill pill-continuation">CONTINUATION</span></td><td>Momentum</td><td>In downtrend / after breakdown</td><td>No</td></tr>
+        <tr><td><strong>Inside Bar / Flag</strong></td><td class="center"><svg width="36" height="50" viewBox="0 0 36 50"><line x1="10" y1="2" x2="10" y2="8" stroke="#00ff88" stroke-width="1.5"/><rect x="5" y="8" width="10" height="22" fill="#00ff88" rx="1"/><line x1="10" y1="30" x2="10" y2="36" stroke="#00ff88" stroke-width="1.5"/><line x1="26" y1="14" x2="26" y2="18" stroke="#ff3355" stroke-width="1.5"/><rect x="21" y="18" width="10" height="12" fill="#ff3355" rx="1"/><line x1="26" y1="30" x2="26" y2="36" stroke="#ff3355" stroke-width="1.5"/></svg></td><td><span class="pill pill-continuation">CONTINUATION</span></td><td>Coil / Energy Build</td><td>After strong move</td><td>On breakout</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="alert-box">
+    <h4>🚨 THE GOLDEN RULE</h4>
+    <p>A candle pattern WITHOUT context = meaningless. Always ask: <strong>(1) Where is it?</strong> (2) What happened before it? (3) Is it at support/resistance? (4) Is volume confirming? — Structure + location &gt; size.</p>
+  </div>
+</div>
+
+<!-- ═══════════════ CONTEXT ═══════════════ -->
+<div id="context" class="section">
+  <div class="alert-box" style="margin-bottom:20px;">
+    <h4>🧠 THE UPGRADE — Think Like This</h4>
+    <p>Stop asking <em>"What candle is this?"</em> — Start asking <em>"What is this candle telling me given WHERE it is?"</em> Same shape = completely different meaning depending on location.</p>
+  </div>
+  <div class="context-grid">
+    <div class="context-card">
+      <h3>📍 LOCATION RULES</h3>
+      <div class="context-rule"><span class="rule-num">01</span><span>Hammer at <strong>support</strong> = High prob bullish reversal ✅</span></div>
+      <div class="context-rule"><span class="rule-num">02</span><span>Hammer in <strong>mid-range</strong> = Meaningless ❌</span></div>
+      <div class="context-rule"><span class="rule-num">03</span><span>Bearish Engulfing at <strong>resistance</strong> = Strong short signal ✅</span></div>
+      <div class="context-rule"><span class="rule-num">04</span><span>Doji after <strong>strong trend</strong> = Reversal warning ⚠️</span></div>
+      <div class="context-rule"><span class="rule-num">05</span><span>Doji in <strong>choppy range</strong> = Noise, ignore ❌</span></div>
+      <div class="context-rule"><span class="rule-num">06</span><span>Marubozu at <strong>breakout</strong> = Ride momentum ✅</span></div>
+    </div>
+    <div class="context-card">
+      <h3>📊 TREND CONTEXT</h3>
+      <div class="context-rule"><span class="rule-num">01</span><span>Big red in <strong>downtrend</strong> = Continuation, NOT reversal</span></div>
+      <div class="context-rule"><span class="rule-num">02</span><span>Big red after <strong>breakout up</strong> = Pullback, watch bounce</span></div>
+      <div class="context-rule"><span class="rule-num">03</span><span>Spinning tops in <strong>uptrend</strong> = Digestion, likely continues</span></div>
+      <div class="context-rule"><span class="rule-num">04</span><span>Spinning tops at <strong>resistance</strong> = Bulls struggling</span></div>
+      <div class="context-rule"><span class="rule-num">05</span><span>Higher lows = Bullish structure regardless of candle color</span></div>
+      <div class="context-rule"><span class="rule-num">06</span><span>Lower highs = Bearish structure — wait for break</span></div>
+    </div>
+    <div class="context-card">
+      <h3>🛩️ LTPRO v7 APPLICATION</h3>
+      <div class="context-rule"><span class="rule-num">01</span><span><strong>SIGNAL = WAIT</strong> — No entry, full stop, no exceptions</span></div>
+      <div class="context-rule"><span class="rule-num">02</span><span><strong>CONFLUENCE ZONE</strong> = Decision point — watch candles</span></div>
+      <div class="context-rule"><span class="rule-num">03</span><span><strong>AT LEVEL</strong> + reversal candle = High conviction setup</span></div>
+      <div class="context-rule"><span class="rule-num">04</span><span><strong>MID-RANGE</strong> + spinning tops = Stay out completely</span></div>
+      <div class="context-rule"><span class="rule-num">05</span><span><strong>BULLISH BIAS</strong> + hammer at VWAP = Strong call setup</span></div>
+      <div class="context-rule"><span class="rule-num">06</span><span><strong>TRIANGLE FORMING</strong> + inside bars = Wait for breakout</span></div>
+    </div>
+    <div class="context-card">
+      <h3>✅ PRE-ENTRY CHECKLIST</h3>
+      <div class="context-rule"><span class="rule-num">01</span><span>Where is price? (support / resistance / mid-range)</span></div>
+      <div class="context-rule"><span class="rule-num">02</span><span>What is the trend? (uptrend / downtrend / chop)</span></div>
+      <div class="context-rule"><span class="rule-num">03</span><span>What happened before this candle?</span></div>
+      <div class="context-rule"><span class="rule-num">04</span><span>Is volume confirming the move?</span></div>
+      <div class="context-rule"><span class="rule-num">05</span><span>What does LTPro SIGNAL say?</span></div>
+      <div class="context-rule"><span class="rule-num">06</span><span>QQQ + NVDA breadth confirming direction?</span></div>
+    </div>
+  </div>
+  <div style="margin-top:20px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;">
+    <h3 style="font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:1px;color:var(--accent2);margin-bottom:14px;">⚠️ THE 13:45 LESSON — BURNED INTO MEMORY</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div><div style="font-size:11px;letter-spacing:2px;color:var(--bear);margin-bottom:8px;font-family:'Share Tech Mono',monospace;">WHAT YOU THOUGHT</div><p style="font-size:13px;line-height:1.7;color:var(--text-dim);">❌ "Looks like a hammer — it has a lower wick"<br>You focused on the wick and ignored the body ratio.</p></div>
+      <div><div style="font-size:11px;letter-spacing:2px;color:var(--bull);margin-bottom:8px;font-family:'Share Tech Mono',monospace;">WHAT IT ACTUALLY WAS</div><p style="font-size:13px;line-height:1.7;color:var(--text-dim);">✅ Strong Bearish Continuation (Marubozu-style)<br>Large red body = seller control. Wick-to-body ratio was wrong. Mid-trend = no reversal context.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ QUIZ ═══════════════ -->
+<div id="quiz" class="section">
+  <div class="quiz-container">
+
+    <div class="quiz-top-bar">
+      <div class="level-selector">
+        <button class="level-btn active" onclick="setLevel(1,this)">L1 Identify</button>
+        <button class="level-btn" onclick="setLevel(2,this)">L2 Context</button>
+        <button class="level-btn" onclick="setLevel(3,this)">L3 Execute</button>
+        <button class="level-btn" onclick="setLevel(4,this)">L4 LTPro</button>
+      </div>
+      <div class="timer-toggle" onclick="toggleTimer()">
+        <span>⏱ TIMED</span>
+        <div class="toggle-switch" id="timerSwitch"><div class="toggle-knob"></div></div>
+      </div>
+    </div>
+
+    <div class="timer-bar-wrap" id="timerBarWrap">
+      <div class="timer-bar-fill" id="timerFill" style="width:100%"></div>
+    </div>
+
+    <div class="quiz-progress">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <span class="progress-text" id="progressText">0 / 0</span>
+      <span class="score-display"><span class="score-green" id="correctCount">0</span>✅ <span class="score-red" id="wrongCount">0</span>❌</span>
+    </div>
+
+    <div id="streakBar" class="streak-bar"></div>
+    <div id="quizArea"></div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════ PERSISTENT STATS ═══════════
+function loadStats() {
+  try {
+    return JSON.parse(localStorage.getItem('maverick_stats') || '{}');
+  } catch(e) { return {}; }
+}
+function saveStats(s) {
+  try { localStorage.setItem('maverick_stats', JSON.stringify(s)); } catch(e) {}
+}
+function getStats() {
+  const s = loadStats();
+  return {
+    streak: s.streak || 0,
+    bestStreak: s.bestStreak || 0,
+    totalCorrect: s.totalCorrect || 0,
+    sessions: s.sessions || 0
+  };
+}
+function updateBanner() {
+  const s = getStats();
+  document.getElementById('bannerStreak').textContent = s.streak;
+  document.getElementById('bannerBest').textContent = s.bestStreak;
+  document.getElementById('bannerTotal').textContent = s.totalCorrect;
+  document.getElementById('bannerSessions').textContent = s.sessions;
+}
+updateBanner();
+
+// ═══════════ SECTION NAV ═══════════
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  else document.querySelector(`[onclick*="${id}"]`).classList.add('active');
+}
+
+// ═══════════ TIMER ═══════════
+let timedMode = false;
+let timerInterval = null;
+let timeLeft = 0;
+const TIME_LIMIT = 20;
+
+function toggleTimer() {
+  timedMode = !timedMode;
+  const sw = document.getElementById('timerSwitch');
+  const wrap = document.getElementById('timerBarWrap');
+  sw.classList.toggle('on', timedMode);
+  wrap.style.display = timedMode ? 'block' : 'none';
+  if (!timedMode) clearInterval(timerInterval);
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  if (!timedMode) return;
+  timeLeft = TIME_LIMIT;
+  const fill = document.getElementById('timerFill');
+  fill.className = 'timer-bar-fill';
+  fill.style.width = '100%';
+  timerInterval = setInterval(() => {
+    timeLeft -= 0.1;
+    const pct = (timeLeft / TIME_LIMIT) * 100;
+    fill.style.width = pct + '%';
+    if (pct < 33) fill.className = 'timer-bar-fill danger';
+    else if (pct < 60) fill.className = 'timer-bar-fill warning';
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timeExpired();
+    }
+  }, 100);
+}
+
+function timeExpired() {
+  if (answered) return;
+  answered = true;
+  const q = quizData[currentLevel][currentQ];
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+  });
+  const fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback-box wrong-fb';
+  fb.innerHTML = `⏱️ <strong>TIME'S UP!</strong><div class="feedback-insight">${q.insight}</div>`;
+  fb.style.display = 'block';
+  wrong++;
+  updateStreakDot(false);
+  const s = loadStats(); s.streak = 0; saveStats(s); updateBanner();
+  document.getElementById('wrongCount').textContent = wrong;
+  document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+// ═══════════ QUIZ DATA ═══════════
+const quizData = {
+  1: [
+    { q:"Identify this candle:", scenario:["Small body near the TOP","Long lower wick = 2–3× the body","Little to no upper wick","Appears AFTER a downtrend"], options:["Hammer","Shooting Star","Doji","Spinning Top"], answer:0, insight:"Hammer = small body at TOP + long lower wick + after downtrend. Location is mandatory — no downtrend, no valid signal." },
+    { q:"Identify this candle:", scenario:["Large green candle","Fully covers and exceeds the prior red candle","Green body opens below prior red close","Green body closes above prior red open"], options:["Morning Star","Bullish Marubozu","Bullish Engulfing","Dragonfly Doji"], answer:2, insight:"Bullish Engulfing = green body completely swallows the prior red candle. Strong reversal — bulls overwhelmed bears." },
+    { q:"Identify this candle:", scenario:["Small real body — any color","Long wicks on BOTH sides","Wicks are longer than the body","Common in sideways markets"], options:["Doji","Inside Bar","Spinning Top","Hammer"], answer:2, insight:"Spinning Top = small body + long wicks both sides. Classic indecision/chop candle. In LTPro MID-RANGE = stay out." },
+    { q:"Identify this candle:", scenario:["Open and close are virtually identical","Long wick extends upward only","No lower wick at all","Appears after an uptrend"], options:["Spinning Top","Shooting Star","Gravestone Doji","Inverted Hammer"], answer:2, insight:"Gravestone Doji = open/close at bottom, long upper wick only. After uptrend = bears rejected the push. Bearish lean." },
+    { q:"Identify this candle:", scenario:["Full body candle — virtually no wicks","Large red body from high to low","Opens at the high, closes at the low","Pure seller dominance all session"], options:["Bearish Engulfing","Shooting Star","Bearish Marubozu","Evening Star"], answer:2, insight:"Bearish Marubozu = full red body, no wicks. THIS was your 13:45 candle — NOT a hammer. Large body = continuation, not reversal." },
+    { q:"Identify this candle:", scenario:["Small body at the BOTTOM","Long upper wick = 2–3× the body","Little to no lower wick","Appears after an uptrend"], options:["Hammer","Inverted Hammer","Shooting Star","Gravestone Doji"], answer:2, insight:"Shooting Star = small body at bottom + long upper wick + after UPTREND. Bulls tried to rally but bears rejected. Top signal." },
+    { q:"Identify this 3-candle pattern:", scenario:["Candle 1: Large bearish red","Candle 2: Small doji/star — gaps down","Candle 3: Large green closing into red body","Occurs after a downtrend"], options:["Evening Star","Morning Star","Three White Soldiers","Bullish Engulfing"], answer:1, insight:"Morning Star = Red → small star → Green. 3-candle bullish reversal. High probability at key support with volume." },
+    { q:"Identify this candle:", scenario:["Looks IDENTICAL to a Hammer visually","Small body near top, long lower wick","Little to no upper wick","CRITICAL: occurs after an UPTREND, not downtrend"], options:["Hammer","Dragonfly Doji","Hanging Man","Inverted Hammer"], answer:2, insight:"Hanging Man LOOKS like a Hammer but after an UPTREND = BEARISH. Same shape, opposite meaning. Context is everything." },
+    { q:"Identify this candle:", scenario:["Open, high, and close all near the same level","Long lower wick only","No upper wick","Appears after a downtrend"], options:["Hammer","Gravestone Doji","Spinning Top","Dragonfly Doji"], answer:3, insight:"Dragonfly Doji = open/close at top, long lower wick only. Bears pushed down but bulls fully recovered. Bullish lean at support." },
+    { q:"Identify this candle:", scenario:["Candle fits entirely within the prior candle's range","Small body — any color","Market digesting and pausing","Breakout of this range = next signal"], options:["Doji","Spinning Top","Inside Bar / Flag","Hammer"], answer:2, insight:"Inside Bar = entire candle contained within prior bar's range. The 'coil before the spring.' Your 14:30 chop area was full of these." },
+    { q:"Identify this 3-candle pattern:", scenario:["Candle 1: Large bullish green","Candle 2: Small doji/star — gaps up","Candle 3: Large red candle closing into green body","Occurs after an uptrend"], options:["Morning Star","Bearish Engulfing","Evening Star","Three Black Crows"], answer:2, insight:"Evening Star = Green → small star → Red. Mirror of Morning Star. Uptrend exhaustion — high conviction reversal at resistance." },
+    { q:"Identify this candle:", scenario:["Full green body — virtually no wicks","Opens at the low, closes at the high","Pure buyer dominance all session","Strong momentum candle"], options:["Bullish Engulfing","Bullish Marubozu","Morning Star","Inside Bar"], answer:1, insight:"Bullish Marubozu = full green body, no wicks. Bulls in complete control. After breakout = high conviction continuation." },
+    { q:"Identify this candle:", scenario:["Small body near the BOTTOM","Long upper wick = 2–3× the body","Little to no lower wick","Appears after a DOWNTREND (not uptrend)"], options:["Shooting Star","Gravestone Doji","Inverted Hammer","Hanging Man"], answer:2, insight:"Inverted Hammer = small body at bottom + long upper wick + after DOWNTREND (not uptrend like Shooting Star). Needs confirmation." },
+    { q:"What is the KEY difference between a Hammer and a Hanging Man?", scenario:["Both have small body near top","Both have long lower wick","Both have little to no upper wick","They look visually IDENTICAL"], options:["Hammer is green, Hanging Man is red","Hammer has longer wick","The TREND they appear in — Hammer = downtrend, Hanging Man = uptrend","Hammer needs confirmation, Hanging Man doesn't"], answer:2, insight:"Same shape, OPPOSITE meaning. Hammer after downtrend = bullish reversal. Hanging Man after uptrend = bearish reversal. CONTEXT IS EVERYTHING." },
+    { q:"A candle has: large red body taking 80% of the candle height, small lower wick (20%). What is it?", scenario:["Large red body dominates the candle","Small lower wick — only 20% of candle height","Wick-to-body ratio is way off for a Hammer","Appears mid-trend"], options:["Hammer — it has a lower wick","Bearish continuation candle (near-Marubozu)","Hanging Man","Shooting Star"], answer:1, insight:"Large body = NOT a hammer. This is exactly your 13:45 candle error. Hammer requires small body (top) with wick 2-3x the body. Always check the ratio first." },
+    { q:"Identify this candle:", scenario:["Large red candle","Fully covers and exceeds the prior green candle","Red body opens above prior green close","Red body closes below prior green open"], options:["Bearish Marubozu","Evening Star","Bearish Engulfing","Shooting Star"], answer:2, insight:"Bearish Engulfing = red body completely swallows prior green candle. Bears overwhelmed bulls. Most powerful at resistance." }
+  ],
+  2: [
+    { q:"Context Check — Valid Hammer Signal?", scenario:["A Hammer candle appears","Price is in the MIDDLE of a sideways trading range","No clear support or resistance nearby","Volume is average"], options:["YES — Hammer is always bullish","NO — Context is invalid, location wrong","MAYBE — depends on next candle","YES — if above VWAP"], answer:1, insight:"Hammer in the middle of nowhere = meaningless. Hammer only signals bullish reversal after a downtrend AND at a key support level. Location is mandatory." },
+    { q:"Context Check — Strong Signal?", scenario:["Bearish Engulfing candle forms","Price is at your yellow resistance line","BIAS shifting from bullish to neutral","Volume is above average"], options:["Weak signal — wait for more","Strong signal — high probability reversal","Ignore it — still bullish overall","Only valid if below VWAP"], answer:1, insight:"Bearish Engulfing AT major resistance with elevated volume = one of the highest probability setups. All context factors align." },
+    { q:"Context Check — Reversal or Pullback?", scenario:["SPY just broke out strongly above resistance","Large red candle appears on the very next bar","LTPro BIAS still shows BULLISH","Price is still above VWAP"], options:["Reversal — go short immediately","Pullback — wait for bounce entry","Exit all positions — danger","Indecision — no trade"], answer:1, insight:"Big red after breakout = likely PULLBACK not reversal. Trend still bullish (BIAS + above VWAP). Wait for bounce to reenter longs." },
+    { q:"Context Check — What does a Doji mean here?", scenario:["Doji candle appears","SPY has been in a strong 2-hour uptrend","Price just tagged major resistance (yellow line)","Volume spikes on the doji"], options:["Ignore — dojis are always noise","High significance — exhaustion warning","Bullish — doji means continuation","No meaning without more context"], answer:1, insight:"Doji after strong trend AT resistance + volume spike = high-probability exhaustion signal. This is when dojis matter most." },
+    { q:"Context Check — Hammer or Not?", scenario:["Candle with a lower wick visible","Red body takes up 70% of the candle","Lower wick is only 30% of total candle length","Appears mid-trend, not at support"], options:["Yes — it has a lower wick","No — body too large, ratio wrong, wrong location","Yes — any candle with lower wick is a hammer","Maybe — depends on timeframe"], answer:1, insight:"YOUR 13:45 CANDLE. Large body = NOT a hammer. Hammer requires small body at top with wick 2-3x the body. Mid-trend = no reversal context." },
+    { q:"Context Check — Inside Bars meaning?", scenario:["Multiple Inside Bar candles forming","After a strong bullish run","Price compressing near highs","Volume declining on the inside bars"], options:["Bearish — market exhausted","Bullish continuation building energy — wait for breakout","Indecision — exit all positions","No signal — ignore inside bars"], answer:1, insight:"Inside bars after a strong run = coiling energy. Declining volume during compression + then expansion on breakout = high probability continuation." },
+    { q:"Context Check — Spinning Top in uptrend?", scenario:["Spinning top candle forms","SPY is in a clear uptrend","Price is above VWAP","LTPro ZONE = MID-RANGE"], options:["Bearish reversal — exit longs","Likely digestion — uptrend probably continues","No trade — spinning tops always mean exit","Immediately buy more calls"], answer:1, insight:"Spinning top IN uptrend = digestion/pause, not reversal. Market resting before likely continuation. MID-RANGE = wait, but don't panic out of trend." },
+    { q:"Context Check — Bearish Engulfing in downtrend?", scenario:["Strong downtrend in progress","Bearish Engulfing candle forms","Price is mid-trend, NOT at resistance","LTPro BIAS = BEARISH"], options:["Strong reversal signal — buy calls","Continuation signal — confirms downtrend","Invalid — Bearish Engulfing only at highs","Indecision — wait"], answer:1, insight:"Bearish Engulfing in a downtrend = continuation confirmation, not reversal. Reversal patterns require the OPPOSITE trend context." },
+    { q:"Context Check — Morning Star validity?", scenario:["3-candle Morning Star pattern forms","Price is at a well-tested support zone","BIAS = BULLISH on LTPro","Volume picks up on the third green candle"], options:["Weak signal — 3-candle patterns are unreliable","High probability setup — all factors align","Ignore — only valid on daily chart","Wait for a 4th candle confirmation"], answer:1, insight:"Morning Star AT support + bullish BIAS + volume on confirmation candle = one of the cleanest setups available. All factors aligned." },
+    { q:"Context Check — Big Green Candle at Resistance?", scenario:["Large bullish Marubozu candle forms","Price is at a KEY resistance level (your yellow line)","LTPro ZONE = AT LEVEL","This is the 3rd test of this resistance"], options:["Buy calls aggressively — strong momentum","Caution — resistance at 3rd test often rejects","Ignore the resistance — Marubozu always continues","Exit all puts — momentum wins"], answer:1, insight:"Strong candle AT resistance = caution. 3rd test of resistance often fails. Wait to see if it breaks through and holds, or gets rejected." },
+    { q:"Context Check — Doji in MID-RANGE?", scenario:["Doji candle forms","LTPro ZONE = MID-RANGE","SIGNAL = WAIT","No clear support or resistance nearby"], options:["Potential reversal — watch closely","Noise — no trade, wait for level","Bullish if green doji body","Short signal if at this level"], answer:1, insight:"Doji in MID-RANGE with SIGNAL=WAIT = pure noise. Dojis only matter at extreme levels. Mid-range dojis are just chop — ignore them." },
+    { q:"Context Check — Gravestone Doji meaning?", scenario:["Gravestone Doji forms","SPY just made a new high for the day","Price is at prior resistance turned support — FROM ABOVE","LTPro LEVEL = AT LEVEL"], options:["Bearish reversal — strong signal","Bullish — it held as support","Indecision — no clear signal","Wait — need 2 more candles"], answer:0, insight:"Gravestone Doji at new high / resistance = strong bearish signal. Bulls pushed hard, bears slammed it back. AT LEVEL confirms location context." }
+  ],
+  3: [
+    { q:"Execution — What do you do?", scenario:["Uptrend on SPY 5m","Price hits yellow resistance line","Large red Bearish Engulfing forms","LTPro SIGNAL shifts to SELL","ZONE = AT LEVEL"], options:["Buy calls — uptrend still intact","Watch for confirmation first","Immediately buy puts on the engulfing","Exit any calls, wait for next signal"], answer:3, insight:"Bearish Engulfing at key level + SIGNAL shift = exit calls. Don't jump to puts yet — protect profits first, new position second." },
+    { q:"Execution — What do you do?", scenario:["SPY pulling back after a run","Price reaches VWAP support","Hammer forms AT VWAP","LTPro SIGNAL = BUY CALL","BIAS = BULLISH"], options:["Wait — could still drop lower","Enter calls — all signals aligned","Wait for 2 more green candles first","Check QQQ/NVDA breadth FIRST then enter"], answer:3, insight:"Almost perfect — but Maverick's rule is CHECK BREADTH FIRST. QQQ + NVDA both green = enter. Don't skip the breadth check." },
+    { q:"Execution — What do you do?", scenario:["LTPro TRIANGLE = COMPRESS & FORMING","Multiple Inside Bars building","SIGNAL = WAIT","ZONE = CONFLUENCE","You 'see' 2-3 green candles forming"], options:["Enter early — you see the move coming","Wait for SIGNAL to change — no exceptions","Enter half position, add on confirmation","Check your phone chart and decide"], answer:1, insight:"SIGNAL = WAIT is the gate. FULL STOP. No exceptions. Jumping early is exactly what happened Monday. The signal exists for this reason." },
+    { q:"Execution — What do you do?", scenario:["Choppy mid-day session","Spinning tops and dojis everywhere","LTPro ZONE = MID-RANGE","SIGNAL fluctuating WAIT ↔ BUY CALL","You're bored and want to trade"], options:["Take a trade — any signal beats sitting","Wait it out — protect capital, no setup","Trade small to stay engaged","Switch to 1m chart for more signals"], answer:1, insight:"MID-RANGE chop + spinning tops = BEST TRADE IS NO TRADE. Boredom kills accounts. The 15:30 explosion rewarded patience." },
+    { q:"Execution — What do you do?", scenario:["Trading from phone between meetings","2-3 green candles forming on screen","LTPro hasn't fired BUY CALL yet","You think you're about to miss the move"], options:["Enter now — can't miss this","Wait for LTPro to confirm even on phone","Enter half size as compromise","Close app and wait for computer"], answer:1, insight:"Sound familiar? 😄 Wait for the signal even on your phone. Missing a move costs $0. Unconfirmed entry can cost real money." },
+    { q:"Execution — What do you do?", scenario:["BUY CALL signal fires on LTPro","You enter calls position","Shooting Star forms at your yellow resistance line","LTPro ZONE shifts to AT LEVEL","Position is up +40%"], options:["Hold — the signal is still BUY CALL","Exit half, move stop to breakeven","Exit full position — Shooting Star at resistance = danger","Add more — momentum is strong"], answer:2, insight:"Shooting Star AT resistance with AT LEVEL = high probability rejection. +40% is real money. Exit and protect gains. You can always re-enter." },
+    { q:"Execution — What do you do?", scenario:["Morning Star completes at VWAP support","QQQ is green, NVDA is green","LTPro: BIAS=BULLISH, SIGNAL=BUY CALL, ZONE=AT LEVEL","You already have a calls position on"], options:["Exit the position — you've been in too long","Add to the position — all signals aligned","Switch to puts — Morning Star is a reversal","Hold current size — don't over-expose"], answer:3, insight:"All signals aligned = hold and let it work, but don't over-expose. Adding to a winner is fine but size discipline matters in a $500 challenge." },
+    { q:"Execution — What do you do?", scenario:["Large red Bearish Marubozu on the 5m chart","Drops below VWAP","QQQ also breaking down","LTPro SIGNAL shifts to SELL","You have no position"], options:["Buy calls — oversold bounce coming","Buy puts — all signals confirm bearish","Wait for SIGNAL=BUY CALL before any entry","Check ES1! first for overall bias"], answer:3, insight:"Even in a bearish setup — always check ES1! for overall market bias. Top-down analysis first. One strong candle ≠ permission to skip your process." },
+    { q:"Execution — What do you do?", scenario:["Strong uptrend all morning","Price at all-time high for the day","Gravestone Doji forms","LTPro LEVEL = AT LEVEL, ZONE = CONFLUENCE","You have profitable calls position"], options:["Hold — greed says keep going","Scale out 50% — lock in gains","Exit entirely — too dangerous up here","Add more — uptrend is strong"], answer:1, insight:"Gravestone Doji + AT LEVEL + CONFLUENCE at all-time high = take some off the table. Scale out 50% locks in gains while letting winners run." },
+    { q:"Execution — Patience test:", scenario:["10:30 AM — market opened choppy","No clean setups all morning","LTPro MID-RANGE for 2 hours straight","Your trading friend says 'wait for the afternoon'","You haven't traded yet today"], options:["Force a trade — can't waste the whole morning","Trust the process — no setup = no trade","Switch to QQQ for a better setup","Lower timeframe to 1m for more signals"], answer:1, insight:"No setup = no trade. Every morning is not a trading morning. Capital preservation IS a strategy. The afternoon often sets up cleaner — as you saw Monday." }
+  ],
+  4: [
+    { q:"LTPro SIGNAL Rule — True or False?", scenario:["LTPro SIGNAL = WAIT","You see a perfect Hammer at VWAP support","QQQ is green, NVDA is green","BIAS = BULLISH","Everything looks perfect EXCEPT the signal"], options:["Enter — all other factors override SIGNAL","WAIT — SIGNAL = WAIT is the gate, no exceptions","Enter half size as a compromise","Ask your trading friend for permission"], answer:1, insight:"SIGNAL = WAIT is the PRIMARY gate. It overrides every other factor. No exceptions. This is LTPro Rule #1 — it exists to protect you from beautiful-looking traps." },
+    { q:"LTPro CONFLUENCE ZONE — What does it mean?", scenario:["LTPro ZONE shows CONFLUENCE","Price is at a key level","BIAS = BULLISH","You're ready to trade"], options:["CONFLUENCE = buy immediately","CONFLUENCE = decision point, NOT directional signal","CONFLUENCE = sell signal","CONFLUENCE = wait for 3 candles"], answer:1, insight:"CONFLUENCE = decision point only. It tells you SOMETHING IS HAPPENING here — not which direction. Let BIAS + SIGNAL determine direction." },
+    { q:"LTPro Breadth Check — What's the rule?", scenario:["LTPro BUY CALL signal fires","You're about to enter calls","You haven't checked QQQ or NVDA yet"], options:["Enter immediately — signal is enough","Check QQQ and NVDA first — both need to confirm","Check only QQQ — NVDA doesn't matter","Skip breadth check if BIAS is BULLISH"], answer:1, insight:"Maverick's Breadth Rule: QQQ green + NVDA green = favor calls. Mixed = wait. Opposite = puts. ALWAYS check before entry — even with a BUY CALL signal." },
+    { q:"LTPro TRIANGLE COMPRESS & FORMING — What do you do?", scenario:["LTPro TRIANGLE = COMPRESS & FORMING","Multiple Inside Bar candles visible","SIGNAL = WAIT","You can see 2-3 green candles starting to form"], options:["Enter early to get better price","Wait for full SIGNAL confirmation after breakout","Exit all positions — triangle = danger","Short the compression"], answer:1, insight:"TRIANGLE COMPRESS = coiling energy. WAIT for the breakout AND SIGNAL confirmation. Entering early into compression is gambling, not trading." },
+    { q:"LTPro ZONE = MID-RANGE — What's the rule?", scenario:["LTPro ZONE = MID-RANGE","SIGNAL = BUY CALL (briefly)","Spinning top candles visible","No clear level nearby"], options:["Take the BUY CALL — signal fired","No trade — MID-RANGE suppresses entries","Wait for 5 more candles then enter","Switch to puts instead"], answer:1, insight:"MID-RANGE = signal suppression zone. Even a brief BUY CALL in MID-RANGE is suspect. LTPro is designed to filter these. Trust the ZONE filter." },
+    { q:"LTPro Dashboard — Priority order?", scenario:["You open LTPro dashboard","Multiple rows showing data","You need to make a fast trading decision","What do you check FIRST?"], options:["TRIANGLE — patterns first","SIGNAL — it's the primary gate","VWAP — always check price location","ORB — opening range is most important"], answer:1, insight:"SIGNAL is always the first check. SIGNAL = WAIT = stop. SIGNAL = BUY CALL or SELL = then continue checking BIAS → ZONE → LEVEL → VWAP → breadth." },
+    { q:"LTPro APEX — What does it signal?", scenario:["LTPro APEX shows a value","Price is approaching the APEX level","BIAS = BULLISH","SIGNAL = BUY CALL"], options:["APEX = guaranteed entry point","APEX = price target / energy exhaustion zone — reduce size near it","APEX = stop loss level","APEX = ignore, only SIGNAL matters"], answer:1, insight:"APEX = energy exhaustion target. When price approaches APEX with a running position, consider scaling out or tightening stops. Not a fresh entry zone." },
+    { q:"LTPro AT LEVEL + Reversal Candle — What does this combo mean?", scenario:["LTPro LEVEL = AT LEVEL","Shooting Star candle forms","BIAS has been BULLISH all day","SIGNAL = BUY CALL (still showing)"], options:["Strong buy — SIGNAL says buy","High caution — Shooting Star AT LEVEL often signals rejection","Ignore the candle — trust the signal only","Add to calls — AT LEVEL means support"], answer:1, insight:"AT LEVEL + Shooting Star = high probability rejection warning. Even with BUY CALL signal — this candle combo at a level is a 'protect profits' alert. Reduce or exit." },
+    { q:"LTPro ES1! Sunday Analysis — Why does it matter?", scenario:["It's Sunday night","You're looking at ES1! futures","Market opens in 13 hours","Your trading friend says 'establish bias before open'"], options:["Skip it — SPY 5m is enough","ES1! Sunday analysis sets your weekly BIAS — it's the foundation of top-down analysis","ES1! only matters for futures traders","Check it but don't change your plan based on it"], answer:1, insight:"ES1! Sunday night = your macro compass. It sets weekly BIAS before you even open the War Room. Your system: ES1! bias → War Room → Cheat Sheet → LTPro execution." },
+    { q:"LTPro ORB (Opening Range Breakout) — What's the rule?", scenario:["Market just opened","LTPro ORB showing: 659.96 - 661.51","Price is at 660.20 — inside the ORB","SIGNAL = WAIT"], options:["Trade inside the ORB freely","SIGNAL = WAIT inside ORB — wait for breakout above/below ORB to confirm direction","Buy calls — price is above the low","Short the ORB high immediately"], answer:1, insight:"ORB defines the first 15-30min range. Price inside ORB = wait for breakout. Above ORB high = bullish. Below ORB low = bearish. SIGNAL = WAIT inside the range is correct." },
+    { q:"LTPro Trade Discipline — $500 Challenge Rule?", scenario:["$500 challenge account","You're up $16 on the day","You see another potential setup","But SIGNAL = WAIT","You want to press your luck"], options:["Take the trade — you're up, have cushion","Stop — SIGNAL = WAIT means WAIT. Green day = green day.","Take half size since you're up","It's fine — you have a profit buffer"], answer:1, insight:"A green day is a green day. $16 is real money in a $500 challenge. SIGNAL = WAIT means WAIT. Pressing luck after a win is how profitable days become losing days." },
+    { q:"LTPro BIAS vs SIGNAL — Which one wins?", scenario:["LTPro BIAS = BULLISH","LTPro SIGNAL = WAIT","Price looks great on the chart","Hammer just formed at VWAP","QQQ is green"], options:["BIAS wins — enter calls, everything looks good","SIGNAL wins — WAIT means WAIT, BIAS doesn't override it","They cancel out — no trade either way","Check ZONE to decide the tiebreaker"], answer:1, insight:"SIGNAL always wins over BIAS. BIAS tells you direction preference. SIGNAL tells you timing. SIGNAL = WAIT with BULLISH BIAS means: direction is right, timing is not yet." }
+  ]
+};
+
+// ═══════════ QUIZ ENGINE ═══════════
+let currentLevel = 1;
+let currentQ = 0;
+let correct = 0;
+let wrong = 0;
+let answered = false;
+let sessionHistory = [];
+
+function setLevel(level, btn) {
+  clearInterval(timerInterval);
+  currentLevel = level;
+  currentQ = 0; correct = 0; wrong = 0;
+  answered = false; sessionHistory = [];
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderQuiz();
+}
+
+function renderStreakDots(total) {
+  const bar = document.getElementById('streakBar');
+  bar.innerHTML = sessionHistory.slice(-total).map((h,i) =>
+    `<div class="streak-dot ${h ? 'hit' : 'miss'}"></div>`
+  ).join('');
+}
+
+function updateStreakDot(isCorrect) {
+  sessionHistory.push(isCorrect);
+  const total = quizData[currentLevel].length;
+  renderStreakDots(total);
+}
+
+function renderQuiz() {
+  const questions = quizData[currentLevel];
+  const total = questions.length;
+  document.getElementById('progressFill').style.width = (currentQ / total * 100) + '%';
+  document.getElementById('progressText').textContent = currentQ + ' / ' + total;
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('wrongCount').textContent = wrong;
+  renderStreakDots(total);
+
+  if (currentQ >= total) { showComplete(total); return; }
+
+  const q = questions[currentQ];
+  const levelNames = {1:'L1 — IDENTIFY THE CANDLE',2:'L2 — CONTEXT MATTERS',3:'L3 — EXECUTION',4:'L4 — LTPRO MASTERY'};
+  const levelColors = {1:getComputedStyle(document.documentElement).getPropertyValue('--bull'),2:getComputedStyle(document.documentElement).getPropertyValue('--indecision'),3:getComputedStyle(document.documentElement).getPropertyValue('--accent2'),4:getComputedStyle(document.documentElement).getPropertyValue('--accent')};
+
+  let optHTML = q.options.map((opt,i) =>
+    `<button class="option-btn" onclick="checkAnswer(${i})" id="opt${i}">${opt}</button>`
+  ).join('');
+  let scHTML = q.scenario.map(s =>
+    `<div class="scenario-item"><span class="scenario-bullet">▸</span><span>${s}</span></div>`
+  ).join('');
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="quiz-level-badge" style="color:${levelColors[currentLevel]}">🎮 ${levelNames[currentLevel]}</div>
+    <div class="quiz-card">
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-scenario">${scHTML}</div>
+      <div class="options-grid">${optHTML}</div>
+      <div class="feedback-box" id="feedbackBox"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="nav-btn primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">NEXT QUESTION →</button>
+    </div>
+  `;
+  answered = false;
+  startTimer();
+}
+
+function checkAnswer(selected) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+  const q = quizData[currentLevel][currentQ];
+  const isCorrect = selected === q.answer;
+
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+    else if (i === selected && !isCorrect) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedbackBox');
+  const s = loadStats();
+  if (isCorrect) {
+    correct++;
+    s.streak = (s.streak || 0) + 1;
+    s.totalCorrect = (s.totalCorrect || 0) + 1;
+    if (s.streak > (s.bestStreak || 0)) s.bestStreak = s.streak;
+    fb.className = 'feedback-box correct-fb';
+    fb.innerHTML = `✅ <strong>CORRECT, MAVERICK! 🔥 Streak: ${s.streak}</strong><div class="feedback-insight">${q.insight}</div>`;
+  } else {
+    wrong++;
+    s.streak = 0;
+    fb.className = 'feedback-box wrong-fb';
+    fb.innerHTML = `❌ <strong>NOT QUITE — STREAK RESET</strong><div class="feedback-insight">${q.insight}</div>`;
+  }
+  saveStats(s);
+  updateBanner();
+  updateStreakDot(isCorrect);
+  fb.style.display = 'block';
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('wrongCount').textContent = wrong;
+  document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  currentQ++;
+  renderQuiz();
+}
+
+function showComplete(total) {
+  clearInterval(timerInterval);
+  const pct = Math.round(correct / total * 100);
+  const color = pct >= 80 ? 'var(--bull)' : pct >= 60 ? 'var(--indecision)' : 'var(--bear)';
+  const msgs = {
+    100: "🛩️ PERFECT SCORE — You ARE Maverick!",
+    80: "🛩️ Cleared for takeoff, Maverick!",
+    60: "📊 Getting there — review the misses",
+    0: "📚 Hit the Library and try again"
+  };
+  const msg = pct === 100 ? msgs[100] : pct >= 80 ? msgs[80] : pct >= 60 ? msgs[60] : msgs[0];
+  const s = loadStats();
+  s.sessions = (s.sessions || 0) + 1;
+  saveStats(s);
+  updateBanner();
+  document.getElementById('quizArea').innerHTML = `
+    <div class="quiz-complete">
+      <div class="score-label">MISSION COMPLETE — LEVEL ${currentLevel}</div>
+      <div class="score-big" style="color:${color}">${pct}%</div>
+      <div class="score-message">${msg}</div>
+      <div class="complete-stats">
+        <div class="cstat"><span style="color:var(--bull)">${correct}</span>CORRECT</div>
+        <div class="cstat"><span style="color:var(--bear)">${wrong}</span>WRONG</div>
+        <div class="cstat"><span style="color:var(--accent)">${s.totalCorrect}</span>ALL-TIME</div>
+        <div class="cstat"><span style="color:var(--indecision)">${s.bestStreak}</span>BEST STREAK</div>
+      </div>
+      <button class="restart-btn" onclick="restartQuiz()">↺ FLY AGAIN</button>
+    </div>
+  `;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = total + ' / ' + total;
+}
+
+function restartQuiz() {
+  currentQ = 0; correct = 0; wrong = 0;
+  sessionHistory = [];
+  renderQuiz();
+}
+
+renderQuiz();
+</script>
+</body>
+</html>
