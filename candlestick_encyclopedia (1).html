@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candlestick Encyclopedia — Maverick Trading</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #080b0e;
+  --surface: #0e1318;
+  --surface2: #141a22;
+  --surface3: #1a2230;
+  --border: #1c2535;
+  --border2: #243040;
+  --bull: #00d97e;
+  --bull-dim: rgba(0,217,126,0.1);
+  --bull-border: rgba(0,217,126,0.25);
+  --bear: #ff3355;
+  --bear-dim: rgba(255,51,85,0.1);
+  --bear-border: rgba(255,51,85,0.25);
+  --neutral: #f5a623;
+  --neutral-dim: rgba(245,166,35,0.1);
+  --neutral-border: rgba(245,166,35,0.25);
+  --accent: #4d9fff;
+  --accent-dim: rgba(77,159,255,0.1);
+  --accent-border: rgba(77,159,255,0.25);
+  --text: #dde3ee;
+  --text-dim: #6b7a94;
+  --text-muted: #3d4d62;
+  --spy: #a78bfa;
+  --strategy: #f59e0b;
+  --strategy-dim: rgba(245,158,11,0.1);
+  --strategy-border: rgba(245,158,11,0.25);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-brand {
+  padding: 18px 28px 18px 0;
+  border-right: 1px solid var(--border);
+  margin-right: 28px;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 4px;
+  line-height: 1;
+  color: var(--text);
+}
+.logo span { color: var(--bull); }
+
+.logo-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-top: 3px;
+  text-transform: uppercase;
+}
+
+.header-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+}
+
+.stat-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stat-pill strong {
+  font-size: 1rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0;
+  margin-left: auto;
+}
+
+/* ─── CONTROLS BAR ─── */
+.controls {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 78px;
+  z-index: 99;
+}
+
+.filter-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.filter-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+
+.fbtn {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
+  padding: 5px 12px;
+  border-radius: 3px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.fbtn:hover { border-color: var(--accent); color: var(--accent); }
+.fbtn.active-all { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+.fbtn.active-bull { background: var(--bull); border-color: var(--bull); color: #000; font-weight: 600; }
+.fbtn.active-bear { background: var(--bear); border-color: var(--bear); color: #fff; font-weight: 600; }
+.fbtn.active-neutral { background: var(--neutral); border-color: var(--neutral); color: #000; font-weight: 600; }
+.fbtn.active-both { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+.fbtn.active-cont { background: var(--spy); border-color: var(--spy); color: #000; font-weight: 600; }
+.fbtn.active-strategy { background: var(--strategy); border-color: var(--strategy); color: #000; font-weight: 600; }
+
+.divider { width: 1px; height: 20px; background: var(--border2); margin: 0 4px; }
+
+.search-wrap {
+  margin-left: auto;
+  position: relative;
+}
+.search-wrap input {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  padding: 6px 12px 6px 30px;
+  border-radius: 3px;
+  width: 230px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-wrap input:focus { border-color: var(--accent); }
+.search-wrap input::placeholder { color: var(--text-muted); }
+.search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; }
+
+/* ─── RESULTS BAR ─── */
+.results-bar {
+  padding: 8px 28px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ─── SECTION DIVIDER ─── */
+.section-divider {
+  grid-column: 1/-1;
+  padding: 14px 20px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  border-top: 2px solid var(--strategy);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-divider-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 3px;
+  color: var(--strategy);
+}
+.section-divider-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+/* ─── GRID ─── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1px;
+  background: var(--border);
+}
+
+/* ─── CARD ─── */
+.card {
+  background: var(--surface);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.15s;
+}
+.card:hover { background: var(--surface2); }
+
+.card-accent {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.bull .card-accent { background: var(--bull); }
+.bear .card-accent { background: var(--bear); }
+.neutral .card-accent { background: var(--neutral); }
+.both .card-accent { background: var(--accent); }
+.strategy .card-accent { background: var(--strategy); }
+.avoid .card-accent { background: #ff3355; }
+
+.card-inner { padding: 20px 20px 20px 24px; }
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.badge-bull { background: var(--bull-dim); color: var(--bull); border: 1px solid var(--bull-border); }
+.badge-bear { background: var(--bear-dim); color: var(--bear); border: 1px solid var(--bear-border); }
+.badge-neutral { background: var(--neutral-dim); color: var(--neutral); border: 1px solid var(--neutral-border); }
+.badge-both { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+.badge-strategy { background: var(--strategy-dim); color: var(--strategy); border: 1px solid var(--strategy-border); }
+.badge-avoid { background: rgba(255,51,85,0.15); color: #ff3355; border: 1px solid rgba(255,51,85,0.3); }
+
+.card-candles { color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 0.6rem; white-space: nowrap; }
+
+.card-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.55rem;
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.card-category {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.card-visual {
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+/* ─── COLLAPSED STATE ─── */
+.card-tagline {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+.expand-hint {
+  margin-top: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+/* ─── EXPANDED STATE ─── */
+.card-expanded { display: none; }
+.card.open .card-expanded { display: block; }
+.card.open .expand-hint { display: none; }
+
+.section-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 14px 0 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.card-desc {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.key-list { margin-top: 4px; }
+.key-item {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+}
+.key-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+/* SPY context box */
+.spy-box {
+  background: rgba(167,139,250,0.07);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-top: 4px;
+}
+.spy-box-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 2px;
+  color: var(--spy);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.spy-box p {
+  font-size: 0.78rem;
+  color: #c4b5fd;
+  line-height: 1.55;
+}
+
+/* Strategy context box */
+.strategy-box {
+  background: rgba(245,158,11,0.07);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-top: 4px;
+}
+.strategy-box-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 2px;
+  color: var(--strategy);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.strategy-box p {
+  font-size: 0.78rem;
+  color: #fcd34d;
+  line-height: 1.55;
+}
+
+/* Phase list for strategy cards */
+.phase-list { margin-top: 4px; }
+.phase-item {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.phase-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--strategy);
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 70px;
+}
+.phase-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.66rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* avoid box */
+.avoid-box {
+  background: rgba(255,51,85,0.08);
+  border: 1px solid rgba(255,51,85,0.25);
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-top: 4px;
+}
+.avoid-box p {
+  font-size: 0.78rem;
+  color: #ff6b84;
+  line-height: 1.55;
+}
+
+/* reliability bar */
+.reliability-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.reliability-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--surface3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.reliability-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+.rel-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* checklist */
+.checklist { margin-top: 6px; }
+.check-item {
+  display: flex;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  align-items: flex-start;
+  line-height: 1.4;
+}
+.check-num {
+  color: var(--strategy);
+  font-weight: 600;
+  min-width: 18px;
+}
+
+.no-results {
+  grid-column: 1/-1;
+  padding: 100px 32px;
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+footer {
+  padding: 20px 28px;
+  border-top: 1px solid var(--border);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width:640px) {
+  .header { padding: 14px 14px; }
+  .controls { padding: 8px 14px; top: 70px; }
+  .results-bar { padding: 6px 14px; }
+  .grid { grid-template-columns: 1fr; }
+  .search-wrap { margin-left: 0; width: 100%; }
+  .search-wrap input { width: 100%; }
+  .header-stats { display: none; }
+  footer { padding: 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">
+    <div class="logo">CANDLE<span>STICK</span></div>
+    <div class="logo-sub">ENCYCLOPEDIA — MAVERICK</div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill"><strong id="totalStat">—</strong>PATTERNS</div>
+    <div class="stat-pill"><strong id="bullStat">—</strong>BULLISH</div>
+    <div class="stat-pill"><strong id="bearStat">—</strong>BEARISH</div>
+    <div class="stat-pill"><strong id="neutStat">—</strong>NEUTRAL</div>
+    <div class="stat-pill"><strong id="stratStat">—</strong>STRATEGIES</div>
+  </div>
+  <div class="header-right">
+    <span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text-muted)">TAP CARD TO EXPAND · SPY CONTEXT INCLUDED</span>
+  </div>
+</div>
+
+<div class="controls">
+  <span class="filter-label">FILTER</span>
+  <div class="filter-group">
+    <button class="fbtn active-all" data-f="all">ALL</button>
+    <button class="fbtn" data-f="bull">🟢 BULLISH</button>
+    <button class="fbtn" data-f="bear">🔴 BEARISH</button>
+    <button class="fbtn" data-f="neutral">⚖️ INDECISION</button>
+    <button class="fbtn" data-f="both">↕ BOTH WAYS</button>
+    <button class="fbtn" data-f="strategy">📊 STRATEGIES</button>
+    <button class="fbtn" data-f="avoid">🚫 AVOID</button>
+  </div>
+  <div class="divider"></div>
+  <div class="filter-group">
+    <span class="filter-label">TYPE</span>
+    <button class="fbtn" data-f="reversal">REVERSAL</button>
+    <button class="fbtn" data-f="continuation">CONTINUATION</button>
+    <button class="fbtn" data-f="single">SINGLE CANDLE</button>
+    <button class="fbtn" data-f="multi">MULTI CANDLE</button>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="searchInput" placeholder="Search any pattern or strategy...">
+  </div>
+</div>
+
+<div class="results-bar">
+  <span id="resultsText">Loading...</span>
+  <span style="color:var(--text-muted)">BULKOWSKI RELIABILITY RATINGS INCLUDED · MAVERICK SYSTEM v2.0</span>
+</div>
+
+<div class="grid" id="cardGrid"></div>
+
+<footer>
+  <span>CANDLESTICK ENCYCLOPEDIA — MAVERICK TRADING SYSTEM — LTPROv7</span>
+  <span>🟢 BULL · 🔴 BEAR · ⚖️ INDECISION · ↕ BOTH · 📊 STRATEGY · SPY/OPTIONS CONTEXT ON EVERY CARD</span>
+</footer>
+
+<script>
+// ── SVG HELPERS ──
+const B = '#00d97e', R = '#ff3355', N = '#f5a623', A = '#4d9fff', S = '#f59e0b';
+
+function c(x,y,w,h,bull,wt=0,wb=0,color=null) {
+  const col = color || (bull ? B : R);
+  const cx = x+w/2;
+  let s = '';
+  if(wt>0) s += `<line x1="${cx}" y1="${y-wt}" x2="${cx}" y2="${y}" stroke="${col}" stroke-width="1.5"/>`;
+  if(wb>0) s += `<line x1="${cx}" y1="${y+h}" x2="${cx}" y2="${y+h+wb}" stroke="${col}" stroke-width="1.5"/>`;
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${col}" rx="1"/>`;
+  return s;
+}
+function d(x,y,wt=12,wb=12,w=12) {
+  const cx=x+w/2;
+  return `<line x1="${cx}" y1="${y-wt}" x2="${cx}" y2="${y+wb}" stroke="${N}" stroke-width="1.5"/>
+          <rect x="${x}" y="${y-1}" width="${w}" height="2" fill="${N}"/>`;
+}
+function gap(x1,y1,x2,y2) {
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${A}" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>`;
+}
+function svg(w,h,content) {
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" overflow="visible">${content}</svg>`;
+}
+// Volume bar helper
+function vol(x,y,w,h,color) {
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${color}" opacity="0.5" rx="1"/>`;
+}
+// Label helper
+function lbl(x,y,text,color='#6b7a94') {
+  return `<text x="${x}" y="${y}" font-family="monospace" font-size="7" fill="${color}" text-anchor="middle">${text}</text>`;
+}
+// Horizontal line helper
+function hline(x1,y,x2,color,dash='') {
+  return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${color}" stroke-width="1" stroke-dasharray="${dash}" opacity="0.8"/>`;
+}
+// Arrow helper
+function arrow(x1,y1,x2,y2,color) {
+  const angle = Math.atan2(y2-y1,x2-x1);
+  const ah = 6;
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.5" opacity="0.9"/>
+  <polygon points="${x2},${y2} ${x2-ah*Math.cos(angle-0.4)},${y2-ah*Math.sin(angle-0.4)} ${x2-ah*Math.cos(angle+0.4)},${y2-ah*Math.sin(angle+0.4)}" fill="${color}" opacity="0.9"/>`;
+}
+
+const V = {
+  // ── ORIGINAL SINGLES ──
+  hammer:          svg(60,56, c(22,34,16,10,true,0,18)),
+  inv_hammer:      svg(60,56, c(22,28,16,10,true,20,0)),
+  hanging_man:     svg(60,56, c(22,10,16,10,false,0,30)),
+  shooting_star:   svg(60,56, c(22,26,16,10,false,24,0)),
+  doji:            svg(60,56, d(24,28,16,16)),
+  dragonfly:       svg(60,56, d(24,20,0,28)),
+  gravestone:      svg(60,56, d(24,32,28,0)),
+  ll_doji:         svg(60,56, d(24,28,22,22)),
+  marubozu_b:      svg(60,56, c(22,14,16,32,true,0,0)),
+  marubozu_r:      svg(60,56, c(22,14,16,32,false,0,0)),
+  spinning_top:    svg(60,56, c(22,24,16,10,true,12,12)),
+  long_day:        svg(80,56, c(5,18,16,26,true,3,3)+c(35,10,16,34,true,2,2)),
+  short_day:       svg(80,56, c(5,24,12,8,true,2,2)+c(35,26,12,6,false,2,2)),
+  belt_hold_bull:  svg(60,56, c(22,10,16,36,true,0,4)),
+  belt_hold_bear:  svg(60,56, c(22,10,16,36,false,4,0)),
+  high_wave:       svg(60,56, c(24,26,12,6,true,18,18)),
+  rickshaw:        svg(60,56, d(24,28,24,24)),
+  four_price:      svg(60,56, `<line x1="30" y1="28" x2="30" y2="28" stroke="${N}" stroke-width="2"/><rect x="22" y="27" width="16" height="2" fill="${N}"/>`),
+  tasuki_up:       svg(100,56, c(2,20,16,22,true,3,3)+c(26,8,16,22,true,3,3)+c(50,14,16,18,false,3,3)),
+  tasuki_dn:       svg(100,56, c(2,12,16,22,false,3,3)+c(26,24,16,22,false,3,3)+c(50,18,16,18,true,3,3)),
+  shadow_analysis: svg(60,56, c(22,20,16,18,true,18,6)),
+  // ── ORIGINAL 2-CANDLE ──
+  bull_engulf:     svg(80,56, c(4,22,16,20,false,3,3)+c(30,10,20,30,true,3,3)),
+  bear_engulf:     svg(80,56, c(4,18,16,14,true,3,3)+c(30,10,20,32,false,3,3)),
+  piercing:        svg(80,56, c(4,10,16,30,false,3,3)+c(30,22,16,22,true,3,3)),
+  dark_cloud:      svg(80,56, c(4,14,16,28,true,3,3)+c(30,8,16,28,false,3,3)),
+  harami_bull:     svg(80,56, c(4,10,18,34,false,2,2)+c(36,22,14,12,true,2,2)),
+  harami_bear:     svg(80,56, c(4,10,18,34,true,2,2)+c(36,22,14,12,false,2,2)),
+  harami_cross:    svg(80,56, c(4,10,18,34,false,2,2)+d(36,28,10,10,14)),
+  rising_win:      svg(90,56, c(2,26,16,22,true,3,3)+c(44,8,16,22,true,3,3)+gap(2,25,60,9)),
+  falling_win:     svg(90,56, c(2,8,16,22,false,3,3)+c(44,28,16,22,false,3,3)+gap(2,31,60,29)),
+  tweezer_bot:     svg(80,56, c(4,14,16,26,false,3,6)+c(32,18,16,22,true,3,6)),
+  tweezer_top:     svg(80,56, c(4,14,16,26,true,6,3)+c(32,14,16,22,false,6,3)),
+  bull_counter:    svg(80,56, c(4,16,16,26,false,3,3)+c(32,16,16,26,true,3,3)),
+  bear_counter:    svg(80,56, c(4,16,16,26,true,3,3)+c(32,16,16,26,false,3,3)),
+  bull_kicker:     svg(90,56, c(2,16,16,26,false,3,3)+c(44,8,16,26,true,3,3)+gap(2,14,60,10)),
+  bear_kicker:     svg(90,56, c(2,8,16,26,true,3,3)+c(44,18,16,26,false,3,3)+gap(2,35,60,19)),
+  on_neck:         svg(80,56, c(4,10,16,30,false,3,3)+c(32,32,16,10,true,3,3)),
+  in_neck:         svg(80,56, c(4,10,16,30,false,3,3)+c(32,28,16,12,true,3,3)),
+  thrusting:       svg(80,56, c(4,10,16,30,false,3,3)+c(32,24,16,16,true,3,3)),
+  mat_hold:        svg(80,56, c(4,10,16,30,true,3,3)+c(32,18,16,20,true,3,3)),
+  // ── ORIGINAL 3-CANDLE ──
+  morning_star:    svg(100,56, c(2,12,16,28,false,3,3)+c(28,30,12,10,true,3,3)+c(54,14,16,24,true,3,3)),
+  morning_doji:    svg(100,56, c(2,12,16,28,false,3,3)+d(30,34,10,10,12)+c(54,14,16,24,true,3,3)),
+  evening_star:    svg(100,56, c(2,14,16,24,true,3,3)+c(28,10,12,10,false,3,3)+c(54,14,16,28,false,3,3)),
+  evening_doji:    svg(100,56, c(2,14,16,24,true,3,3)+d(30,18,10,10,12)+c(54,14,16,28,false,3,3)),
+  three_soldiers:  svg(110,56, c(4,30,16,20,true,3,3)+c(26,22,16,24,true,3,3)+c(48,10,16,28,true,3,3)),
+  three_crows:     svg(110,56, c(4,8,16,20,false,3,3)+c(26,16,16,22,false,3,3)+c(48,24,16,22,false,3,3)),
+  three_inside_up: svg(110,56, c(4,10,16,28,false,2,2)+c(26,18,14,14,true,2,2)+c(48,8,16,28,false,2,2)),
+  three_out_up:    svg(110,56, c(4,22,16,20,false,2,2)+c(26,10,18,28,true,2,2)+c(52,8,16,30,true,2,2)),
+  abandoned:       svg(110,56, c(2,10,16,26,false,3,3)+d(36,32,8,8,12)+c(62,10,16,24,true,3,3)),
+  upside_2crows:   svg(110,56, c(2,16,18,28,true,3,3)+c(30,8,14,12,false,3,3)+c(54,6,16,22,false,3,3)),
+  three_star_s:    svg(100,56, d(10,18,10,10)+d(36,28,8,8,10)+d(62,16,10,10)),
+  unique_3river:   svg(110,56, c(2,8,16,22,false,3,3)+c(26,16,16,18,false,3,10)+c(52,30,14,8,true,0,0)),
+  deliberation:    svg(110,56, c(4,28,14,18,true,2,2)+c(24,18,14,20,true,2,2)+c(44,14,10,10,true,2,2)),
+  advance_block:   svg(110,56, c(4,28,14,18,true,2,8)+c(24,18,14,20,true,2,10)+c(44,14,10,10,true,2,14)),
+  stalled:         svg(110,56, c(4,28,16,20,true,2,2)+c(26,16,16,24,true,2,2)+c(48,14,10,14,true,2,2)),
+  three_line_s:    svg(130,56, c(2,8,14,22,false,2,2)+c(22,18,12,16,true,2,2)+c(40,14,12,18,true,2,2)+c(58,8,12,18,true,2,2)+c(78,6,14,26,false,2,2)),
+  conc_baby:       svg(120,56, c(2,8,16,26,false,2,2)+c(26,8,16,26,false,2,2)+c(50,18,14,12,true,2,2)+c(72,6,16,28,false,2,2)),
+  rising_3:        svg(140,56, c(2,8,16,30,true,2,2)+c(22,18,12,12,false,2,2)+c(38,20,12,10,false,2,2)+c(54,22,12,10,false,2,2)+c(70,6,16,34,true,2,2)),
+  falling_3:       svg(140,56, c(2,6,16,30,false,2,2)+c(22,16,12,12,true,2,2)+c(38,18,12,10,true,2,2)+c(54,20,12,10,true,2,2)+c(70,8,16,32,false,2,2)),
+  upside_g3:       svg(110,56, c(2,18,16,24,true,3,3)+c(30,6,16,20,true,3,3)+c(58,14,16,18,false,3,3)),
+  downside_g3:     svg(110,56, c(2,8,16,24,false,3,3)+c(30,18,16,22,false,3,3)+c(58,14,16,18,true,3,3)),
+
+  // ── NEW CANDLE VISUALS ──
+  // High Volume Wick — bullish: long lower wick with volume spike
+  high_vol_wick_bull: svg(100,60,
+    vol(5,40,12,15,R)+vol(20,38,12,17,R)+vol(35,30,12,25,'#00d97e')+vol(50,44,12,11,B)+vol(65,42,12,13,B)+
+    c(32,20,14,8,true,0,26)
+  ),
+  // High Volume Wick — bearish: long upper wick with volume spike
+  high_vol_wick_bear: svg(100,60,
+    vol(5,38,12,17,B)+vol(20,40,12,15,B)+vol(35,30,12,25,R)+vol(50,42,12,13,R)+vol(65,44,12,11,R)+
+    c(32,30,14,8,false,22,0)
+  ),
+  // Expansion Higher — small then large green
+  expansion_higher: svg(90,56,
+    c(2,28,16,16,true,3,3)+c(28,8,20,36,true,2,2)
+  ),
+  // Expansion Lower — small then large red
+  expansion_lower: svg(90,56,
+    c(2,16,16,14,false,3,3)+c(28,12,20,36,false,2,2)
+  ),
+  // Exhaustion — new highs on shrinking volume
+  exhaustion: svg(130,60,
+    vol(2,42,12,13,B)+vol(18,36,12,19,B)+vol(34,44,12,11,B)+vol(50,48,12,7,'#6b7a94')+vol(66,50,12,5,'#6b7a94')+vol(82,52,12,3,'#6b7a94')+
+    c(2,32,12,10,true,2,2)+c(18,24,12,12,true,2,2)+c(34,18,12,14,true,3,3)+c(50,14,12,14,true,3,3)+c(66,10,12,14,true,4,4)+c(82,8,12,12,false,5,5)
+  ),
+  // Seek & Destroy — choppy wicks both ways
+  seek_destroy: svg(110,56,
+    c(4,22,12,12,true,14,14)+c(22,20,12,14,false,12,12)+c(40,22,12,12,true,14,14)+c(58,20,12,14,false,12,12)+c(76,22,12,12,true,14,14)
+  ),
+  // Consolidation — tight overlapping candles
+  consolidation: svg(110,56,
+    c(4,22,14,12,true,3,3)+c(22,24,14,10,false,3,3)+c(40,22,14,12,true,3,3)+c(58,24,14,10,false,3,3)+c(76,22,14,12,true,3,3)
+  ),
+  // Hammer with volume
+  hammer_vol: svg(100,60,
+    vol(5,44,12,11,R)+vol(20,44,12,11,R)+vol(35,30,12,25,B)+vol(50,44,12,11,B)+vol(65,44,12,11,B)+
+    c(32,28,14,8,true,0,20)
+  ),
+  // Engulfing with volume
+  engulf_vol: svg(110,60,
+    vol(5,40,12,15,R)+vol(20,38,12,17,R)+vol(45,25,18,30,B)+vol(70,44,12,11,B)+
+    c(4,22,14,18,false,3,3)+c(40,10,18,32,true,2,2)
+  ),
+
+  // ── STRATEGY VISUALS ──
+  // ORB — 4 phases
+  orb_phases: svg(200,60,
+    hline(0,20,200,'#f59e0b','4,2')+
+    hline(0,42,200,'#f59e0b','4,2')+
+    c(2,24,14,14,false,3,3)+c(18,22,14,16,true,3,3)+
+    lbl(15,56,'A','#f59e0b')+
+    arrow(40,31,60,18,B)+
+    c(56,10,14,18,true,3,3)+lbl(63,56,'B','#00d97e')+
+    c(80,38,14,8,false,3,3)+c(96,36,14,10,true,3,3)+lbl(96,56,'C','#4d9fff')+
+    c(116,28,14,18,true,2,2)+c(132,18,14,22,true,2,2)+c(148,8,14,24,true,2,2)+lbl(148,56,'D','#00d97e')
+  ),
+  // VWAP — bounce and cross
+  vwap_visual: svg(200,60,
+    `<path d="M0,50 Q30,48 60,30 Q90,12 120,28 Q150,44 180,20 Q190,15 200,18" stroke="#a78bfa" stroke-width="2" fill="none"/>` +
+    c(10,38,10,10,true,3,3)+c(60,18,10,10,false,3,3)+c(120,20,10,10,true,3,3)+c(175,10,10,10,false,3,3)+
+    lbl(100,56,'VWAP','#a78bfa')
+  ),
+  // 9EMA scalp
+  nine_ema: svg(200,60,
+    `<path d="M0,50 Q20,48 40,44 Q60,40 80,32 Q100,24 120,20 Q140,16 160,12 Q180,8 200,6" stroke="${S}" stroke-width="2" fill="none"/>` +
+    c(5,42,10,8,false,3,3)+c(20,40,10,8,false,3,3)+c(35,38,10,10,false,3,3)+
+    c(60,22,10,14,true,2,2)+c(75,14,10,16,true,2,2)+c(90,10,10,18,true,2,2)+c(105,6,10,18,true,2,2)+
+    lbl(100,56,'9EMA FLIP','#f59e0b')
+  ),
+  // CRT — 8am range
+  crt_visual: svg(200,60,
+    hline(0,16,90,'#4d9fff','3,2')+hline(0,38,90,'#4d9fff','3,2')+
+    c(5,22,10,12,false,2,2)+c(20,20,10,14,true,2,2)+c(35,18,10,16,true,2,2)+c(50,28,10,8,false,2,2)+c(65,30,10,8,false,2,2)+
+    lbl(45,8,'8AM RANGE','#4d9fff')+
+    arrow(90,27,110,18,B)+
+    c(110,10,12,20,true,2,2)+c(125,6,12,24,true,2,2)+c(140,4,12,26,true,2,2)+
+    lbl(150,56,'CISD→LONG','#00d97e')
+  ),
+  // Support strength
+  support_strength: svg(200,60,
+    hline(0,44,200,'#00d97e','2,2')+
+    c(5,26,12,16,false,3,8)+c(22,30,12,12,false,3,8)+c(40,36,12,6,true,3,12)+
+    arrow(56,40,76,20,B)+
+    c(76,14,12,24,true,2,2)+c(92,10,12,28,true,2,2)+
+    lbl(50,56,'STRONG','#00d97e')+
+    c(120,22,12,16,false,4,8)+c(137,30,12,10,true,4,8)+c(154,26,12,14,false,4,8)+c(171,30,12,10,true,4,8)+
+    lbl(160,56,'WEAK','#ff3355')
+  ),
+  // Double bottom
+  double_bottom: svg(200,60,
+    c(2,10,12,16,false,2,2)+c(18,14,12,14,false,2,2)+
+    c(36,32,12,8,true,0,14)+
+    c(54,20,12,12,true,2,2)+c(70,16,12,14,true,2,2)+
+    c(88,32,12,8,true,0,14)+
+    c(106,14,12,20,true,2,2)+c(122,8,12,24,true,2,2)+c(138,4,12,28,true,2,2)+
+    hline(0,26,160,'#f59e0b','3,2')+
+    lbl(80,56,'NECKLINE','#f59e0b')
+  ),
+  // Higher low reversal
+  higher_low: svg(200,60,
+    c(2,8,10,18,false,2,2)+c(16,12,10,16,false,2,2)+c(30,40,10,8,true,0,8)+
+    c(46,24,10,14,true,2,2)+c(60,28,10,10,false,2,2)+c(74,36,10,6,true,0,6)+
+    c(90,18,10,18,true,2,2)+c(104,22,10,14,false,2,2)+c(118,32,10,8,true,0,4)+
+    c(134,10,10,22,true,2,2)+c(148,6,10,26,true,2,2)+c(162,2,10,28,true,2,2)+
+    arrow(30,48,74,42,S)+arrow(74,42,118,36,S)+
+    lbl(74,58,'HIGHER LOWS','#f59e0b')
+  ),
+  // Volume profile shelves/deserts
+  vol_profile: svg(200,60,
+    vol(0,36,35,20,B)+vol(0,24,50,12,B)+vol(0,18,30,6,B)+
+    vol(0,10,15,8,'#6b7a94')+
+    vol(0,6,10,4,'#6b7a94')+
+    lbl(80,16,'DESERT','#6b7a94')+lbl(80,40,'SHELF',B)+
+    `<line x1="45" y1="16" x2="60" y2="16" stroke="#6b7a94" stroke-width="1" stroke-dasharray="2,2"/>` +
+    `<line x1="55" y1="40" x2="70" y2="40" stroke="${B}" stroke-width="1" stroke-dasharray="2,2"/>` +
+    c(120,38,12,10,true,0,16)+c(136,24,12,22,true,2,2)+c(152,10,12,30,true,2,2)+c(168,4,12,36,true,2,2)+
+    arrow(130,44,164,44,R)
+  ),
+  // ICT Smart Money map
+  ict_map: svg(200,60,
+    c(2,38,10,12,false,2,2)+c(16,34,10,14,false,2,8)+
+    lbl(12,56,'OB','#f59e0b')+
+    arrow(30,44,50,34,B)+
+    c(50,26,10,16,true,2,4)+
+    lbl(55,58,'IDM','#ff3355')+
+    arrow(64,34,84,20,B)+
+    c(84,14,10,20,true,2,2)+c(98,10,10,20,true,2,2)+
+    lbl(91,58,'BOS',B)+
+    c(116,22,10,14,false,4,4)+
+    lbl(121,58,'BB','#a78bfa')+
+    arrow(130,28,150,10,B)+
+    c(150,4,10,26,true,2,2)+c(164,2,10,28,true,2,2)+
+    lbl(167,58,'TP1',B)
+  ),
+  // VPOC
+  vpoc_visual: svg(200,60,
+    vol(0,40,60,16,B)+vol(0,26,50,14,B)+vol(0,18,70,8,'#a78bfa')+vol(0,10,30,8,B)+vol(0,4,20,6,B)+
+    lbl(85,20,'VPOC','#a78bfa')+
+    `<line x1="70" y1="18" x2="80" y2="18" stroke="#a78bfa" stroke-width="1.5"/>` +
+    c(110,36,12,10,true,0,10)+c(126,28,12,18,true,2,2)+c(142,20,12,22,true,2,2)+c(158,12,12,28,true,2,2)+c(174,6,12,30,true,2,2)
+  ),
+  // Trendline
+  trendline_visual: svg(200,60,
+    `<line x1="0" y1="52" x2="200" y2="8" stroke="${S}" stroke-width="1.5" stroke-dasharray="3,2"/>` +
+    c(10,42,10,8,true,0,4)+c(30,36,10,10,false,2,6)+c(55,28,10,12,true,0,6)+c(80,22,10,10,false,2,4)+c(105,16,10,12,true,0,4)+
+    lbl(100,58,'3RD TOUCH = ENTRY','#f59e0b')
+  ),
+};
+
+const patterns = [
+// ══════════════════════════════════════════════════════════
+// SECTION 1 — SINGLE CANDLE PATTERNS (original)
+// ══════════════════════════════════════════════════════════
+{
+  name:"Hammer", type:"bull", cat:"Single Candle · Bullish Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bull"],
+  tagline:"Bullish reversal at the bottom of a downtrend. Square lollipop with a long stick pointing down.",
+  desc:"Forms after a declining security. Price opens, drops significantly, then rallies well above the intraday low — looks like a square lollipop with a long lower stick. Bulls strengthening but not yet in full control. Green hammers carry more weight than red ones.",
+  keys:["Lower shadow ≥ 2× the real body","Small body near the top of candle","Green body preferred — stronger signal","Found at bottom of downtrend","Confirm with next green candle close"],
+  spy:"On SPY 5-min: classic hammer at a support level (VWAP, ORB low, key zone) with LTPro showing AT ZONE + SIGNAL flipping from WAIT → BUY is high-probability. The candle you spotted around 13:50 was likely this shape after a selloff.",
+  reliability:72, visual:"hammer"
+},
+{
+  name:"Inverted Hammer", type:"bull", cat:"Single Candle · Bullish Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bull"],
+  tagline:"Same as Shooting Star shape — but at the BOTTOM. Warning of reversal up, not a standalone buy signal.",
+  desc:"Occurs at the bottom of downtrends. Opens lower, trades much higher, then closes near its open — inverted lollipop shape. It's a WARNING of potential price change, not a buy trigger by itself. Context and confirmation are everything.",
+  keys:["Upper shadow ≥ 2× the real body","Small body near the bottom of candle","Green body preferred","Found at bottom of downtrend","MUST confirm with next candle — do NOT buy on the inverted hammer alone"],
+  spy:"On SPY 5-min: if you see this after a sharp move down into a key support (VWAP, golden zone), and LTPro dashboard shows BULLISH BIAS + AT ZONE — wait for the NEXT candle to close green before entry.",
+  reliability:65, visual:"inv_hammer"
+},
+{
+  name:"Hanging Man", type:"bear", cat:"Single Candle · Bearish Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bear"],
+  tagline:"Same shape as Hammer — but at the TOP of an uptrend. Bulls losing grip.",
+  desc:"Forms at the top of an uptrend. Identical shape to Hammer — same lollipop with long lower stick — but context makes it bearish. Reliability drastically improves when price drops the day/candle after.",
+  keys:["Lower shadow ≥ 2× the real body","Red body preferred — stronger signal","Gap up on open adds power","Found at top of uptrend","Confirm with next candle closing lower"],
+  spy:"On SPY: found at resistance zones (prior day high, VWAP resistance, ORB high) or after a strong rally into a supply zone. LTPro AT ZONE + BEARISH BIAS + this candle = put setup. DO NOT short the candle alone — wait for confirmation.",
+  reliability:60, visual:"hanging_man"
+},
+{
+  name:"Shooting Star", type:"bear", cat:"Single Candle · Bearish Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bear"],
+  tagline:"Inverted lollipop at the TOP of an uptrend. Bulls failed to hold highs — sellers took over.",
+  desc:"Single-day pattern in an uptrend. Opens higher, trades much higher, then closes near its open — long upper shadow, tiny body near the bottom.",
+  keys:["Long upper shadow — 2× the real body or more","Small body near the bottom of candle","Little to no lower shadow","Found in an uptrend at resistance","Confirm with follow-through red candle"],
+  spy:"On SPY 5-min: powerful when it forms at the ORB high, prior resistance, or VWAP resistance with LTPro showing BEARISH BIAS + NEAR ZONE or AT ZONE. Watch your LTPro SIGNAL — if it stays WAIT, skip the trade.",
+  reliability:68, visual:"shooting_star"
+},
+{
+  name:"Doji", type:"neutral", cat:"Single Candle · Indecision", candles:"1 CANDLE",
+  tags:["single","neutral"],
+  tagline:"Open ≈ Close. Bulls and bears fought all session and called it a draw.",
+  desc:"Forms when open and close are virtually equal. Represents a tug-of-war where price tested both directions but closed at (or near) the open. Context determines whether it signals continuation or reversal.",
+  keys:["Open ≈ Close (virtually equal)","Upper and lower shadow lengths vary","Signals indecision / tug-of-war","Most significant after a strong trend","Combine with support/resistance for direction"],
+  spy:"On SPY: a Doji at VWAP after a strong trend = possible reversal. A Doji in mid-range = noise, skip it. LTPro showing MID-RANGE + Doji = NO TRADE.",
+  reliability:50, visual:"doji"
+},
+{
+  name:"Dragonfly Doji", type:"bull", cat:"Single Candle · Bullish Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bull","doji"],
+  tagline:"T-shaped Doji. Long lower wick, no upper wick. Sellers tried — bulls crushed them.",
+  desc:"Long lower shadow, small to no upper shadow, close ≈ open. Sellers drove price far down during the session but bulls recovered ALL losses by the close.",
+  keys:["Long lower shadow","Small to no upper shadow","Open and close are near the same level","Found at bottom of downtrend = bullish","Found at top of uptrend = bearish warning"],
+  spy:"On SPY 5-min: a Dragonfly Doji bouncing off VWAP or the ORB low — especially with increasing volume — is a textbook long setup. LTPro BULLISH BIAS + AT ZONE + this candle = valid call entry on confirmation.",
+  reliability:70, visual:"dragonfly"
+},
+{
+  name:"Gravestone Doji", type:"bear", cat:"Single Candle · Bearish Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bear","doji"],
+  tagline:"Upside-down T. Bulls pushed hard but bears sent it all back. Supply > demand.",
+  desc:"Open and close are at or near the HIGH of the day — only a long upper shadow, no lower shadow. Bearish traders pushed the price back down to where it opened.",
+  keys:["Long upper shadow","Little to no lower shadow","Open and close at or near the high of day","Found at top of uptrend = bearish reversal","Appears at market turning points"],
+  spy:"On SPY: a Gravestone Doji rejecting off the prior day high, ORB high, or VWAP resistance with red volume spike = strong warning. LTPro AT ZONE + BEARISH BIAS + this shape = PUT setup candidate.",
+  reliability:67, visual:"gravestone"
+},
+{
+  name:"Long-Legged Doji", type:"neutral", cat:"Single Candle · Indecision", candles:"1 CANDLE",
+  tags:["single","neutral","doji"],
+  tagline:"Cross with long shadows on both sides. Maximum indecision. Nobody won.",
+  desc:"Long upper AND lower shadows with the Doji body in the middle of the day's range. Maximum indecision — bulls and bears fought hard the entire session and neither won.",
+  keys:["Long upper AND lower shadows","Doji body in the middle of the range","Signals maximum indecision","Most powerful Doji indecision variant","Watch for breakout after this candle"],
+  spy:"On SPY 5-min: after a Long-Legged Doji, the next candle's direction often sets the tone. Wait for LTPro SIGNAL to flip to BUY or SELL before entering.",
+  reliability:52, visual:"ll_doji"
+},
+{
+  name:"Four-Price Doji", type:"neutral", cat:"Single Candle · Rare / Indecision", candles:"1 CANDLE",
+  tags:["single","neutral","doji"],
+  tagline:"Open = High = Low = Close. Total standstill. Rare in liquid markets.",
+  desc:"Open, high, low, and close are all at the same price. Extremely rare in actively traded markets like SPY.",
+  keys:["Open = High = Low = Close","Appears as a flat horizontal dash","Extremely rare in liquid markets like SPY","Signals complete market standstill","Not tradable on its own"],
+  spy:"You will almost never see a true Four-Price Doji on SPY. If you do, it's likely a data artifact. Don't trade on it.",
+  reliability:30, visual:"four_price"
+},
+{
+  name:"Rickshaw Man", type:"neutral", cat:"Single Candle · Indecision", candles:"1 CANDLE",
+  tags:["single","neutral","doji"],
+  tagline:"Long-Legged Doji where open/close are at the exact midpoint. Perfect balance.",
+  desc:"A specific Long-Legged Doji where the open and close occur at the exact midpoint of the high-low range.",
+  keys:["Long upper AND lower shadows of equal length","Open = Close = midpoint of the high-low range","Signals perfect market balance","Rare and powerful indecision signal","Watch for explosive move following this candle"],
+  spy:"On SPY: treat it the same as a Long-Legged Doji. Wait for LTPro SIGNAL confirmation on the NEXT candle.",
+  reliability:53, visual:"rickshaw"
+},
+{
+  name:"Marubozu (Bullish)", type:"bull", cat:"Single Candle · Momentum", candles:"1 CANDLE",
+  tags:["single","bull","momentum"],
+  tagline:"Pure green candle — no shadows. Bulls dominated from open bell to close. Unstoppable.",
+  desc:"No shadows at either end. Price opened at the exact low and closed at the exact high — uninterrupted bullish momentum throughout the entire session.",
+  keys:["No upper or lower shadows","Opens at the low, closes at the high","Signals complete bull dominance","3× the size of recent candles = even stronger","Confirmed by next candle holding above close"],
+  spy:"On SPY 5-min: a Bullish Marubozu breaking through VWAP or ORB high with heavy volume is a momentum continuation signal. LTPro BULLISH BIAS + SIGNAL = BUY + this candle = strong call setup.",
+  reliability:78, visual:"marubozu_b"
+},
+{
+  name:"Marubozu (Bearish)", type:"bear", cat:"Single Candle · Momentum", candles:"1 CANDLE",
+  tags:["single","bear","momentum"],
+  tagline:"Pure red candle — no shadows. Bears dominated from open to close. Complete capitulation.",
+  desc:"No shadows at either end. Opens at the exact high and closes at the exact low — uninterrupted bearish momentum.",
+  keys:["No upper or lower shadows","Opens at the high, closes at the low","Signals complete bear dominance","High volume confirms the move","Confirmed by next candle holding below close"],
+  spy:"On SPY: a Bearish Marubozu breaking through VWAP or ORB low on high volume = strong put continuation signal.",
+  reliability:78, visual:"marubozu_r"
+},
+{
+  name:"Bullish Belt Hold", type:"bull", cat:"Single Candle · Bullish Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bull"],
+  tagline:"Green candle that opens at or near the low with no lower shadow. Bulls take control immediately.",
+  desc:"A single long green candlestick that opens at (or very near) the low of the session — no lower shadow. Price moves upward the entire period.",
+  keys:["Opens at or very near the session low","No lower shadow (or very small)","Long green body","Found after a downtrend","Stronger when it gaps down on the open"],
+  spy:"On SPY 5-min: a Belt Hold green candle that opens right at the ORB low or VWAP and rips straight up = trend reversal signal.",
+  reliability:65, visual:"belt_hold_bull"
+},
+{
+  name:"Bearish Belt Hold", type:"bear", cat:"Single Candle · Bearish Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bear"],
+  tagline:"Red candle opening at the high with no upper shadow. Bears take control immediately.",
+  desc:"A single long red candlestick that opens at (or very near) the high of the session — no upper shadow.",
+  keys:["Opens at or very near the session high","No upper shadow (or very small)","Long red body","Found after an uptrend","Stronger when it gaps up on the open"],
+  spy:"On SPY: a Belt Hold red candle opening at the prior high or VWAP resistance and dropping immediately = strong put signal.",
+  reliability:65, visual:"belt_hold_bear"
+},
+{
+  name:"High Wave Candle", type:"neutral", cat:"Single Candle · Indecision", candles:"1 CANDLE",
+  tags:["single","neutral"],
+  tagline:"Very small body with extremely long shadows on both sides. Maximum volatility, zero conviction.",
+  desc:"A Spinning Top variant with an exceptionally small body and very long upper and lower shadows. Signals extreme indecision with high volatility.",
+  keys:["Very small real body","Extremely long upper AND lower shadows","Much larger range than nearby candles","Signals extreme indecision + volatility","Often precedes a significant directional move"],
+  spy:"On SPY: High Wave candles appear during news events, FOMC announcements. LTPro will often show WAIT + MID-RANGE during these. STAY OUT until volatility resolves.",
+  reliability:48, visual:"high_wave"
+},
+{
+  name:"Spinning Top", type:"neutral", cat:"Single Candle · Indecision", candles:"1 CANDLE",
+  tags:["single","neutral"],
+  tagline:"Small body with upper and lower shadows exceeding body length. Bulls and bears both tried — nobody won.",
+  desc:"Small body (the defining feature) with upper and lower shadows that exceed the body length. Signals indecision.",
+  keys:["Small real body (key feature)","Upper + lower shadows exceed body length","Signals indecision — neither side in control","Significant at support/resistance or in a pattern","High volume Spinning Top = major warning"],
+  spy:"On SPY: a Spinning Top at VWAP or the ORB high/low = the market is deciding. LTPro showing MID-RANGE + Spinning Top = wait.",
+  reliability:50, visual:"spinning_top"
+},
+{
+  name:"Shadow Analysis", type:"neutral", cat:"Concept · Candle Anatomy", candles:"CONCEPT",
+  tags:["single","neutral"],
+  tagline:"Read the battle inside the candle. Upper wick = bears won late. Lower wick = bulls won late.",
+  desc:"Shadow length reveals who controlled which part of the session. Long upper shadow = buyers dominated early but sellers pushed back. Long lower shadow = sellers drove price down but buyers recovered.",
+  keys:["Long upper shadow = buyers dominated early","Long lower shadow = sellers dominated early","Both shadows = contested session","No shadows = complete domination (Marubozu)","Combine shadow reading with body color for full picture"],
+  spy:"On SPY 5-min: always read the shadow before calling a pattern. A green candle with a huge upper wick is NOT fully bullish — sellers are pushing back. Wicks tell the story the body can't.",
+  reliability:0, visual:"shadow_analysis"
+},
+{
+  name:"Long Day", type:"both", cat:"Single Candle · Momentum", candles:"1 CANDLE",
+  tags:["single","both","momentum"],
+  tagline:"Body ≈ 3× nearby candles. Strong conviction — direction matters.",
+  desc:"Large price move from open to close. Signals strong directional conviction. Context determines whether it's continuation or exhaustion.",
+  keys:["Body ≈ 3× the size of recent candles","Can be green (bullish) or red (bearish)","Signals strong directional conviction","Check volume — high volume confirms","May be continuation OR exhaustion — check context"],
+  spy:"On SPY 5-min: a Long Day candle often signals the START of a strong trending move or the EXHAUSTION of one. Always check where you are in the trend.",
+  reliability:65, visual:"long_day"
+},
+{
+  name:"Short Day", type:"neutral", cat:"Single Candle · Low Momentum", candles:"1 CANDLE",
+  tags:["single","neutral"],
+  tagline:"Small body, small range. Low conviction. Market resting or waiting.",
+  desc:"Small price move from open to close — short candle body. Signals low conviction and often consolidation.",
+  keys:["Small body — short range","Signals low conviction","Can be green or red","Often precedes a breakout","Often the 'rest' candles in continuation patterns"],
+  spy:"On SPY: Short Day candles mid-trend = the trend is pausing but not over. Multiple consecutive short days = coiling for the next leg. LTPro MID-RANGE + short days = WAIT.",
+  reliability:40, visual:"short_day"
+},
+
+// ══════════════════════════════════════════════════════════
+// NEW CANDLE PATTERNS — ADDED FROM SATURDAY STUDY
+// ══════════════════════════════════════════════════════════
+{
+  name:"Hammer + Volume Spike", type:"bull", cat:"Single Candle · High Probability Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bull"],
+  tagline:"Hammer candle WITH a volume spike. Institutional fingerprints all over it. High conviction reversal.",
+  desc:"A standard hammer candle — long lower wick, small body near the top — but with a significant volume spike on that same candle. The volume spike is the key differentiator. Without the volume, a hammer is just a pretty candle. With the volume spike, institutions stepped in aggressively to defend that level. This is what your Friday study confirmed: hammer without volume = inconsistent. Hammer with high volume = higher win rate.",
+  keys:["Long lower wick — 2× the body or more","Small body near the top of the candle","Volume spike = SIGNIFICANTLY above average","Volume is the institutional fingerprint","Entry after the candle CLOSES — not during"],
+  spy:"On SPY 5-min: hammer candle at ORL, VWAP, or VPOC with volume spike = your A+ call entry setup. Check volume bars at the bottom of your chart — the hammer candle's volume bar should visibly stand out above nearby bars. LTPro BULLISH BIAS + AT ZONE + volume spike = enter on close.",
+  reliability:76, visual:"hammer_vol"
+},
+{
+  name:"High Volume Wick (Bullish)", type:"bull", cat:"Single Candle · Institutional Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bull"],
+  tagline:"Long lower wick on the highest volume candle of the session. Institutions absorbed the selling.",
+  desc:"Price drops hard, creating a long lower wick — but the defining feature is that this candle has the HIGHEST volume of the session. Institutions were absorbing every sell order at that level. The long wick proves sellers tried to push lower; the high volume proves buyers overwhelmed them. This is the clearest institutional 'fingerprint' you can see on a chart.",
+  keys:["Long lower wick — the longer the better","Candle has highest or near-highest volume of the session","Body can be red or green — wick and volume matter most","Price tried to go lower — got slammed back","Entry after the candle CLOSES fully"],
+  spy:"On SPY morning: when the ORL or VWAP gets tested with a high volume wick candle, that's your CISD moment. The wick low = your Order Block zone. Stop goes below the wick. This is the exact 9EMA bounce setup — price wicks below, volume spikes, candle closes back above. Enter call on close.",
+  reliability:78, visual:"high_vol_wick_bull"
+},
+{
+  name:"High Volume Wick (Bearish)", type:"bear", cat:"Single Candle · Institutional Reversal", candles:"1 CANDLE",
+  tags:["reversal","single","bear"],
+  tagline:"Long upper wick on the highest volume candle. Institutions distributed into that rally.",
+  desc:"Price rallies hard creating a long upper wick — but this candle has the HIGHEST volume of the session. Institutions were selling into every buy order at that level. The wick proves bulls tried to push higher; the volume proves bears overwhelmed them at that resistance.",
+  keys:["Long upper wick — the longer the better","Candle has highest or near-highest volume of the session","Body can be red or green — wick and volume matter most","Price tried to go higher — got rejected hard","Entry after the candle CLOSES fully"],
+  spy:"On SPY: high volume upper wick at ORH, VWAP resistance, or VPOC = institutional distribution signal. Stop goes above the wick high. This is your put entry setup when CRT showed bearish bias and ORB confirms bearish direction.",
+  reliability:78, visual:"high_vol_wick_bear"
+},
+{
+  name:"Expansion Higher", type:"bull", cat:"2-Candle · Bullish Momentum", candles:"2 CANDLES",
+  tags:["continuation","multi","bull","momentum"],
+  tagline:"Small candle followed by a large green expansion candle. Institutions stepped on the gas.",
+  desc:"A small or average candle is followed by a significantly larger green candle. The expansion shows institutional money entering with size — the move accelerates. This is your 'Seek and Destroy avoided, now momentum confirmed' signal. The bigger the second candle relative to the first, the stronger the institutional conviction.",
+  keys:["Candle 1: Small or average body","Candle 2: Large green body — significantly bigger","Body of candle 2 should be 2-3× candle 1","Volume should increase on candle 2","Entry on candle 2 close or pullback to candle 2 midpoint"],
+  spy:"On SPY: after the ORB break, the expansion candle is your green light to hold or enter. Volume desert above = this move will be fast. LTPro BULLISH BIAS + expansion candle above VWAP = ride it to the target. Don't exit early on expansion — let it run to the next volume shelf.",
+  reliability:72, visual:"expansion_higher"
+},
+{
+  name:"Expansion Lower", type:"bear", cat:"2-Candle · Bearish Momentum", candles:"2 CANDLES",
+  tags:["continuation","multi","bear","momentum"],
+  tagline:"Small candle followed by a large red expansion candle. Bears stepping on the gas.",
+  desc:"A small candle followed by a significantly larger red candle. The expansion shows institutional selling entering with size. Mirror of Expansion Higher.",
+  keys:["Candle 1: Small or average body","Candle 2: Large red body — significantly bigger","Body of candle 2 should be 2-3× candle 1","Volume should increase on candle 2","Do NOT short the wick — wait for the candle to close"],
+  spy:"On SPY: after the ORB breakdown, the red expansion candle confirms the move is real. Below VWAP + expansion lower + volume desert below = fast move to the next support. LTPro BEARISH BIAS + this = ride the put to your $50 target.",
+  reliability:72, visual:"expansion_lower"
+},
+{
+  name:"Exhaustion Candle", type:"both", cat:"Single Candle · Exit Warning", candles:"1 CANDLE",
+  tags:["reversal","single","both"],
+  tagline:"New high or low made on DECLINING volume. The trend is running out of fuel. Prepare to exit.",
+  desc:"Price makes a new high (or low) but the volume on that candle is noticeably lower than previous candles in the move. This is the market's way of showing that institutions are no longer participating in the push. Fewer and fewer buyers (or sellers) are showing up. The move is exhausting. This is your exit warning — not necessarily a reversal entry, but a strong signal to take your profits.",
+  keys:["Price makes new high or low","Volume is DECLINING — visibly lower than recent candles","Bodies may be getting smaller with each new extreme","Upper wicks getting longer = bulls failing at the top","This is your EXIT signal — take the $50 and walk"],
+  spy:"On SPY: you're in a call, price is making new highs — but you notice the volume bars are shrinking with each push. That's exhaustion. Take your profit NOW before the reversal hits. Do not get greedy. The exhaustion candle is the market whispering 'this is as good as it gets today.' Listen.",
+  reliability:70, visual:"exhaustion"
+},
+{
+  name:"Engulfing + Volume Spike", type:"both", cat:"2-Candle · Institutional Takeover", candles:"2 CANDLES",
+  tags:["reversal","multi","both"],
+  tagline:"Engulfing candle WITH a volume spike. Full institutional takeover confirmed. Highest conviction entry.",
+  desc:"An engulfing candle (green body completely covers the prior red body, or red body completely covers the prior green body) that also has a significant volume spike. This is the strongest possible 2-candle signal in your system. The engulfing proves directional control; the volume proves institutional conviction. When both happen together at a key level — this is your A+ entry.",
+  keys:["Candle 2 body completely covers Candle 1 body","Volume spike on Candle 2 — significantly above average","Entry AFTER Candle 2 fully closes","Stop below the low of the engulfing candle (bull) or above the high (bear)","At a key level = VPOC, VWAP, ORL, ORH, trendline"],
+  spy:"On SPY: bullish engulfing at ORL with volume spike = enter call on close. Bearish engulfing at ORH with volume spike = enter put on close. The volume is your institutional confirmation. Without the volume spike, the engulfing alone is only moderate probability. With the spike — it's your highest conviction trade.",
+  reliability:80, visual:"engulf_vol"
+},
+
+// ══════════════════════════════════════════════════════════
+// AVOID PATTERNS
+// ══════════════════════════════════════════════════════════
+{
+  name:"Seek & Destroy — AVOID", type:"avoid", cat:"Pattern to Avoid · Choppy Price Action", candles:"AVOID",
+  tags:["avoid","single"],
+  tagline:"Price wicking aggressively in both directions. Market hunting stops above AND below. Stay out.",
+  desc:"Seek and Destroy price action is when the market makes aggressive moves in BOTH directions — long upper wicks AND long lower wicks — without establishing a clear direction. Institutions are literally hunting retail stop losses on both sides. Retail traders who enter get whipped out whether they're long or short. This is one of your kill switch conditions.",
+  keys:["Long wicks in BOTH directions","No clear directional bias","Often seen before news events or in chop zones","LTPro will show WAIT or MID-RANGE during this","ZERO entries — no calls, no puts — sit on hands"],
+  spy:"On SPY: Seek and Destroy often appears between 10:30-11:30am when the morning trend fades and the market chops. Also appears around news events. If you see candles with long wicks both ways and no expansion — CLOSE YOUR PLATFORM. Your $50 target cannot be hit in this environment. Protect the account.",
+  reliability:0, visual:"seek_destroy"
+},
+{
+  name:"Consolidation — AVOID", type:"avoid", cat:"Pattern to Avoid · No Momentum Zone", candles:"AVOID",
+  tags:["avoid","single"],
+  tagline:"Tight overlapping candles going nowhere. Market is in a waiting room. Don't enter.",
+  desc:"Consolidation is a series of small-bodied candles with minimal range, overlapping each other, going sideways. The market is resting or waiting for a catalyst. Neither bulls nor bears have conviction. Entering during consolidation means getting chopped by the random noise until the real move begins.",
+  keys:["Small bodies — all similar size","Candles overlapping each other","No directional expansion","Volume is low — nobody is committing","Wait for the BREAKOUT from consolidation — trade that"],
+  spy:"On SPY: consolidation appears after the initial morning move when price pauses at a level. LTPro will show WAIT + MID-RANGE. Do NOT enter the consolidation — enter the BREAKOUT from it. The consolidation is the spring loading. The expansion candle after consolidation is your entry.",
+  reliability:0, visual:"consolidation"
+},
+
+// ══════════════════════════════════════════════════════════
+// SECTION 2 — TWO-CANDLE PATTERNS (original)
+// ══════════════════════════════════════════════════════════
+{
+  name:"Bullish Engulfing", type:"bull", cat:"2-Candle · Bullish Reversal", candles:"2 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Big green candle completely swallows the prior red candle. Bulls took full control.",
+  desc:"Day 1: Red candle. Day 2: Green candle completely engulfs Day 1's body — higher high AND lower low. Bulls reject the bears entirely and close well above Day 1's open.",
+  keys:["Day 1: Red candle","Day 2: Green candle body engulfs all of Day 1","Day 2 has higher high AND lower low","High volume confirms Day 2","Draw support at Day 2 low"],
+  spy:"On SPY: a Bullish Engulfing at a support level (VWAP bounce, ORB low retest, prior day low) with LTPro showing AT ZONE + BULLISH BIAS = primary call entry setup.",
+  reliability:75, visual:"bull_engulf"
+},
+{
+  name:"Bearish Engulfing", type:"bear", cat:"2-Candle · Bearish Reversal", candles:"2 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Big red candle completely swallows the prior green candle. Bears took full control.",
+  desc:"Day 1: Small green body. Day 2: Large red body that completely engulfs Day 1. Bears dominate and close well below Day 1's open.",
+  keys:["Day 1: Small green candle","Day 2: Red candle body engulfs all of Day 1","Day 2 has higher high AND lower low","Resistance established at Day 2 high","Draw resistance at Day 2 high"],
+  spy:"On SPY: a Bearish Engulfing at resistance (prior high, VWAP, ORB high) with LTPro AT ZONE + BEARISH BIAS = put entry candidate.",
+  reliability:75, visual:"bear_engulf"
+},
+{
+  name:"Piercing Line", type:"bull", cat:"2-Candle · Bullish Reversal", candles:"2 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Red candle then green candle that gaps down but closes above the midpoint. Bulls reclaim the territory.",
+  desc:"Day 1: Long red candle. Day 2: Opens at a new low (gap down) then closes ABOVE the midpoint of Day 1's body.",
+  keys:["Day 1: Long red candle","Day 2: Opens at new low (gap down)","Day 2: Closes above midpoint of Day 1 body","Stronger the push above 50% = stronger signal","Does NOT fully engulf = weaker than Bullish Engulfing"],
+  spy:"On SPY: found at key support levels after a deep selloff. Still valid with LTPro AT ZONE + BULLISH BIAS confirmation.",
+  reliability:72, visual:"piercing"
+},
+{
+  name:"Dark Cloud Cover", type:"bear", cat:"2-Candle · Bearish Reversal", candles:"2 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Green candle then red that opens high but closes below the midpoint. Bears crashing the party.",
+  desc:"Day 1: Long green candle. Day 2: Opens at a new high then closes BELOW the midpoint of Day 1's body.",
+  keys:["Day 1: Long green candle","Day 2: Opens at new high","Day 2: Closes below midpoint of Day 1 body","Creates ~25-session resistance level","If closes at Day 1 low = Bearish Engulfing"],
+  spy:"On SPY: watch for this at the ORB high, prior day high, or VWAP resistance zones. LTPro AT ZONE + BEARISH BIAS + this pattern = strong put setup.",
+  reliability:72, visual:"dark_cloud"
+},
+{
+  name:"Bullish Harami", type:"bull", cat:"2-Candle · Bullish Reversal", candles:"2 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Large red candle followed by a small green candle contained inside it. Mama bear hiding a bull calf.",
+  desc:"Day 1: Large red candle. Day 2: Small green candle whose body is completely contained within Day 1's body.",
+  keys:["Day 1: Large red candle","Day 2: Small green body contained within Day 1","Day 2 is opposite color","Found at bottom of downtrend = bullish","Weaker signal than Bullish Engulfing"],
+  spy:"On SPY: a Bullish Harami at support with LTPro AT ZONE + BULLISH BIAS = entry candidate, but WAIT for third candle confirmation.",
+  reliability:62, visual:"harami_bull"
+},
+{
+  name:"Bearish Harami", type:"bear", cat:"2-Candle · Bearish Reversal", candles:"2 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Large green candle followed by a small red candle contained inside it. Uptrend losing momentum.",
+  desc:"Day 1: Large green candle. Day 2: Small red candle whose body is completely contained within Day 1's body.",
+  keys:["Day 1: Large green candle","Day 2: Small red body contained within Day 1","Found at top of uptrend = bearish","Weaker signal than Bearish Engulfing","Confirm with third candle closing below Day 2 low"],
+  spy:"On SPY: at resistance levels with LTPro BEARISH BIAS, a Bearish Harami tells you momentum is stalling. Wait for the next candle to close red below Day 2's low before entering puts.",
+  reliability:60, visual:"harami_bear"
+},
+{
+  name:"Harami Cross", type:"both", cat:"2-Candle · Reversal (Stronger)", candles:"2 CANDLES",
+  tags:["reversal","multi","both"],
+  tagline:"Harami where Day 2 is a Doji. Stronger signal than regular Harami — maximum indecision at a key level.",
+  desc:"Same structure as a Harami but Day 2 is a Doji instead of a small body. The Doji's indecision makes this pattern stronger.",
+  keys:["Day 1: Large candle in trend direction","Day 2: Doji contained within Day 1 body","Doji = maximum indecision","Stronger than regular Harami","Confirm with third candle for direction"],
+  spy:"On SPY: a Harami Cross at VWAP or a key zone with LTPro CONFLUENCE = high-alert decision point. Direction of the next candle = your trade direction.",
+  reliability:67, visual:"harami_cross"
+},
+{
+  name:"Tweezer Bottom", type:"bull", cat:"2-Candle · Bullish Reversal", candles:"2 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Two candles with the same low. Support tested twice — held both times. Floor is in.",
+  desc:"Two consecutive candles that reach exactly the same low. Equal lows confirm a strong support level.",
+  keys:["Two candles with identical lows","Day 1: Typically red","Day 2: Typically green","Equal lows = strong double-confirmed support","Volume increase on Day 2 strengthens signal"],
+  spy:"On SPY: Tweezer Bottoms at VWAP, ORB low, or prior support levels are high-quality setups. LTPro AT ZONE + BULLISH BIAS + two equal lows = excellent call entry on Day 2 close.",
+  reliability:70, visual:"tweezer_bot"
+},
+{
+  name:"Tweezer Top", type:"bear", cat:"2-Candle · Bearish Reversal", candles:"2 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Two candles with the same high. Resistance tested twice — rejected both times. Ceiling is in.",
+  desc:"Two consecutive candles that reach exactly the same high. Equal highs confirm a strong resistance level.",
+  keys:["Two candles with identical highs","Day 1: Typically green","Day 2: Typically red","Equal highs = strong double-confirmed resistance","Volume increase on Day 2 strengthens signal"],
+  spy:"On SPY: Tweezer Tops at ORB high, prior resistance, or VWAP resistance = strong put setups. LTPro AT ZONE + BEARISH BIAS + two equal highs = high conviction entry.",
+  reliability:70, visual:"tweezer_top"
+},
+{
+  name:"Rising Window (Gap Up)", type:"bull", cat:"2-Candle · Bullish Continuation", candles:"2 CANDLES",
+  tags:["continuation","multi","bull"],
+  tagline:"Gap up between two candles. The gap = support. Price expected to continue higher.",
+  desc:"Market gaps up, creating a 'window' between two candles where no price was traded. Bullish continuation.",
+  keys:["Gap between two candles — no price traded in gap","Bullish continuation pattern","Gap zone = support on pullback","Fill of the gap = pattern failure warning","Volume should be elevated on the gap candle"],
+  spy:"On SPY: gap-up opens create Rising Windows. LTPro BULLISH BIAS + above VWAP + price holding above gap = look for call entries on retests of the gap top.",
+  reliability:68, visual:"rising_win"
+},
+{
+  name:"Falling Window (Gap Down)", type:"bear", cat:"2-Candle · Bearish Continuation", candles:"2 CANDLES",
+  tags:["continuation","multi","bear"],
+  tagline:"Gap down between two candles. The gap = resistance. Price expected to continue lower.",
+  desc:"Market gaps down creating a 'window.' Bearish continuation — the gap should act as RESISTANCE on any bounce.",
+  keys:["Gap between two candles","Bearish continuation pattern","Gap zone = resistance on any bounce","Fill of the gap = pattern failure warning","Volume should be elevated on the gap candle"],
+  spy:"On SPY: gap-down opens create Falling Windows. Watch for rallies back INTO the gap that get rejected — excellent put entry points.",
+  reliability:68, visual:"falling_win"
+},
+{
+  name:"Bullish Counterattack Line", type:"bull", cat:"2-Candle · Bullish Reversal", candles:"2 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Red candle then green candle closing at the same price. Bulls mount a counterattack.",
+  desc:"Two opposite-colored candles that close at the SAME price. Day 2 gaps down but fights back to close at the exact same price as Day 1.",
+  keys:["Day 1: Red candle","Day 2: Green candle — gaps down but recovers","Both candles close at same price","Must appear after a downtrend","Less powerful than Bullish Engulfing — confirm"],
+  spy:"On SPY 5-min: when price gaps down to a key support then closes back at the prior candle's close, it shows absorption. Not strong enough alone — confirm with next green candle.",
+  reliability:60, visual:"bull_counter"
+},
+{
+  name:"Bearish Counterattack Line", type:"bear", cat:"2-Candle · Bearish Reversal", candles:"2 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Green candle then red candle closing at the same price. Bears completely neutralize the bulls.",
+  desc:"Day 1: Large green candle. Day 2: Gaps up but closes at the SAME price as Day 1.",
+  keys:["Day 1: Large green candle","Day 2: Red candle gaps up then closes at Day 1 close","Both close at same price","Must appear after an uptrend","Confirm with follow-through red candle"],
+  spy:"On SPY: when price gaps up to resistance then closes back at the prior candle's close, distribution is occurring.",
+  reliability:60, visual:"bear_counter"
+},
+{
+  name:"Bullish Kicker", type:"bull", cat:"2-Candle · Bullish Reversal (Strong)", candles:"2 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Red candle then green candle that gaps up completely — zero overlap. Strongest 2-candle reversal.",
+  desc:"Day 1: Red candle. Day 2: Green candle that gaps up so completely that there is ZERO overlap between the two candles. Often driven by surprise news or Fed announcements.",
+  keys:["Day 1: Red candle","Day 2: Green candle — gaps completely above Day 1","Zero overlap between bodies","Strongest 2-candle bullish reversal","Often news/event driven"],
+  spy:"On SPY: Bullish Kickers appear on gap-up opens after major news. LTPro BULLISH BIAS + strong gap = ride the momentum. Don't short these — respect the kicker.",
+  reliability:82, visual:"bull_kicker"
+},
+{
+  name:"Bearish Kicker", type:"bear", cat:"2-Candle · Bearish Reversal (Strong)", candles:"2 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Green candle then red candle that gaps down completely — zero overlap. Strongest 2-candle reversal.",
+  desc:"Day 1: Green candle. Day 2: Red candle that gaps down with ZERO overlap between the two candles.",
+  keys:["Day 1: Green candle","Day 2: Red candle — gaps completely below Day 1","Zero overlap between bodies","Strongest 2-candle bearish reversal","Often news/event driven"],
+  spy:"On SPY: gap-down opens after bad news = Bearish Kickers. Respect the gap. Do NOT try to catch this falling knife.",
+  reliability:82, visual:"bear_kicker"
+},
+{
+  name:"On Neck Pattern", type:"bear", cat:"2-Candle · Bearish Continuation", candles:"2 CANDLES",
+  tags:["continuation","multi","bear"],
+  tagline:"Red candle then small green candle closing near the red candle's low. Bears still in control.",
+  desc:"Long red candle followed by a smaller green candle that gaps down but closes near the prior candle's close. Bears are still in control — the bounce is weak.",
+  keys:["Day 1: Long red candle","Day 2: Small green candle gaps down","Day 2 closes near Day 1 close (neckline)","Bearish continuation — bounce is weak","Does NOT reach Day 1 midpoint"],
+  spy:"On SPY: during a downtrend, an On Neck pattern signals a weak bounce — the bears are about to resume. Don't be fooled by the green Day 2 candle.",
+  reliability:62, visual:"on_neck"
+},
+{
+  name:"In Neck Pattern", type:"bear", cat:"2-Candle · Bearish Continuation", candles:"2 CANDLES",
+  tags:["continuation","multi","bear"],
+  tagline:"Like On Neck but Day 2 barely penetrates the prior low. Still bearish continuation.",
+  desc:"Similar to On Neck, but Day 2 closes slightly INTO the body of Day 1. Still a bearish continuation signal.",
+  keys:["Day 1: Long red candle","Day 2: Small green candle — closes slightly above Day 1 low","Barely penetrates Day 1 body","Still bearish continuation","Penetration is less than 25% of Day 1 body"],
+  spy:"On SPY: similar to On Neck — a weak bounce that barely makes a dent in the prior red candle. Bearish continuation likely.",
+  reliability:60, visual:"in_neck"
+},
+{
+  name:"Thrusting Pattern", type:"bear", cat:"2-Candle · Bearish Continuation", candles:"2 CANDLES",
+  tags:["continuation","multi","bear"],
+  tagline:"Red candle then green that closes into the lower half but below the midpoint. Bulls tried but failed.",
+  desc:"Day 1: Long red candle. Day 2: Green candle closes BELOW the midpoint of Day 1's body. Bearish continuation.",
+  keys:["Day 1: Long red candle","Day 2: Green candle closes below Day 1 midpoint","Does NOT reach the 50% level","Bearish continuation — bulls failed","More bullish than On Neck, still bearish overall"],
+  spy:"On SPY: during a downtrend, this represents a failed bounce attempt. The bulls couldn't even get to the midpoint. Downtrend continuation.",
+  reliability:60, visual:"thrusting"
+},
+
+// ══════════════════════════════════════════════════════════
+// SECTION 3 — THREE-CANDLE PATTERNS (original)
+// ══════════════════════════════════════════════════════════
+{
+  name:"Morning Star", type:"bull", cat:"3-Candle · Bullish Reversal", candles:"3 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Big red → small star → big green. The sun rises after darkness. Classic reversal.",
+  desc:"Day 1: Large red candle. Day 2: Small body (the 'star') gaps down — indecision at the low. Day 3: Large green candle closes well above Day 1's midpoint.",
+  keys:["Day 1: Long red candle","Day 2: Small body gaps down (star)","Day 3: Large green closes above Day 1 midpoint","Day 3 volume > Days 1 & 2","Confirm with MACD/RSI divergence"],
+  spy:"On SPY: Morning Stars at key support levels (VWAP, prior day low, major S/R) with LTPro AT ZONE + BULLISH BIAS = one of the strongest call setups in your system.",
+  reliability:78, visual:"morning_star"
+},
+{
+  name:"Morning Doji Star", type:"bull", cat:"3-Candle · Bullish Reversal (Stronger)", candles:"3 CANDLES",
+  tags:["reversal","multi","bull","doji"],
+  tagline:"Morning Star but the middle candle is a Doji. Stronger — maximum indecision before the reversal.",
+  desc:"Same as Morning Star but Day 2 is a Doji. The Doji's perfect indecision at the low makes this pattern stronger.",
+  keys:["Day 1: Long red candle","Day 2: Doji gaps down (maximum indecision)","Day 3: Large green closes above Day 1 midpoint","Stronger than regular Morning Star","Doji at a key support level = very high confidence"],
+  spy:"On SPY: a Morning Doji Star at VWAP or a key support with LTPro BULLISH BIAS + AT ZONE = extremely high-probability call setup.",
+  reliability:80, visual:"morning_doji"
+},
+{
+  name:"Evening Star", type:"bear", cat:"3-Candle · Bearish Reversal", candles:"3 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Big green → small star → big red. The party's over. Bears take control.",
+  desc:"Day 1: Large green candle. Day 2: Small body (the 'star') gaps up — indecision at the top. Day 3: Large red candle closes well below Day 1's midpoint.",
+  keys:["Day 1: Long green candle","Day 2: Small body gaps up (star)","Day 3: Large red closes below Day 1 midpoint","Highest high of both candles = resistance","Gap on Day 2 = additional confirmation"],
+  spy:"On SPY: Evening Stars at resistance levels (ORB high, prior day high, VWAP resistance) with LTPro AT ZONE + BEARISH BIAS = premium put entry setup.",
+  reliability:78, visual:"evening_star"
+},
+{
+  name:"Evening Doji Star", type:"bear", cat:"3-Candle · Bearish Reversal (Stronger)", candles:"3 CANDLES",
+  tags:["reversal","multi","bear","doji"],
+  tagline:"Evening Star but the middle candle is a Doji. Stronger — maximum indecision before the drop.",
+  desc:"Same as Evening Star but Day 2 is a Doji. The Doji at the top confirms complete buyer/seller indecision before bears take over.",
+  keys:["Day 1: Long green candle","Day 2: Doji gaps up (maximum indecision at top)","Day 3: Large red closes below Day 1 midpoint","Stronger than regular Evening Star","More powerful when Day 2 gaps are larger"],
+  spy:"On SPY: Evening Doji Stars at ORB high or prior resistance with LTPro BEARISH BIAS + AT ZONE = top-tier put setup.",
+  reliability:80, visual:"evening_doji"
+},
+{
+  name:"Three White Soldiers", type:"bull", cat:"3-Candle · Bullish Reversal", candles:"3 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Three consecutive green candles marching higher. Each opens inside prior body, closes near the high.",
+  desc:"Three consecutive long green bodies. Each opens within the previous body and closes near the high.",
+  keys:["Three consecutive green candles","Each opens within previous body","Each closes near the high of the day","Appears after a downtrend","Higher volume confirms the move"],
+  spy:"On SPY: Three White Soldiers after a significant selloff = trend reversal confirmation. LTPro BULLISH BIAS + three consecutive green closes + increasing volume = strong call continuation.",
+  reliability:76, visual:"three_soldiers"
+},
+{
+  name:"Three Black Crows", type:"bear", cat:"3-Candle · Bearish Reversal", candles:"3 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Three consecutive red candles stepping lower. Each opens inside prior body, closes near the low.",
+  desc:"Three consecutive long red bodies. Each opens within the previous body and closes at or near its low.",
+  keys:["Three consecutive red candles","Each opens within previous body","Each closes at or near the low","Resistance at first red candle","Increasing volume confirms the move"],
+  spy:"On SPY: Three Black Crows after a significant rally = trend reversal confirmation. LTPro BEARISH BIAS + three consecutive red closes + rising volume = strong put continuation.",
+  reliability:76, visual:"three_crows"
+},
+{
+  name:"Three Inside Up", type:"bull", cat:"3-Candle · Bullish Reversal", candles:"3 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Harami confirmed. Large red → small green → large green breakout. Pattern is proven.",
+  desc:"Day 1: Large red candle. Day 2: Small green body contained within Day 1 (Harami). Day 3: Large green candle closes above Day 1's open, confirming the reversal.",
+  keys:["Day 1: Large red candle","Day 2: Small green body inside Day 1 (Harami)","Day 3: Large green closes above Day 1 open","Confirmed Bullish Harami","Strong reversal — three candles validate the setup"],
+  spy:"On SPY: Three Inside Up gives you a confirmed entry signal that the lone Harami doesn't. LTPro AT ZONE + BULLISH BIAS + Day 3 confirms = enter calls on Day 3 close.",
+  reliability:73, visual:"three_inside_up"
+},
+{
+  name:"Three Outside Up", type:"bull", cat:"3-Candle · Bullish Reversal", candles:"3 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Bullish Engulfing confirmed. Red → big green engulf → third green continuation. Confirmed reversal.",
+  desc:"Day 1: Red candle. Day 2: Large green candle that engulfs Day 1. Day 3: Another green candle closing above Day 2.",
+  keys:["Day 1: Red candle","Day 2: Large green engulfs Day 1","Day 3: Another green closes above Day 2","Bullish Engulfing confirmed by Day 3","Higher probability than standalone Engulfing"],
+  spy:"On SPY: Three Outside Up is your high-confidence call entry. LTPro BULLISH BIAS + AT ZONE + three-candle confirmation = full position entry.",
+  reliability:77, visual:"three_out_up"
+},
+{
+  name:"Abandoned Baby (Bullish)", type:"bull", cat:"3-Candle · Bullish Reversal (Rare)", candles:"3 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Gap down into a Doji, then gap back up. The rarest and most powerful bullish reversal.",
+  desc:"Day 1: Large red candle. Day 2: Doji that gaps down completely — shadows don't overlap Day 1's shadows. Day 3: Large green candle that gaps up completely above Day 2.",
+  keys:["Day 1: Large red candle","Day 2: Doji — completely isolated (gaps below Day 1)","Day 3: Large green gaps up above Day 2","Both gaps must be complete — no shadow overlap","Rarest and most powerful reversal pattern"],
+  spy:"On SPY: Abandoned Babies appear after major news events. The isolated Doji represents a moment of complete uncertainty. When it resolves upward, the move is typically large and fast.",
+  reliability:85, visual:"abandoned"
+},
+{
+  name:"Three Stars in the South", type:"bull", cat:"3-Candle · Bullish Reversal (Rare)", candles:"3 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Three progressively smaller red candles at the bottom. Bears weakening — bulls incoming.",
+  desc:"Three red candles in a downtrend, each progressively smaller. Day 1: Large red with long lower shadow. Day 2: Smaller red. Day 3: Small red completely contained within Day 2.",
+  keys:["Three red candles — each smaller than the last","Each contained within the prior candle's range","Lower shadows decrease with each candle","Bears are losing strength","Bullish reversal signal — confirm with green candle"],
+  spy:"On SPY: rare but powerful at a major support zone. Each smaller red candle shows the bears are running out of ammunition. LTPro AT ZONE + decreasing red candle sizes = get ready for a call entry.",
+  reliability:72, visual:"three_line_s"
+},
+{
+  name:"Advance Block", type:"bear", cat:"3-Candle · Bearish Warning", candles:"3 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Three green candles with progressively smaller bodies and longer upper wicks. Bulls running out of gas.",
+  desc:"Three green candles in an uptrend, but each has a progressively smaller body and longer upper shadow. Buying pressure is weakening.",
+  keys:["Three green candles (uptrend)","Each candle has a smaller body than the last","Each candle has a longer upper shadow than the last","Bulls losing momentum","Warning signal — not a reversal confirmation alone"],
+  spy:"On SPY: Advance Block after a strong rally = decreasing momentum warning. Tighten stops on calls. Watch for SIGNAL to flip to WAIT.",
+  reliability:60, visual:"advance_block"
+},
+{
+  name:"Deliberation", type:"bear", cat:"3-Candle · Bearish Warning", candles:"3 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Two strong green candles then a very small third green. The rally is stalling out.",
+  desc:"Three green candles. Days 1 and 2 are large and strong, but Day 3 is much smaller — the rally is losing momentum.",
+  keys:["Day 1 and Day 2: Large green candles","Day 3: Much smaller green candle","Rally losing momentum on Day 3","Often followed by reversal or consolidation","Watch for bearish reversal candle next"],
+  spy:"On SPY: after two strong green candles if the third is tiny, the rally is stalling. Consider tightening stops on calls or looking for put entry on the next red candle.",
+  reliability:60, visual:"deliberation"
+},
+{
+  name:"Upside Gap Two Crows", type:"bear", cat:"3-Candle · Bearish Reversal", candles:"3 CANDLES",
+  tags:["reversal","multi","bear"],
+  tagline:"Green → two red crows gap up and grow. Bears moving in while bulls hold the gap.",
+  desc:"Day 1: Long green candle. Day 2: Small red body gaps above Day 1. Day 3: Larger red body that engulfs Day 2 but closes ABOVE Day 1's close.",
+  keys:["Only occurs in uptrend","Day 1: Long green candle","Day 2: Small red — gaps above Day 1","Day 3: Larger red — engulfs Day 2 but above Day 1 close","Follow-through red = confirmation"],
+  spy:"On SPY: two red candles appearing at the top while the gap is still open = bears building a position. LTPro AT ZONE + BEARISH BIAS + this formation = put entry warning.",
+  reliability:68, visual:"upside_2crows"
+},
+{
+  name:"Unique Three River Bottom", type:"bull", cat:"3-Candle · Bullish Reversal (Rare)", candles:"3 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Two red candles then a small inside green. Rare Japanese pattern signaling bottom formation.",
+  desc:"Day 1: Long red candle. Day 2: Red candle with a long lower shadow that sets a new low. Day 3: Small green candle contained within Day 2's range.",
+  keys:["Day 1: Long red candle","Day 2: Red candle — new low, long lower shadow","Day 3: Small green inside candle","Rare pattern — verify at key support","Confirm with strong green follow-through"],
+  spy:"On SPY: rare, but when it appears at a major support (VWAP, prior week low) — pay attention. The new low on Day 2 with the long lower wick shows buyers defending the level.",
+  reliability:70, visual:"unique_3river"
+},
+
+// ══════════════════════════════════════════════════════════
+// SECTION 4 — MULTI-CANDLE PATTERNS
+// ══════════════════════════════════════════════════════════
+{
+  name:"Rising Three Methods", type:"bull", cat:"5-Candle · Bullish Continuation", candles:"5 CANDLES",
+  tags:["continuation","multi","bull"],
+  tagline:"Big green → 3 small reds inside → big green breakout. Bulls pause, reload, attack.",
+  desc:"Day 1: Large green candle. Days 2-4: Three small red candles fully contained within Day 1's range. Day 5: Large green candle closes at a new high.",
+  keys:["Day 1: Large green candle","Days 2-4: Three small reds — inside Day 1 range","Day 5: Large green closes at new high","Volume: High D1 → Low D2-4 → High D5","Draw support at Day 1 low"],
+  spy:"On SPY 5-min: mini Rising Three Methods appear within intraday trends. Three small consolidation candles inside a big green candle's range = the trend is resting. LTPro BULLISH BIAS + above VWAP + pattern = call continuation.",
+  reliability:72, visual:"rising_3"
+},
+{
+  name:"Falling Three Methods", type:"bear", cat:"5-Candle · Bearish Continuation", candles:"5 CANDLES",
+  tags:["continuation","multi","bear"],
+  tagline:"Big red → 3 small greens inside → big red breakdown. Bears pause, reload, attack.",
+  desc:"Day 1: Large red candle. Days 2-4: Three small green candles fully contained within Day 1's range. Day 5: Large red candle closes at a new low.",
+  keys:["Day 1: Large red candle","Days 2-4: Three small greens — inside Day 1 range","Day 5: Large red closes at new low","Volume: High D1 → Low D2-4 → High D5","Draw resistance at Day 1 high"],
+  spy:"On SPY 5-min: three small consolidation candles inside a big red candle's range = the downtrend is resting, not over. LTPro BEARISH BIAS + below VWAP + pattern = put continuation.",
+  reliability:72, visual:"falling_3"
+},
+{
+  name:"Upside Gap Three Methods", type:"bull", cat:"3-Candle · Bullish Continuation", candles:"3 CANDLES",
+  tags:["continuation","multi","bull"],
+  tagline:"Two green candles with a gap → small red fills partially into gap but doesn't close it.",
+  desc:"Day 1: Long green body. Day 2: Green body gaps above Day 1. Day 3: Red candle opens within Day 2's body, closes into the gap — but does NOT close the gap.",
+  keys:["Day 1: Long green candle","Day 2: Green candle gaps above Day 1","Day 3: Red closes into gap — does NOT close it","Gap remains open = bullish","Gap level = support on further pullbacks"],
+  spy:"On SPY: when a red candle fills part of a gap but can't close it, the underlying bullish momentum is strong. LTPro BULLISH BIAS + gap still open = hold calls.",
+  reliability:68, visual:"upside_g3"
+},
+{
+  name:"Downside Gap Three Methods", type:"bear", cat:"3-Candle · Bearish Continuation", candles:"3 CANDLES",
+  tags:["continuation","multi","bear"],
+  tagline:"Two red candles with a gap → small green fills partially into gap but doesn't close it.",
+  desc:"Day 1: Long red body. Day 2: Red body gaps below Day 1. Day 3: Green candle opens within Day 2's body, closes into the gap — but does NOT close the gap.",
+  keys:["Day 1: Long red candle","Day 2: Red candle gaps below Day 1","Day 3: Green closes into gap — does NOT close it","Gap remains open = bearish","Gap level = resistance on bounces"],
+  spy:"On SPY: during a strong downtrend, a green bounce candle that can't close the gap = bears still firmly in control.",
+  reliability:68, visual:"downside_g3"
+},
+{
+  name:"Concealing Baby Swallow", type:"bull", cat:"4-Candle · Bullish Reversal (Rare)", candles:"4 CANDLES",
+  tags:["reversal","multi","bull"],
+  tagline:"Four bearish candles that secretly signal exhaustion. Very rare.",
+  desc:"Days 1-2: Two long bearish Marubozu candles. Day 3: Gaps down but has an upper shadow. Day 4: Large red engulfs Day 3. Despite appearing bearish, selling pressure is exhausting.",
+  keys:["Days 1-2: Two long red Marubozu candles","Day 3: Gaps down — small body with upper shadow","Day 4: Large red engulfs Day 3","Despite looking bearish — this IS a bullish reversal","Watch for strong green candle after Day 4"],
+  spy:"On SPY: extremely rare. If you see four consecutive heavy red candles where the third had a subtle upper wick — watch closely. The selling pressure may be nearly exhausted.",
+  reliability:68, visual:"conc_baby"
+},
+{
+  name:"Mat Hold", type:"bull", cat:"5-Candle · Bullish Continuation", candles:"5 CANDLES",
+  tags:["continuation","multi","bull"],
+  tagline:"Like Rising Three Methods — but Day 2 gaps up above Day 1. Stronger bullish continuation.",
+  desc:"Day 1: Long green candle. Day 2: Gaps up. Days 3-4: Small declining candles. Day 5: Large green closes at new high.",
+  keys:["Day 1: Long green candle","Day 2: Gaps up above Day 1","Days 3-4: Small inside candles","Day 5: Large green closes at new high","Stronger than Rising Three Methods"],
+  spy:"On SPY: same concept as Rising Three but the gap on Day 2 shows even stronger underlying demand. LTPro BULLISH BIAS + above VWAP = call continuation on Day 5.",
+  reliability:74, visual:"rising_3"
+},
+{
+  name:"Tasuki Gap (Bullish)", type:"bull", cat:"3-Candle · Bullish Continuation", candles:"3 CANDLES",
+  tags:["continuation","multi","bull"],
+  tagline:"Two green candles with a gap then a red that doesn't close the gap. Gap = support confirmed.",
+  desc:"Two consecutive green candles with a gap up between them, followed by a red candle that opens within the second green candle's body and closes into the gap — but does NOT close it.",
+  keys:["Day 1 & 2: Two green candles with gap between","Day 3: Red opens inside Day 2, closes into gap","Gap is NOT closed = bullish continuation","Gap = confirmed support","Close below gap bottom = bearish reversal signal"],
+  spy:"On SPY: when a red retracement candle tries to fill a gap but can't close it, the bulls are absorbing supply. LTPro BULLISH BIAS + gap still open = hold or add calls.",
+  reliability:67, visual:"tasuki_up"
+},
+{
+  name:"Tasuki Gap (Bearish)", type:"bear", cat:"3-Candle · Bearish Continuation", candles:"3 CANDLES",
+  tags:["continuation","multi","bear"],
+  tagline:"Two red candles with a gap then a green that doesn't close the gap. Gap = resistance confirmed.",
+  desc:"Two consecutive red candles with a gap down between them, followed by a green candle that opens within the second red candle's body and closes into the gap — but does NOT close it.",
+  keys:["Day 1 & 2: Two red candles with gap between","Day 3: Green opens inside Day 2, closes into gap","Gap is NOT closed = bearish continuation","Gap = confirmed resistance","Close above gap top = bullish reversal signal"],
+  spy:"On SPY: during a downtrend, a green bounce into an unclosed gap that gets rejected = high-confidence put entry.",
+  reliability:67, visual:"tasuki_dn"
+},
+
+// ══════════════════════════════════════════════════════════
+// STRATEGY REFERENCE SECTION
+// ══════════════════════════════════════════════════════════
+{
+  name:"ORB — Opening Range Break", type:"strategy", cat:"Strategy · Core Setup · 15M Chart", candles:"STRATEGY",
+  tags:["strategy"],
+  tagline:"Mark the first 15-min candle high and low. Wait for the break. Enter on the RETEST. This is your bread and butter.",
+  desc:"The Opening Range Break (ORB) is your primary setup. The first 15 minutes after market open creates a range with a high (ORH) and low (ORL). That range defines the battlefield for the rest of the morning. Price breaking above ORH = bullish. Breaking below ORL = bearish. The RETEST of the broken level is your entry — not the initial break.",
+  phases:[
+    {label:"PHASE A", text:"9:30 open — first 15-min candle forms. Mark the HIGH (ORH) and LOW (ORL). Do nothing else. Just mark the levels."},
+    {label:"PHASE B", text:"Price breaks ABOVE ORH (bullish) or BELOW ORL (bearish) on volume. Do NOT chase this candle."},
+    {label:"PHASE C", text:"Price RETESTS the broken level. ORH becomes support. ORL becomes resistance. This is your ENTRY — after confirmation candle closes."},
+    {label:"PHASE D", text:"Price makes new highs/lows toward your target. This is where you're already IN the trade riding to your $50."}
+  ],
+  keys:["Mark ORH and ORL at 9:45am when 15M candle closes","Never enter ON the break — wait for the retest","Confirmation candle must CLOSE above/below the level","Volume spike on the break = high conviction","Target = opposite side of the range or next key level"],
+  spy:"On SPY: ORB is your daily setup. CRT gives you bias direction BEFORE the open — then ORB confirms at the open. When CRT says bullish AND ORH breaks with volume = maximum conviction call entry on the retest. This is the trade you're hunting every morning.",
+  reliability:0, visual:"orb_phases"
+},
+{
+  name:"CRT — Candle Range Theory", type:"strategy", cat:"Strategy · Pre-Market Bias · 1H Chart", candles:"STRATEGY",
+  tags:["strategy"],
+  tagline:"Mark the 8am 1H candle range. Watch which side gets swept. That's your directional bias BEFORE the open.",
+  desc:"CRT (Candle Range Theory) gives you directional bias BEFORE the 9:30 open. The 8:00 AM 1H candle establishes a pre-market range. During the 8:12-9:12am window, price will typically sweep one side of that range to hunt liquidity. Which side gets swept — and whether CISD (Change In State of Delivery) confirms — gives you your bias for the entire morning session.",
+  phases:[
+    {label:"8:00 AM", text:"Mark the 1H candle HIGH and LOW on TradingView (enable pre-market extended hours)."},
+    {label:"8:12-9:12AM", text:"Watch which side of the range gets swept. Price hunting liquidity above or below."},
+    {label:"CISD", text:"On the lower timeframe (5M), watch for a Change In State of Delivery — price flips direction after the sweep."},
+    {label:"BIAS SET", text:"Range low swept + CISD bullish = BULLISH bias. Range high swept + CISD bearish = BEARISH bias."},
+    {label:"9:30 OPEN", text:"Bring this bias into the ORB. CRT + ORB agreeing = highest conviction trade of the day."}
+  ],
+  keys:["Enable pre-market on TradingView to see the 8AM candle","Mark 8AM 1H candle high AND low as horizontal lines","Watch 8:12-9:12am window for the sweep","CISD on 5M confirms the flip","CRT bias + ORB break in same direction = A+ setup"],
+  spy:"On SPY: Monday morning — 8AM 1H candle low gets swept at 8:45am. 5M CISD flips bullish. You now have bullish CRT bias BEFORE the open. At 9:45am ORB breaks above ORH on volume. CRT said bullish + ORB confirms bullish = enter call on the retest. This is your highest probability trade.",
+  reliability:0, visual:"crt_visual"
+},
+{
+  name:"9EMA Scalping System", type:"strategy", cat:"Strategy · Execution · 5M Chart", candles:"STRATEGY",
+  tags:["strategy"],
+  tagline:"Price below 9EMA = sellers in control. 9EMA flip = entry. 9EMA holds = stay in. Close below = exit.",
+  desc:"The 9EMA scalping system on the 5-minute chart is your execution engine. The 9EMA is fast and reactive — perfect for intraday scalping. The system has four clear phases that match exactly with your ORB four phases. Price stuck below 9EMA = no trade. 9EMA flip = prepare. Retest of 9EMA = entry. Price holding above = hold. This is how the real SPY chart from Saturday played out perfectly.",
+  phases:[
+    {label:"PHASE A", text:"Price stuck BELOW 9EMA. Sellers in control. 9EMA sloping down. ZERO entries — wait patiently."},
+    {label:"PHASE B", text:"Price breaks ABOVE 9EMA. 9EMA starts to flatten and turn up. Get ready — don't enter yet."},
+    {label:"ENTRY", text:"Price retests 9EMA from above. 9EMA holds as support. Confirmation candle closes. THIS is your entry."},
+    {label:"PHASE C", text:"Buyers confirm the new trend. Price making higher highs above the 9EMA. You're IN — hold the trade."},
+    {label:"PHASE D", text:"Price pulls back to 9EMA again. LOW volume on pullback = healthy retest. HIGH volume = get out."}
+  ],
+  keys:["Price above 9EMA = bullish — calls only","Price below 9EMA = bearish — puts only","9EMA flip = Phase B — get ready NOT in yet","Entry after retest bounce candle CLOSES","Exit if price CLOSES below 9EMA — no exceptions"],
+  spy:"This is exactly the SPY chart from Saturday: stuck below 9EMA 8:30-10:00am (no trades). Break above 9EMA at 10:00. Retest at 10:15-10:30 (entry). Rally from $673.50 to $676.11. $2+ SPY move = well over $50 target on 1 contract. The patience during Phase A was everything.",
+  reliability:0, visual:"nine_ema"
+},
+{
+  name:"VWAP Trading System", type:"strategy", cat:"Strategy · Key Level · Intraday", candles:"STRATEGY",
+  tags:["strategy"],
+  tagline:"VWAP is your compass. Above = bullish only. Below = bearish only. Chop at VWAP = walk away.",
+  desc:"VWAP (Volume Weighted Average Price) is the most important single level on your intraday chart. Every institution, algorithm, and professional trader references VWAP. It represents the true fair value of the session. Price above VWAP = institutions are net long. Price below = net short. The VWAP bounce and VWAP break are two distinct setups with two distinct entries.",
+  phases:[
+    {label:"ABOVE VWAP", text:"Price above VWAP = bullish bias. Only take CALL entries. Any dip back to VWAP = potential long entry."},
+    {label:"BOUNCE", text:"Price pulls back to touch VWAP. Strong quick bounce (not lingering) = enter call on confirmation candle."},
+    {label:"BREAK", text:"High volume candle closes ABOVE VWAP (after being below) = bullish flip. Enter on retest of VWAP from above."},
+    {label:"BELOW VWAP", text:"Price below VWAP = bearish bias. Only take PUT entries. Any rally back to VWAP = potential short entry."},
+    {label:"AVOID", text:"Price CHOPPING back and forth across VWAP = NO TRADE. This is your #1 kill switch condition."}
+  ],
+  keys:["Above VWAP = calls only — no exceptions","Below VWAP = puts only — no exceptions","Chop at VWAP = close platform and walk away","VWAP bounce = enter on confirmation candle close","VWAP break = enter on retest from the new side"],
+  spy:"On SPY: VWAP + 9EMA agreeing = double confirmation. Price above BOTH VWAP and 9EMA = strongest bullish signal. Price below BOTH = strongest bearish signal. VWAP is your compass — it tells you which direction to walk every minute of the trading day.",
+  reliability:0, visual:"vwap_visual"
+},
+{
+  name:"VPOC — Volume Point of Control", type:"strategy", cat:"Strategy · Key Level · Volume Profile", candles:"STRATEGY",
+  tags:["strategy"],
+  tagline:"VPOC is the price where the most volume traded. It's a magnet — price always returns to it.",
+  desc:"The Volume Point of Control (VPOC) is the price level with the most volume traded during a session — the longest bar on the Volume Profile. Institutions have significant orders resting here. Price gravitates toward VPOC like a magnet. When price is above VPOC, it's bullish. Below VPOC, bearish. When price breaks and retests VPOC, that's one of your cleanest entries.",
+  phases:[
+    {label:"ABOVE VPOC", text:"Price above previous day's VPOC = bullish. VPOC acts as support on pullbacks."},
+    {label:"BOUNCE", text:"Price pulls back to VPOC. Quick absorption and bounce = enter call on confirmation candle."},
+    {label:"BREAK", text:"Price breaks ABOVE VPOC on volume = enter on retest. VPOC flips from resistance to support."},
+    {label:"MAGNET", text:"If price is near VPOC it will be drawn to it. Factor this into your profit targets."},
+    {label:"CONFLICT", text:"VPOC and VWAP at the same level = maximum confluence. That level is your most important level of the day."}
+  ],
+  keys:["Add Volume Profile indicator on TradingView","VPOC = longest horizontal bar on the profile","Previous day VPOC = key level for the next session","VPOC + VWAP at same level = maximum confluence","Price always gravitates back to VPOC during the session"],
+  spy:"On SPY: previous day VPOC sitting at $519 and your CRT bias is bullish? That $519 level is your primary entry zone for the morning. Price taps $519, volume spike, hammer candle = enter call. VPOC held = institutions defended it. That's your trade.",
+  reliability:0, visual:"vpoc_visual"
+},
+{
+  name:"Volume Profile — Shelves & Deserts", type:"strategy", cat:"Strategy · Key Level · Volume Profile", candles:"STRATEGY",
+  tags:["strategy"],
+  tagline:"Shelves = price fights here. Deserts = price moves FAST here. Know which zone you're in.",
+  desc:"Volume Profile shows you WHERE the most trading occurred (shelves = high volume) and where almost no trading occurred (deserts = low volume). This tells you how fast or slow your trade will move. Price entering a volume desert = fast explosive move. Price approaching a volume shelf = slow grind or reversal. This is how you know when to hold and when to take profit.",
+  phases:[
+    {label:"SHELF", text:"High volume zone — long bars on the profile. Price slows down, consolidates, or reverses here. This is your profit target zone."},
+    {label:"BOUNCE", text:"Price approaches shelf from below — bounces. Shelf from above — rejected. Use as entry and target levels."},
+    {label:"DESERT", text:"Low volume zone — short bars or gaps in the profile. Price moves FAST through deserts. Hold your trade here."},
+    {label:"ENTRY", text:"Enter at a shelf bounce. Once price enters the desert above — DO NOT exit early. Let the desert do the work."},
+    {label:"EXIT", text:"Take profit as price approaches the NEXT shelf above. That shelf will slow or stop the move."}
+  ],
+  keys:["Shelf = high volume = support or resistance zone","Desert = low volume = fast price movement zone","Enter at shelves — exit at the next shelf","Desert above your entry = fast move incoming","Volume Profile on TradingView: use 'Fixed Range' or 'Session Volume'"],
+  spy:"On SPY: you enter a call at the shelf bounce at $519. Volume profile shows a desert from $519 to $522. You hold through the desert — price moves fast as expected. Price hits the $522 shelf, starts to slow. Take your $50 profit at the shelf. Don't get greedy waiting for more above the shelf.",
+  reliability:0, visual:"vol_profile"
+},
+{
+  name:"Support Strength Reading", type:"strategy", cat:"Strategy · Key Skill · Price Action", candles:"STRATEGY",
+  tags:["strategy"],
+  tagline:"Fast bounce = STRONG support — enter. Price lingers = WEAK support — wait or avoid.",
+  desc:"Not all support bounces are equal. The SPEED at which price bounces off a support level tells you how strong that level is and whether you should enter. A strong support bounce has price touching the level and immediately reversing — candles don't linger inside the zone. A weak bounce has price grinding through the zone, multiple candles sitting inside it, no conviction. This single skill eliminates a lot of false entries.",
+  phases:[
+    {label:"STRONG", text:"Price approaches support. Single candle touches it. IMMEDIATELY bounces with force. Candles do NOT linger in the zone. Enter on close."},
+    {label:"WEAK", text:"Price approaches support. Multiple candles chop through the zone. Bodies closing INSIDE the zone. No conviction. This is your Seek & Destroy / Consolidation signal — stay out."},
+    {label:"BREAKING", text:"Price closes MULTIPLE candles inside or below the zone. Support is failing. Do NOT buy — look for the break entry instead."},
+    {label:"RULE", text:"The speed of the bounce = the strength of the institutional defense. Fast = institutions defending hard. Slow = institutions not showing up."},
+  ],
+  keys:["Fast touch and bounce = strong support = enter","Candles lingering inside zone = weak support = skip","Multiple closes inside zone = support breaking = get out","Apply to all levels: VWAP, VPOC, ORH/ORL, trendlines","Strong bounce at confluence of multiple levels = highest probability"],
+  spy:"On SPY: VWAP gets hit — single candle wick touches it and immediately bounces with a hammer candle. That's STRONG support. Enter the call. Alternatively, VWAP gets hit and three candles all have bodies sitting on it, closing inside the VWAP zone. That's WEAK support. Skip the trade — wait for expansion OR a breakdown to trade.",
+  reliability:0, visual:"support_strength"
+},
+{
+  name:"Double Bottom & Double Top", type:"strategy", cat:"Strategy · Reversal Pattern · 15M Chart", candles:"STRATEGY",
+  tags:["strategy","reversal"],
+  tagline:"Same level tested twice — rejected both times. Floor or ceiling is confirmed. Entry after second test.",
+  desc:"Double Bottom forms when price makes two lows at approximately the same level — the level was tested twice and held twice. This is a strong reversal signal because institutions defended that level twice. Entry is AFTER the second bounce confirms. Take profit when price returns to the previous trend high. Double Top is the mirror.",
+  phases:[
+    {label:"FIRST TEST", text:"Price drops to a support level, bounces. Note this level. First test alone = not enough. Wait."},
+    {label:"SECOND TEST", text:"Price drops AGAIN to the same level. Second touch approaching the same price = get ready."},
+    {label:"CONFIRM", text:"Price bounces off the second bottom with a confirmation candle (hammer, engulfing + volume). THIS is your entry."},
+    {label:"TARGET", text:"Take profit when price reaches the NECKLINE — the high between the two bottoms. That's your $50 zone."},
+    {label:"DOUBLE TOP", text:"Mirror setup at resistance. Two equal highs = ceiling confirmed. Entry on second rejection. Target = neckline low."}
+  ],
+  keys:["Two equal lows (bottom) or highs (top)","Entry AFTER second bounce confirms — not on first test","Volume spike on second bounce = higher conviction","Target = neckline level (high between the two lows)","Double bottom at ORL + VWAP + VPOC = A+ setup"],
+  spy:"On SPY: ORL gets hit at 9:38am, bounces. Price comes back to ORL at 9:52am — second test. Hammer candle forms. Volume spike. LTPro fires. ENTER CALL. Target = ORH above. This is your morning double bottom play — one of the most reliable setups you'll see on SPY daily.",
+  reliability:0, visual:"double_bottom"
+},
+{
+  name:"Higher Low Reversal", type:"strategy", cat:"Strategy · Reversal Pattern · Daily + 1H", candles:"STRATEGY",
+  tags:["strategy","reversal"],
+  tagline:"Price making higher lows = buyers stepping in earlier each time. Trend is reversing. Watch Phase C.",
+  desc:"The Higher Low Reversal is one of the earliest and most reliable signs that a downtrend is ending. Each time price makes a new low, buyers step in at a HIGHER price than before. They're defending progressively higher levels. When you see two clear higher lows form (Phase C), that's your initial entry signal. Phase D — when previous resistance flips to support — is your second entry.",
+  phases:[
+    {label:"PHASE A", text:"Price in downtrend. Sellers in control. Lower highs AND lower lows. Do nothing."},
+    {label:"PHASE B", text:"First bottom forms. Nothing confirms reversal yet. Could be a dead cat bounce. STILL waiting."},
+    {label:"PHASE C", text:"TWO higher lows form. Buyers stepping in at higher prices each time. THIS is your initial entry."},
+    {label:"PHASE D", text:"Price breaks through previous resistance. Pulls back to test it as support — resistance flip. SECOND entry."},
+    {label:"TARGET", text:"Previous trend high. That's where institutions will start taking profits. Take yours there too."}
+  ],
+  keys:["Look for this on Daily chart for weekly macro bias","Two higher lows = Phase C = initial entry","Entry on the second higher low bounce candle close","Phase D resistance flip = highest conviction entry","Higher lows on 1H pre-market = bullish CRT confirmation"],
+  spy:"On SPY weekly/daily: if SPY has been selling off and you spot two higher lows forming — that's the earliest signal of a potential recovery week. Phase C entry on the daily = your call bias is confirmed for the entire week. Every morning ORB during that week has a bullish tailwind behind it.",
+  reliability:0, visual:"higher_low"
+},
+{
+  name:"ICT Smart Money Map", type:"strategy", cat:"Strategy · Institutional Framework · All Timeframes", candles:"STRATEGY",
+  tags:["strategy"],
+  tagline:"Sweep → Induce → Load → Break → Deliver → Take Profit. This is the institutional playbook every morning.",
+  desc:"The ICT Smart Money framework describes exactly how institutions move price — the same sequence every single day on SPY. Internal sweep hunts early retail entries. IDM (Inducement) shakes weak hands. OB (Order Block) is where institutions load positions. BOS (Break of Structure) confirms direction. BB (Breaker Block) is a retest level. TP1 is the institutional profit target — YOUR exit.",
+  phases:[
+    {label:"SWEEP", text:"Internal sweep: price hunts early retail stop losses. Retail enters early — gets stopped out. Don't be retail."},
+    {label:"IDM", text:"Inducement: price creates a fake move to trap retail in the wrong direction. The 'lawnmower' moment. Wait through this."},
+    {label:"OB", text:"Order Block: price returns to the zone where institutions loaded. This is your entry zone — hammer or engulf here."},
+    {label:"BOS", text:"Break of Structure: price breaks the previous high/low with conviction. CISD confirmed. LTPro fires signal."},
+    {label:"BB + TP1", text:"Breaker Block retest — possible second entry. TP1 = previous high/key resistance — YOUR profit target. Take it."}
+  ],
+  keys:["Sweep = do not enter — let it happen","IDM = do not enter — fake move, you'll get stopped","OB = entry zone — look for hammer or engulf + volume","BOS = confirmation — LTPro signal should fire here","TP1 = take your $50 and close the platform — done"],
+  spy:"On SPY every morning: pre-market sweep takes out stops. 9:30 IDM creates a fake reversal. Price taps the Order Block (often ORL or VWAP area). CISD happens. BOS confirms. You enter. Price runs to TP1. You take $50. This sequence repeats with slight variations every single trading day. Learn the sequence — own the day.",
+  reliability:0, visual:"ict_map"
+},
+{
+  name:"Trendline — 3-Touch Rule", type:"strategy", cat:"Strategy · Dynamic Level · 5M + 15M", candles:"STRATEGY",
+  tags:["strategy"],
+  tagline:"Two touches = just a line. Three touches = institutional level. Trade the 3rd touch or the break/retest.",
+  desc:"Trendlines become tradeable only after THREE confirmed touches. The first two touches draw the line. The third touch CONFIRMS it as an institutional level. Two entries: (1) trade the 3rd touch bounce, or (2) wait for the trendline to BREAK — then enter on the retest of the broken trendline (trendline flip). Your LTProv7 draws trendlines automatically — now you know how to trade them.",
+  phases:[
+    {label:"TOUCH 1", text:"Price touches a diagonal level. Draw the line. This is just a potential trendline. Watch only."},
+    {label:"TOUCH 2", text:"Price touches the same diagonal level again. Now it's a confirmed potential trendline. Prepare."},
+    {label:"TOUCH 3", text:"Third touch = CONFIRMED institutional trendline. Enter on the 3rd bounce with confirmation candle. Stop beyond the trendline."},
+    {label:"BREAK", text:"Price breaks through the trendline on volume. Do NOT chase. Wait for the retest."},
+    {label:"FLIP", text:"Price retests the broken trendline from the other side. What was resistance is now support (or vice versa). THIS is your entry."}
+  ],
+  keys:["Minimum 3 touches before a trendline is valid","LTProv7 draws trendlines automatically — use them","3rd touch = entry zone with tight stop beyond the line","Break + retest = cleanest low-risk entry","Flat trendline = support/resistance; angled = trend"],
+  spy:"On SPY 5M: LTProv7 draws a rising trendline. Price touches it twice. Third touch forms — hammer candle on the trendline with volume spike. CRT bullish bias + above VWAP + 3rd trendline touch = enter call. Stop just below the trendline. Target = next resistance level.",
+  reliability:0, visual:"trendline_visual"
+},
+{
+  name:"Maverick's Complete Entry Checklist", type:"strategy", cat:"Strategy · Master Framework · Every Trade", candles:"CHECKLIST",
+  tags:["strategy"],
+  tagline:"5 questions. 5 seconds. One trade. Walk away with $50. This is the full system in one card.",
+  desc:"Every single trade — whether on Robinhood or Tastytrade — runs through this complete checklist. All five boxes must check before a single contract is bought. One unchecked box = no trade. The discipline is the edge. The patience is the profit. This checklist is the result of everything built on Saturday — from CRT to VWAP to 9EMA to Volume Profile to LTProv7.",
+  phases:[
+    {label:"PRE-MARKET", text:"CRT: 8AM 1H candle range marked. Which side swept? CISD confirmed? Bias = BULL or BEAR?"},
+    {label:"9:30 OPEN", text:"ORB: 15M candle closed at 9:45. ORH and ORL marked. VWAP direction established. 9EMA slope = up or down?"},
+    {label:"SETUP", text:"Is there an ORB break? 9EMA flip? Trendline 3rd touch? Double bottom/top? Volume shelf bounce? What is the setup?"},
+    {label:"CONFIRM", text:"Confirmation candle CLOSED? Volume spike present? VWAP and 9EMA aligned with the trade? LTProv7 signal fired?"},
+    {label:"EXECUTE", text:"ALL boxes checked = ENTER. One contract. Defined stop. Target = $20-$50. HIT TARGET → CLOSE PLATFORM → DONE FOR THE DAY."}
+  ],
+  keys:["PRE-MARKET: CRT bias established on 1H","OPEN: ORB levels marked, VWAP direction noted","SETUP: identify the specific pattern — ORB/9EMA/trendline/double bottom","CONFIRM: candle closed + volume + LTProv7 signal","ONE TRADE MAX on Tastytrade — protect the $300"],
+  spy:"This is YOUR system Maverick. CRT → ORB → 9EMA → VWAP → Volume Profile → LTProv7 → Enter → $50 → Walk away. Every morning. Same routine. Same discipline. Same result over time. The traders who went from $300 to $100,000 followed this exact mindset — same setup, same discipline, more contracts as the account grew. Build the habit first. The money follows.",
+  reliability:0, visual:"orb_phases"
+},
+];
+
+// ── RENDERING ──
+function getBadgeClass(type) {
+  if(type==='strategy') return 'badge-strategy';
+  if(type==='avoid') return 'badge-avoid';
+  return {bull:'badge-bull',bear:'badge-bear',neutral:'badge-neutral',both:'badge-both'}[type]||'badge-both';
+}
+function getBadgeLabel(type) {
+  if(type==='strategy') return '📊 STRATEGY';
+  if(type==='avoid') return '🚫 AVOID';
+  if(type==='bull') return '🟢 BULLISH';
+  if(type==='bear') return '🔴 BEARISH';
+  if(type==='neutral') return '⚖️ INDECISION';
+  return '↕ BOTH';
+}
+function getRelColor(r) {
+  if(r>=75) return '#00d97e';
+  if(r>=60) return '#f5a623';
+  if(r>=1) return '#ff3355';
+  return '#3d4d62';
+}
+function getDotColor(type) {
+  if(type==='strategy') return '#f59e0b';
+  if(type==='avoid') return '#ff3355';
+  return {bull:'#00d97e',bear:'#ff3355',neutral:'#f5a623',both:'#4d9fff'}[type]||'#4d9fff';
+}
+
+function renderCards(list) {
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = '';
+  if(!list.length) { grid.innerHTML='<div class="no-results">NO PATTERNS MATCH — TRY A DIFFERENT FILTER OR SEARCH TERM</div>'; return; }
+
+  // Group by section
+  const candles = list.filter(p => !['strategy','avoid'].includes(p.type));
+  const avoids = list.filter(p => p.type==='avoid');
+  const strategies = list.filter(p => p.type==='strategy');
+
+  function renderGroup(items, dividerTitle, dividerSub) {
+    if(!items.length) return;
+    if(dividerTitle) {
+      const div = document.createElement('div');
+      div.className = 'section-divider';
+      div.innerHTML = `<span class="section-divider-title">${dividerTitle}</span><span class="section-divider-sub">${dividerSub}</span>`;
+      grid.appendChild(div);
+    }
+    items.forEach(p => {
+      const el = document.createElement('div');
+      el.className = `card ${p.type}`;
+      const relColor = getRelColor(p.reliability);
+      const relPct = p.reliability || 0;
+      const relLabel = relPct >= 75 ? 'HIGH' : relPct >= 60 ? 'MODERATE' : relPct >= 1 ? 'LOW' : 'N/A';
+      const vis = V[p.visual] || '';
+      const keysHtml = (p.keys||[]).map(k=>`<div class="key-item"><span class="key-dot" style="background:${getDotColor(p.type)}"></span>${k}</div>`).join('');
+      
+      let phasesHtml = '';
+      if(p.phases && p.phases.length) {
+        phasesHtml = `<div class="section-title">THE PHASES</div><div class="phase-list">${
+          p.phases.map(ph=>`<div class="phase-item"><span class="phase-label">${ph.label}</span><span class="phase-text">${ph.text}</span></div>`).join('')
+        }</div>`;
+      }
+
+      let contextBox = '';
+      if(p.type==='strategy' || p.type==='avoid') {
+        const boxClass = p.type==='avoid' ? 'avoid-box' : 'strategy-box';
+        const title = p.type==='avoid' ? '⚠️ WHY TO AVOID' : '◈ MAVERICK SYSTEM APPLICATION';
+        const titleStyle = p.type==='avoid' ? 'color:#ff3355;font-family:"DM Mono",monospace;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;' : '';
+        contextBox = `<div class="section-title">📈 SPY APPLICATION</div>
+          <div class="${boxClass}">
+            ${titleStyle ? `<div style="${titleStyle}">${title}</div>` : `<div class="strategy-box-title">${title}</div>`}
+            <p>${p.spy}</p>
+          </div>`;
+      } else {
+        contextBox = `<div class="section-title">📈 SPY / OPTIONS REAL-WORLD CONTEXT</div>
+          <div class="spy-box">
+            <div class="spy-box-title">◈ LTPROv7 APPLICATION</div>
+            <p>${p.spy}</p>
+          </div>`;
+      }
+
+      el.innerHTML = `
+        <div class="card-accent"></div>
+        <div class="card-inner">
+          <div class="card-header">
+            <span class="badge ${getBadgeClass(p.type)}">${getBadgeLabel(p.type)}</span>
+            <span class="card-candles">${p.candles}</span>
+          </div>
+          <div class="card-name">${p.name}</div>
+          <div class="card-category">${p.cat}</div>
+          <div class="card-visual">${vis}</div>
+          <div class="card-tagline">${p.tagline}</div>
+          <div class="card-expanded">
+            <div class="section-title">DESCRIPTION</div>
+            <div class="card-desc">${p.desc}</div>
+            ${phasesHtml}
+            ${keysHtml.length ? `<div class="section-title">KEY RULES</div><div class="key-list">${keysHtml}</div>` : ''}
+            ${relPct>=1?`
+            <div class="section-title">RELIABILITY</div>
+            <div class="reliability-wrap">
+              <div class="reliability-bar"><div class="reliability-fill" style="width:${relPct}%;background:${relColor}"></div></div>
+              <span class="rel-label" style="color:${relColor}">${relLabel} — ${relPct}%</span>
+            </div>`:''}
+            ${contextBox}
+          </div>
+          <div class="expand-hint">TAP TO EXPAND ▾</div>
+        </div>`;
+      el.addEventListener('click', ()=>{ el.classList.toggle('open'); });
+      grid.appendChild(el);
+    });
+  }
+
+  renderGroup(candles, candles.length && (avoids.length||strategies.length) ? '📖 CANDLESTICK PATTERNS' : null, 'SINGLE · MULTI-CANDLE · REVERSAL · CONTINUATION');
+  renderGroup(avoids, avoids.length ? '🚫 PATTERNS TO AVOID' : null, 'RECOGNIZE AND STAY OUT — PROTECT THE ACCOUNT');
+  renderGroup(strategies, strategies.length ? '📊 STRATEGY REFERENCE' : null, 'MAVERICK SYSTEM — CRT · ORB · 9EMA · VWAP · VOLUME PROFILE · ICT');
+}
+
+// ── STATS ──
+function setStats(list) {
+  document.getElementById('resultsText').textContent = `Showing ${list.length} of ${patterns.length} total entries`;
+}
+function initStats() {
+  const total = patterns.length;
+  const bull = patterns.filter(p=>p.type==='bull').length;
+  const bear = patterns.filter(p=>p.type==='bear').length;
+  const neut = patterns.filter(p=>p.type==='neutral'||p.type==='both'||p.type==='avoid').length;
+  const strat = patterns.filter(p=>p.type==='strategy').length;
+  document.getElementById('totalStat').textContent = total;
+  document.getElementById('bullStat').textContent = bull;
+  document.getElementById('bearStat').textContent = bear;
+  document.getElementById('neutStat').textContent = neut;
+  document.getElementById('stratStat').textContent = strat;
+}
+
+// ── FILTERS ──
+let activeFilter = 'all';
+let searchTerm = '';
+
+function applyFilters() {
+  let list = patterns;
+  if(activeFilter !== 'all') {
+    if(['bull','bear','neutral','both','strategy','avoid'].includes(activeFilter)) {
+      list = list.filter(p => p.type === activeFilter);
+    } else if(activeFilter === 'reversal') {
+      list = list.filter(p => p.tags.includes('reversal'));
+    } else if(activeFilter === 'continuation') {
+      list = list.filter(p => p.tags.includes('continuation'));
+    } else if(activeFilter === 'single') {
+      list = list.filter(p => p.tags.includes('single'));
+    } else if(activeFilter === 'multi') {
+      list = list.filter(p => p.tags.includes('multi'));
+    }
+  }
+  if(searchTerm) {
+    const s = searchTerm.toLowerCase();
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(s) ||
+      p.desc.toLowerCase().includes(s) ||
+      p.cat.toLowerCase().includes(s) ||
+      p.tagline.toLowerCase().includes(s) ||
+      (p.spy||'').toLowerCase().includes(s) ||
+      (p.phases||[]).some(ph=>ph.text.toLowerCase().includes(s))
+    );
+  }
+  renderCards(list);
+  setStats(list);
+}
+
+document.querySelectorAll('.fbtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.fbtn').forEach(b => { b.className = 'fbtn'; });
+    const f = btn.dataset.f;
+    activeFilter = f;
+    const classMap = {
+      all:'active-all',bull:'active-bull',bear:'active-bear',neutral:'active-neutral',
+      both:'active-both',strategy:'active-strategy',avoid:'active-bear',
+      reversal:'active-cont',continuation:'active-cont',single:'active-cont',multi:'active-cont'
+    };
+    btn.classList.add(classMap[f]||'active-all');
+    applyFilters();
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  applyFilters();
+});
+
+initStats();
+applyFilters();
+</script>
+</body>
+</html>
