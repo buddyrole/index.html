@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rod's Price Action Bible</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --bg2: #0d1219;
+    --bg3: #111820;
+    --border: #1e2d3d;
+    --border2: #243444;
+    --bull: #00e5a0;
+    --bear: #ff4466;
+    --neutral: #f0b429;
+    --blue: #38bdf8;
+    --text: #c8d8e8;
+    --text2: #7a96b0;
+    --text3: #4a6070;
+    --white: #eef4fa;
+    --glow-bull: 0 0 20px rgba(0,229,160,0.15);
+    --glow-bear: 0 0 20px rgba(255,68,102,0.15);
+    --glow-neutral: 0 0 20px rgba(240,180,41,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(56,189,248,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 48px 0 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::after {
+    content: 'PRICE ACTION';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 120px;
+    color: rgba(56,189,248,0.03);
+    letter-spacing: 8px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .header-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--blue);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 80px);
+    color: var(--white);
+    letter-spacing: 4px;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  h1 span {
+    color: var(--bull);
+  }
+
+  .header-sub {
+    font-size: 14px;
+    color: var(--text2);
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+
+  .callsign {
+    display: inline-block;
+    margin-top: 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--neutral);
+    border: 1px solid rgba(240,180,41,0.3);
+    padding: 4px 12px;
+    letter-spacing: 2px;
+  }
+
+  /* NAV */
+  nav {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    background: rgba(8,12,16,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+  }
+
+  .nav-inner {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .nav-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+    border: 1px solid var(--border);
+    background: transparent;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .nav-btn:hover {
+    color: var(--blue);
+    border-color: var(--blue);
+    background: rgba(56,189,248,0.05);
+  }
+
+  /* SECTIONS */
+  section {
+    padding: 56px 0 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--blue);
+    margin-bottom: 8px;
+    opacity: 0.7;
+  }
+
+  h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--white);
+    letter-spacing: 3px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  h2::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border2), transparent);
+  }
+
+  h3 {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* CARDS */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 24px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover {
+    border-color: var(--border2);
+  }
+
+  .card.bull {
+    border-left: 3px solid var(--bull);
+  }
+  .card.bull:hover { box-shadow: var(--glow-bull); }
+
+  .card.bear {
+    border-left: 3px solid var(--bear);
+  }
+  .card.bear:hover { box-shadow: var(--glow-bear); }
+
+  .card.neutral {
+    border-left: 3px solid var(--neutral);
+  }
+  .card.neutral:hover { box-shadow: var(--glow-neutral); }
+
+  .card.info {
+    border-left: 3px solid var(--blue);
+  }
+
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 3px 8px;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+
+  .tag.bull { background: rgba(0,229,160,0.1); color: var(--bull); border: 1px solid rgba(0,229,160,0.2); }
+  .tag.bear { background: rgba(255,68,102,0.1); color: var(--bear); border: 1px solid rgba(255,68,102,0.2); }
+  .tag.neutral { background: rgba(240,180,41,0.1); color: var(--neutral); border: 1px solid rgba(240,180,41,0.2); }
+  .tag.info { background: rgba(56,189,248,0.1); color: var(--blue); border: 1px solid rgba(56,189,248,0.2); }
+
+  .card p {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  .card .psychology {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text3);
+    font-style: italic;
+  }
+
+  /* CANDLE SVG STYLES */
+  .candle-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .candle-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 20px 16px;
+    text-align: center;
+    flex: 1;
+    min-width: 130px;
+    transition: all 0.2s;
+  }
+
+  .candle-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+  }
+
+  .candle-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+    margin-top: 10px;
+    text-transform: uppercase;
+  }
+
+  .candle-name {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--text);
+    margin-top: 4px;
+  }
+
+  /* RULE BLOCKS */
+  .rule-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .rule-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--blue);
+    opacity: 0.3;
+    line-height: 1;
+    min-width: 36px;
+  }
+
+  .rule-content h4 {
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--white);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+
+  .rule-content p {
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  /* EDGE FILTERS */
+  .edge-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .edge-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--bull), transparent);
+  }
+
+  .edge-card.bear-edge::before {
+    background: linear-gradient(90deg, var(--bear), transparent);
+  }
+
+  .edge-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+
+  .edge-question {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--bull);
+    background: rgba(0,229,160,0.05);
+    border: 1px solid rgba(0,229,160,0.15);
+    padding: 12px 16px;
+    margin: 12px 0;
+  }
+
+  .edge-card.bear-edge .edge-question {
+    color: var(--bear);
+    background: rgba(255,68,102,0.05);
+    border-color: rgba(255,68,102,0.15);
+  }
+
+  .verdict-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .verdict {
+    padding: 12px 16px;
+    font-size: 12px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .verdict.yes {
+    background: rgba(0,229,160,0.06);
+    border: 1px solid rgba(0,229,160,0.2);
+    color: var(--bull);
+  }
+
+  .verdict.no {
+    background: rgba(255,68,102,0.06);
+    border: 1px solid rgba(255,68,102,0.2);
+    color: var(--bear);
+  }
+
+  .verdict span {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 4px;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  /* CHECKLIST */
+  .checklist {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 28px;
+  }
+
+  .checklist-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 3px;
+    color: var(--white);
+    margin-bottom: 20px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .check-item:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--bull);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .check-box:hover {
+    border-color: var(--bull);
+    background: rgba(0,229,160,0.05);
+  }
+
+  .check-box.checked {
+    background: rgba(0,229,160,0.1);
+    border-color: var(--bull);
+    color: var(--bull);
+  }
+
+  .check-text strong {
+    display: block;
+    font-size: 13px;
+    color: var(--white);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .check-text span {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .data-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border2);
+    background: var(--bg3);
+  }
+
+  .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.01); }
+
+  .data-table td:first-child {
+    color: var(--white);
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  /* GOLDEN RULE */
+  .golden-rule {
+    background: linear-gradient(135deg, rgba(240,180,41,0.08), rgba(240,180,41,0.02));
+    border: 1px solid rgba(240,180,41,0.25);
+    padding: 32px;
+    text-align: center;
+    margin: 32px 0;
+    position: relative;
+  }
+
+  .golden-rule::before {
+    content: '⚡';
+    font-size: 32px;
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .golden-rule p {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(18px, 3vw, 26px);
+    letter-spacing: 2px;
+    color: var(--neutral);
+    line-height: 1.4;
+  }
+
+  .golden-rule small {
+    display: block;
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* DOJI SECTION */
+  .doji-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .doji-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 20px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .doji-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+  }
+
+  .doji-card h4 {
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 10px 0 6px;
+  }
+
+  .doji-card p {
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+
+  /* WARNING BOX */
+  .warning {
+    background: rgba(255,68,102,0.05);
+    border: 1px solid rgba(255,68,102,0.2);
+    border-left: 3px solid var(--bear);
+    padding: 16px 20px;
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 16px;
+  }
+
+  .warning strong {
+    color: var(--bear);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 40px 0;
+    text-align: center;
+  }
+
+  footer p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 2px;
+  }
+
+  footer .maverick {
+    color: var(--bull);
+    margin-top: 4px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card, .rule-block, .edge-card, .candle-card, .doji-card {
+    animation: fadeIn 0.4s ease both;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-tag">// MAVERICK TRADING SYSTEM — GROUND SCHOOL</div>
+    <h1>ROD'S PRICE<br><span>ACTION BIBLE</span></h1>
+    <div class="header-sub">Candle Psychology · Location Rules · Edge Filters · Pre-Trade Checklist</div>
+    <div class="callsign">CALLSIGN: MAVERICK · WINGMAN: GOOSE · VERSION 1.0</div>
+  </div>
+</header>
+
+<nav>
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#candle-types" class="nav-btn">01 CANDLE TYPES</a>
+      <a href="#location" class="nav-btn">02 LOCATION RULES</a>
+      <a href="#hammer-family" class="nav-btn">03 HAMMER FAMILY</a>
+      <a href="#doji-family" class="nav-btn">04 DOJI FAMILY</a>
+      <a href="#edge-filters" class="nav-btn">05 EDGE FILTERS</a>
+      <a href="#checklist" class="nav-btn">06 PRE-TRADE CHECKLIST</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="container">
+
+    <!-- SECTION 1: THREE CANDLE TYPES -->
+    <section id="candle-types">
+      <div class="section-label">// SECTION 01</div>
+      <h2>THE THREE CANDLE TYPES</h2>
+
+      <div class="card-grid">
+        <div class="card bull">
+          <span class="tag bull">STRENGTH</span>
+          <h3 style="color: var(--bull)">Strength Candle</h3>
+          <p>Large body, small or no wicks. One side dominated the entire session with little to no contest. The bigger the body, the stronger the conviction.</p>
+          <div class="psychology">
+            "We went this direction and nobody stopped us."
+          </div>
+          <!-- SVG: Bullish strength candle -->
+          <svg width="40" height="80" style="margin-top:16px" viewBox="0 0 40 80">
+            <line x1="20" y1="5" x2="20" y2="12" stroke="#00e5a0" stroke-width="2"/>
+            <rect x="10" y="12" width="20" height="60" fill="#00e5a0" rx="1"/>
+            <line x1="20" y1="72" x2="20" y2="76" stroke="#00e5a0" stroke-width="2"/>
+          </svg>
+        </div>
+
+        <div class="card neutral">
+          <span class="tag neutral">CONTROL SHIFT</span>
+          <h3 style="color: var(--neutral)">Control Shift Candle</h3>
+          <p>Small body, long wick on ONE side. One side attempted a move and the opposing side took over before close. The long wick is the failed attempt.</p>
+          <div class="psychology">
+            "They tried hard. We won."
+          </div>
+          <!-- SVG: Hammer shape -->
+          <svg width="40" height="80" style="margin-top:16px" viewBox="0 0 40 80">
+            <line x1="20" y1="5" x2="20" y2="15" stroke="#f0b429" stroke-width="2"/>
+            <rect x="10" y="15" width="20" height="14" fill="#f0b429" rx="1"/>
+            <line x1="20" y1="29" x2="20" y2="75" stroke="#f0b429" stroke-width="2"/>
+          </svg>
+        </div>
+
+        <div class="card info">
+          <span class="tag info">INDECISION</span>
+          <h3 style="color: var(--blue)">Indecision Candle</h3>
+          <p>Small body, wicks on BOTH sides. Price went up AND down and closed near where it opened. Neither side could dominate. No edge here.</p>
+          <div class="psychology">
+            "Nobody won. Wait."
+          </div>
+          <!-- SVG: Doji shape -->
+          <svg width="40" height="80" style="margin-top:16px" viewBox="0 0 40 80">
+            <line x1="20" y1="5" x2="20" y2="37" stroke="#38bdf8" stroke-width="2"/>
+            <rect x="8" y="37" width="24" height="6" fill="#38bdf8" rx="1"/>
+            <line x1="20" y1="43" x2="20" y2="75" stroke="#38bdf8" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-num">!</div>
+        <div class="rule-content">
+          <h4>The Universal Truth</h4>
+          <p>Strength candles = stay with the trend. Control shift candles at key levels = watch for reversal. Indecision candles = wait for direction. Location determines which one actually matters.</p>
+        </div>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-num">!</div>
+        <div class="rule-content">
+          <h4>Speed Matters Too</h4>
+          <p>A strong move that took 1 hour and a pullback that took 4 days = buyers still winning the war. The velocity of a move relative to the opposing move reveals institutional intent.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: LOCATION RULES -->
+    <section id="location">
+      <div class="section-label">// SECTION 02</div>
+      <h2>LOCATION RULES</h2>
+
+      <div class="golden-rule">
+        <p>"THE COLOR OF THE CANDLE DOES NOT MATTER.<br>WHAT MATTERS IS WHERE IT APPEARS AND HOW IT'S FORMED."</p>
+        <small>— THE FOUNDATIONAL RULE OF CANDLESTICK READING</small>
+      </div>
+
+      <div class="card-grid">
+        <div class="card bull">
+          <span class="tag bull">BOTTOM OF DOWNTREND</span>
+          <h3 style="color: var(--bull)">Bullish Location</h3>
+          <p>Any reversal candle forming at the <strong style="color:var(--bull)">bottom of a clear downtrend</strong> at a key support level signals buyer defense regardless of candle color.</p>
+          <div class="psychology">Wick pointing down at the bottom = buyers defending lower prices</div>
+        </div>
+
+        <div class="card bear">
+          <span class="tag bear">TOP OF UPTREND</span>
+          <h3 style="color: var(--bear)">Bearish Location</h3>
+          <p>Any reversal candle forming at the <strong style="color:var(--bear)">top of a clear uptrend</strong> at a key resistance level signals seller pressure regardless of candle color.</p>
+          <div class="psychology">Wick pointing up at the top = sellers rejecting higher prices</div>
+        </div>
+
+        <div class="card">
+          <span class="tag">MID-RANGE</span>
+          <h3 style="color: var(--text3)">No Man's Land</h3>
+          <p>Any reversal candle forming in the <strong>middle of a range</strong> or sideways market is <strong style="color:var(--bear)">meaningless noise</strong>. Ignore it. No level = no context = no edge.</p>
+          <div class="psychology">Mid-range candles of any shape have zero directional edge</div>
+        </div>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-num">2x</div>
+        <div class="rule-content">
+          <h4>The 2X Wick Rule — Mandatory Filter</h4>
+          <p>The wick must be at least 2x the size of the candle body or the pattern is <strong style="color:var(--bear)">disqualified</strong>. A small wick means price tested and got a slight rejection. A 2x+ wick means one side got aggressively pushed back. That's conviction. Anything less is a shrug.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: HAMMER FAMILY -->
+    <section id="hammer-family">
+      <div class="section-label">// SECTION 03</div>
+      <h2>THE HAMMER FAMILY</h2>
+
+      <p style="font-size:13px; color:var(--text2); margin-bottom:28px;">Four patterns. Two shapes. One rule: location determines bias, not color.</p>
+
+      <div class="candle-row">
+
+        <!-- Hammer -->
+        <div class="candle-card">
+          <svg width="44" height="90" viewBox="0 0 44 90">
+            <line x1="22" y1="8" x2="22" y2="20" stroke="#00e5a0" stroke-width="2.5"/>
+            <rect x="12" y="20" width="20" height="16" fill="#00e5a0" rx="1.5"/>
+            <line x1="22" y1="36" x2="22" y2="82" stroke="#00e5a0" stroke-width="2.5"/>
+          </svg>
+          <span class="tag bull" style="margin:0">BULLISH</span>
+          <div class="candle-name">Hammer</div>
+          <div class="candle-label">Bottom of downtrend</div>
+        </div>
+
+        <!-- Hanging Man -->
+        <div class="candle-card">
+          <svg width="44" height="90" viewBox="0 0 44 90">
+            <line x1="22" y1="8" x2="22" y2="20" stroke="#ff4466" stroke-width="2.5"/>
+            <rect x="12" y="20" width="20" height="16" fill="#ff4466" rx="1.5"/>
+            <line x1="22" y1="36" x2="22" y2="82" stroke="#ff4466" stroke-width="2.5"/>
+          </svg>
+          <span class="tag bear" style="margin:0">BEARISH</span>
+          <div class="candle-name">Hanging Man</div>
+          <div class="candle-label">Top of uptrend</div>
+        </div>
+
+        <!-- Shooting Star -->
+        <div class="candle-card">
+          <svg width="44" height="90" viewBox="0 0 44 90">
+            <line x1="22" y1="8" x2="22" y2="54" stroke="#ff4466" stroke-width="2.5"/>
+            <rect x="12" y="54" width="20" height="16" fill="#ff4466" rx="1.5"/>
+            <line x1="22" y1="70" x2="22" y2="82" stroke="#ff4466" stroke-width="2.5"/>
+          </svg>
+          <span class="tag bear" style="margin:0">BEARISH</span>
+          <div class="candle-name">Shooting Star</div>
+          <div class="candle-label">Top of uptrend</div>
+        </div>
+
+        <!-- Inverted Hammer -->
+        <div class="candle-card">
+          <svg width="44" height="90" viewBox="0 0 44 90">
+            <line x1="22" y1="8" x2="22" y2="54" stroke="#00e5a0" stroke-width="2.5"/>
+            <rect x="12" y="54" width="20" height="16" fill="#00e5a0" rx="1.5"/>
+            <line x1="22" y1="70" x2="22" y2="82" stroke="#00e5a0" stroke-width="2.5"/>
+          </svg>
+          <span class="tag bull" style="margin:0">BULLISH</span>
+          <div class="candle-name">Inverted Hammer</div>
+          <div class="candle-label">Bottom of downtrend</div>
+        </div>
+
+      </div>
+
+      <div class="card-grid" style="margin-top:8px">
+        <div class="card bull">
+          <h3 style="color:var(--bull); font-size:11px; letter-spacing:2px">BOTTOM = BULLISH</h3>
+          <p style="margin-top:8px">Hammer · Inverted Hammer<br><br>Long lower wick at bottom = buyers rejected lower prices. Long upper wick at bottom = buyers probing higher. Both show buyer presence at support.</p>
+        </div>
+        <div class="card bear">
+          <h3 style="color:var(--bear); font-size:11px; letter-spacing:2px">TOP = BEARISH</h3>
+          <p style="margin-top:8px">Hanging Man · Shooting Star<br><br>Long lower wick at top = sellers warning during the candle. Long upper wick at top = sellers rejecting the push higher. Both show seller presence at resistance.</p>
+        </div>
+      </div>
+
+      <div class="rule-block" style="margin-top:16px">
+        <div class="rule-num">→</div>
+        <div class="rule-content">
+          <h4>Formation = Alert. Confirmation = Entry.</h4>
+          <p>The candle forming at the level is the soldier raising his hand saying "I'm here." The confirmation candle is that soldier actually holding the line. Never enter on the pattern alone — wait for the next candle to follow through in the reversal direction.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: DOJI FAMILY -->
+    <section id="doji-family">
+      <div class="section-label">// SECTION 04</div>
+      <h2>THE DOJI FAMILY</h2>
+
+      <p style="font-size:13px; color:var(--text2); margin-bottom:24px;">All Dojis = indecision. The specific type tells you <em>how intense</em> the battle was. Location tells you whether it matters.</p>
+
+      <div class="doji-grid">
+
+        <div class="doji-card">
+          <svg width="44" height="80" viewBox="0 0 44 80">
+            <line x1="22" y1="8" x2="22" y2="37" stroke="#38bdf8" stroke-width="2.5"/>
+            <rect x="8" y="37" width="28" height="5" fill="#38bdf8" rx="1"/>
+            <line x1="22" y1="42" x2="22" y2="72" stroke="#38bdf8" stroke-width="2.5"/>
+          </svg>
+          <h4 style="color:var(--blue)">Standard Doji</h4>
+          <p>Equal wicks. Pure indecision. Neither side had an edge.</p>
+        </div>
+
+        <div class="doji-card">
+          <svg width="44" height="80" viewBox="0 0 44 80">
+            <line x1="22" y1="5" x2="22" y2="37" stroke="#38bdf8" stroke-width="2.5"/>
+            <rect x="8" y="37" width="28" height="5" fill="#38bdf8" rx="1"/>
+            <line x1="22" y1="42" x2="22" y2="75" stroke="#38bdf8" stroke-width="2.5"/>
+          </svg>
+          <h4 style="color:var(--blue)">Long-Legged Doji</h4>
+          <p>Very long wicks both sides. Extreme battle. Nobody won. Big move coming.</p>
+        </div>
+
+        <div class="doji-card">
+          <svg width="44" height="80" viewBox="0 0 44 80">
+            <rect x="8" y="16" width="28" height="5" fill="#00e5a0" rx="1"/>
+            <line x1="22" y1="21" x2="22" y2="72" stroke="#00e5a0" stroke-width="2.5"/>
+          </svg>
+          <h4 style="color:var(--bull)">Dragonfly Doji</h4>
+          <p>Long lower wick, no upper. Bears tried. Bulls dominated. Bullish at support.</p>
+        </div>
+
+        <div class="doji-card">
+          <svg width="44" height="80" viewBox="0 0 44 80">
+            <line x1="22" y1="8" x2="22" y2="58" stroke="#ff4466" stroke-width="2.5"/>
+            <rect x="8" y="58" width="28" height="5" fill="#ff4466" rx="1"/>
+          </svg>
+          <h4 style="color:var(--bear)">Gravestone Doji</h4>
+          <p>Long upper wick, no lower. Bulls tried. Bears dominated. Bearish at resistance.</p>
+        </div>
+
+        <div class="doji-card" style="grid-column: span 1">
+          <svg width="70" height="80" viewBox="0 0 70 80">
+            <!-- Morning Star Doji -->
+            <rect x="2" y="15" width="18" height="40" fill="#ff4466" rx="1"/>
+            <line x1="11" y1="10" x2="11" y2="15" stroke="#ff4466" stroke-width="2"/>
+            <line x1="11" y1="55" x2="11" y2="62" stroke="#ff4466" stroke-width="2"/>
+            <!-- Doji -->
+            <line x1="35" y1="28" x2="35" y2="42" stroke="#38bdf8" stroke-width="2"/>
+            <rect x="28" y="42" width="14" height="4" fill="#38bdf8" rx="1"/>
+            <line x1="35" y1="46" x2="35" y2="58" stroke="#38bdf8" stroke-width="2"/>
+            <!-- Bullish confirm -->
+            <rect x="50" y="20" width="18" height="36" fill="#00e5a0" rx="1"/>
+            <line x1="59" y1="14" x2="59" y2="20" stroke="#00e5a0" stroke-width="2"/>
+            <line x1="59" y1="56" x2="59" y2="62" stroke="#00e5a0" stroke-width="2"/>
+          </svg>
+          <h4 style="color:var(--neutral)">Doji Star</h4>
+          <p>Doji after strong candle. Trend pausing. Wait for confirmation candle.</p>
+        </div>
+
+      </div>
+
+      <div class="card-grid">
+        <div class="card bull">
+          <span class="tag bull">POWER SIGNAL</span>
+          <h3 style="color:var(--bull)">Double Doji = Compression</h3>
+          <p>Two consecutive Dojis = volatility coiling like a spring. When it breaks, the move is fast and decisive. On SPY intraday — this is your pre-explosion warning. Get ready.</p>
+        </div>
+        <div class="card info">
+          <span class="tag info">DISTINGUISH</span>
+          <h3 style="color:var(--blue)">Doji vs Spinning Top</h3>
+          <p><strong style="color:var(--white)">Doji:</strong> Open = Close. Complete equilibrium. Stronger reversal signal when confirmed.<br><br><strong style="color:var(--white)">Spinning Top:</strong> Small but visible body. Mild indecision. Sign of hesitation, not reversal.</p>
+        </div>
+      </div>
+
+      <div class="warning">
+        <strong>⚠ TIMEFRAME WARNING — CRITICAL FOR SPY 0DTE</strong>
+        On 15M / 5M / 1M charts, Doji signals are LOW reliability — often noise. Only valid with confluence: VWAP positioning + volume spike + key level. A Doji alone on a 1M chart means nothing without location context.
+      </div>
+    </section>
+
+    <!-- SECTION 5: EDGE FILTERS -->
+    <section id="edge-filters">
+      <div class="section-label">// SECTION 05</div>
+      <h2>NEW EDGE FILTERS</h2>
+
+      <p style="font-size:13px; color:var(--text2); margin-bottom:28px;">These two filters are your toolbox upgrades. Apply them after LTProv7 fires — before entry.</p>
+
+      <div class="edge-card">
+        <div class="edge-title">FILTER 01 — SPEED / VELOCITY CHECK</div>
+        <p style="font-size:13px; color:var(--text2); margin-bottom:12px">Before every entry, ask one question:</p>
+        <div class="edge-question">
+          "Is the pullback SLOWER and CHOPPIER than the impulse that preceded it?"
+        </div>
+        <div class="verdict-row">
+          <div class="verdict yes">
+            <span>✓ YES — TRADE IT</span>
+            Fast impulse + slow choppy pullback = trend intact. The dominant side is still in control. Pullback entry is valid.
+          </div>
+          <div class="verdict no">
+            <span>✗ NO — STAND DOWN</span>
+            Pullback matching impulse speed = trend weakening. The opposing side is gaining. Avoid or flip bias.
+          </div>
+        </div>
+        <div class="psychology" style="margin-top:16px; font-size:12px; color:var(--text3); font-style:italic; padding-top:12px; border-top:1px solid var(--border)">
+          This is institutional footprint detection. Fast up + slow down = smart money still positioned long. Speed disparity reveals who's really in control.
+        </div>
+      </div>
+
+      <div class="edge-card bear-edge" style="margin-top:16px">
+        <div class="edge-title">FILTER 02 — WICK vs BODY CLOSE AT LEVELS</div>
+        <p style="font-size:13px; color:var(--text2); margin-bottom:12px">When price hits your ZONE or LEVEL, read the candle closes:</p>
+        <div class="edge-question" style="color:var(--bear); background:rgba(255,68,102,0.05); border-color:rgba(255,68,102,0.15)">
+          "Are we seeing wicks only — or are bodies closing beyond the level?"
+        </div>
+        <div class="verdict-row">
+          <div class="verdict yes">
+            <span>✓ WICKS ONLY — A+ SETUP</span>
+            No body closes beyond the level. The opposing side is actively defending. Level is holding. This is your highest conviction entry context.
+          </div>
+          <div class="verdict no">
+            <span>✗ BODY CLOSES THROUGH — STEP ASIDE</span>
+            Bodies closing beyond the level = level is failing. The defending side is losing. Do not fight this. Let it go.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: PRE-TRADE CHECKLIST -->
+    <section id="checklist">
+      <div class="section-label">// SECTION 06</div>
+      <h2>PRE-TRADE CHECKLIST</h2>
+
+      <div class="checklist">
+        <div class="checklist-title">MAVERICK'S GATE — ALL FIVE OR NO TRADE</div>
+
+        <div class="check-item">
+          <div class="check-box" onclick="this.classList.toggle('checked'); this.textContent = this.classList.contains('checked') ? '✓' : ''"></div>
+          <div class="check-text">
+            <strong>1. BIAS — Who is in control?</strong>
+            <span>LTProv7 BIAS row confirmed. Direction established on higher timeframe.</span>
+          </div>
+        </div>
+
+        <div class="check-item">
+          <div class="check-box" onclick="this.classList.toggle('checked'); this.textContent = this.classList.contains('checked') ? '✓' : ''"></div>
+          <div class="check-text">
+            <strong>2. SPEED — Is the pullback weaker than the impulse?</strong>
+            <span>Fast impulse + slow choppy pullback = YES. Matching speed = NO TRADE.</span>
+          </div>
+        </div>
+
+        <div class="check-item">
+          <div class="check-box" onclick="this.classList.toggle('checked'); this.textContent = this.classList.contains('checked') ? '✓' : ''"></div>
+          <div class="check-text">
+            <strong>3. ZONE / LEVEL — Is price at a key location?</strong>
+            <span>LTProv7 ZONE or LEVEL confirmed. Not mid-range. Not open air.</span>
+          </div>
+        </div>
+
+        <div class="check-item">
+          <div class="check-box" onclick="this.classList.toggle('checked'); this.textContent = this.classList.contains('checked') ? '✓' : ''"></div>
+          <div class="check-text">
+            <strong>4. WICKS vs BODIES — Is the level holding?</strong>
+            <span>Wicks only beyond level = level defending = A+ setup. Body closes = abort.</span>
+          </div>
+        </div>
+
+        <div class="check-item">
+          <div class="check-box" onclick="this.classList.toggle('checked'); this.textContent = this.classList.contains('checked') ? '✓' : ''"></div>
+          <div class="check-text">
+            <strong>5. SIGNAL — Has LTProv7 confirmed?</strong>
+            <span>SIGNAL = WAIT is the gate. No signal = no entry. Regardless of everything above.</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="golden-rule" style="margin-top:24px">
+        <p>"I ONLY TRADE WHEN STRENGTH CONFIRMS CONTROL — AND THE OPPOSING MOVE IS SLOWER."</p>
+        <small>— MAVERICK'S EVOLVED TRADING RULE · LTPROV7 + PRICE ACTION BIBLE</small>
+      </div>
+
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>ROD'S PRICE ACTION BIBLE · GROUND SCHOOL REFERENCE</p>
+    <p class="maverick">MAVERICK TRADING SYSTEM · BUILT WITH GOOSE · APRIL 2026</p>
+  </div>
+</footer>
+
+<script>
+  // Reset checkboxes on load
+  document.querySelectorAll('.check-box').forEach(box => {
+    box.textContent = '';
+  });
+
+  // Smooth scroll for nav
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+
+</body>
+</html>
