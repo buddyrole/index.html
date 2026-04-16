@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LTProv7 Field Manual — Maverick Edition</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;700&display=swap');
+
+  :root {
+    --green: #00e676;
+    --red: #ff1744;
+    --orange: #ff9100;
+    --yellow: #ffd600;
+    --blue: #2979ff;
+    --teal: #1de9b6;
+    --purple: #d500f9;
+    --bg: #0a0c0f;
+    --bg2: #0f1318;
+    --bg3: #141920;
+    --bg4: #1a2030;
+    --border: rgba(255,255,255,0.08);
+    --text: #e8eaf0;
+    --muted: #7a8599;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-head: 'Rajdhani', sans-serif;
+    --font-body: 'Exo 2', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0a0c0f 0%, #0d1420 50%, #0a0c0f 100%);
+    border-bottom: 1px solid var(--teal);
+    padding: 32px 24px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(29,233,182,0.02) 40px, rgba(29,233,182,0.02) 41px),
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(29,233,182,0.02) 40px, rgba(29,233,182,0.02) 41px);
+    pointer-events: none;
+  }
+  .header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+  .callsign {
+    font-family: var(--font-mono);
+    color: var(--teal);
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+  .title {
+    font-family: var(--font-head);
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #fff;
+    line-height: 1;
+  }
+  .title span { color: var(--teal); }
+  .subtitle {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+  .version-badge {
+    display: inline-block;
+    background: var(--teal);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 2px;
+    margin-left: 12px;
+    vertical-align: middle;
+    letter-spacing: 1px;
+  }
+
+  /* NAV TABS */
+  .nav {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .nav-inner { max-width: 1100px; margin: 0 auto; display: flex; gap: 0; }
+  .tab {
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 20px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+  /* MAIN */
+  .main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .section-desc { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+
+  /* DASHBOARD GRID */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  /* ROW CARD */
+  .row-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.1s;
+  }
+  .row-card:hover { border-color: rgba(29,233,182,0.3); transform: translateY(-1px); }
+  .row-card.expanded { border-color: var(--teal); }
+
+  .row-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  .row-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 80px;
+    letter-spacing: 1px;
+  }
+  .row-values { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .pill {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .pill-green  { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+  .pill-red    { background: rgba(255,23,68,0.15);  color: var(--red);   border: 1px solid rgba(255,23,68,0.3); }
+  .pill-orange { background: rgba(255,145,0,0.15);  color: var(--orange); border: 1px solid rgba(255,145,0,0.3); }
+  .pill-yellow { background: rgba(255,214,0,0.15);  color: var(--yellow); border: 1px solid rgba(255,214,0,0.3); }
+  .pill-blue   { background: rgba(41,121,255,0.15); color: var(--blue);  border: 1px solid rgba(41,121,255,0.3); }
+  .pill-teal   { background: rgba(29,233,182,0.15); color: var(--teal);  border: 1px solid rgba(29,233,182,0.3); }
+  .pill-gray   { background: rgba(122,133,153,0.15); color: var(--muted); border: 1px solid rgba(122,133,153,0.3); }
+  .pill-white  { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+
+  .row-expand { color: var(--muted); font-size: 16px; transition: transform 0.2s; }
+  .row-card.expanded .row-expand { transform: rotate(180deg); color: var(--teal); }
+
+  .row-detail {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 0;
+  }
+  .row-card.expanded .row-detail { display: block; }
+
+  .detail-summary {
+    font-size: 13px;
+    color: var(--text);
+    padding: 12px 0 8px;
+    line-height: 1.7;
+  }
+  .detail-states { margin-top: 8px; }
+  .state-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .state-row:last-child { border-bottom: none; }
+  .state-signal { min-width: 120px; }
+  .state-meaning { color: var(--muted); flex: 1; }
+  .state-action { color: var(--yellow); font-family: var(--font-mono); font-size: 11px; min-width: 100px; text-align: right; }
+
+  /* RULE CARDS */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .rule-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    border-radius: 0 6px 6px 0;
+    padding: 16px;
+  }
+  .rule-card.red { border-left-color: var(--red); }
+  .rule-card.orange { border-left-color: var(--orange); }
+  .rule-card.yellow { border-left-color: var(--yellow); }
+  .rule-card.blue { border-left-color: var(--blue); }
+  .rule-number {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--teal);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .rule-card.red .rule-number { color: var(--red); }
+  .rule-card.orange .rule-number { color: var(--orange); }
+  .rule-card.yellow .rule-number { color: var(--yellow); }
+  .rule-card.blue .rule-number { color: var(--blue); }
+  .rule-title {
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .rule-body { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .rule-body strong { color: var(--text); }
+
+  /* FLOW CHART */
+  .flow { margin: 24px 0; }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .flow-step::after {
+    content: '▼';
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--teal);
+    font-size: 10px;
+    z-index: 1;
+  }
+  .flow-step:last-child::after { display: none; }
+  .flow-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--teal);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .flow-content { flex: 1; }
+  .flow-title {
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .flow-desc { font-size: 12px; color: var(--muted); }
+  .flow-check {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    margin-top: 6px;
+    line-height: 1.8;
+  }
+
+  /* ENV TABLE */
+  .env-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .env-table th {
+    font-family: var(--font-head);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    font-size: 11px;
+  }
+  .env-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .env-table tr:last-child td { border-bottom: none; }
+  .env-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .dot-g { background: var(--green); }
+  .dot-r { background: var(--red); }
+
+  /* COMBO CARDS */
+  .combo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .combo-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .combo-card.bull { border-top: 2px solid var(--green); }
+  .combo-card.bear { border-top: 2px solid var(--red); }
+  .combo-card.caution { border-top: 2px solid var(--orange); }
+  .combo-title {
+    font-family: var(--font-head);
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .combo-title.bull { color: var(--green); }
+  .combo-title.bear { color: var(--red); }
+  .combo-title.caution { color: var(--orange); }
+  .combo-signals { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .combo-desc { font-size: 12px; color: var(--muted); }
+  .combo-action { font-family: var(--font-mono); font-size: 11px; color: var(--yellow); margin-top: 8px; }
+
+  /* GLOSSARY */
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+  }
+  .gloss-item {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 14px;
+  }
+  .gloss-term {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--teal);
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+  }
+  .gloss-def { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ALERT SECTION */
+  .alert-list { display: flex; flex-direction: column; gap: 8px; }
+  .alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-name { font-family: var(--font-mono); color: var(--text); margin-bottom: 3px; font-size: 11px; }
+  .alert-desc { color: var(--muted); }
+
+  /* SEARCH */
+  .search-bar {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-bar:focus { border-color: var(--teal); }
+  .search-bar::placeholder { color: var(--muted); }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+  }
+
+  /* MOBILE */
+  @media (max-width: 600px) {
+    .header { padding: 20px 16px; }
+    .main { padding: 16px; }
+    .tab { padding: 12px 12px; font-size: 11px; }
+    .dashboard-grid, .rules-grid, .combo-grid, .glossary-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ANIMATIONS */
+  .section.active .row-card,
+  .section.active .rule-card,
+  .section.active .flow-step,
+  .section.active .combo-card {
+    animation: fadeUp 0.3s ease both;
+  }
+  .section.active .row-card:nth-child(2) { animation-delay: 0.04s; }
+  .section.active .row-card:nth-child(3) { animation-delay: 0.08s; }
+  .section.active .row-card:nth-child(4) { animation-delay: 0.12s; }
+  .section.active .row-card:nth-child(5) { animation-delay: 0.16s; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="callsign">⚡ MAVERICK SYSTEMS // CLASSIFIED FIELD MANUAL</div>
+    <div class="title">LTProv<span>7</span> <span style="font-size:0.6em;color:#7a8599;">FIELD MANUAL</span><span class="version-badge">v7.15</span></div>
+    <div class="subtitle">SPY Liquidity Trap Pro · Dashboard Reference · Signal Logic · Trade Execution Guide</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="tab active" onclick="showTab('dashboard')">Dashboard Rows</div>
+    <div class="tab" onclick="showTab('signals')">Signal Logic</div>
+    <div class="tab" onclick="showTab('environment')">Environment</div>
+    <div class="tab" onclick="showTab('execution')">Execution Flow</div>
+    <div class="tab" onclick="showTab('combos')">Setups</div>
+    <div class="tab" onclick="showTab('alerts')">Alerts</div>
+    <div class="tab" onclick="showTab('glossary')">Glossary</div>
+  </div>
+</nav>
+
+<div class="main">
+
+<!-- ═══════════════════════════════════════════ DASHBOARD ROWS -->
+<div id="dashboard" class="section active">
+  <div class="section-title">Dashboard Rows</div>
+  <div class="section-desc">Every row in your LTProv7 dashboard — what it shows, what each state means, and what to do. Click any row to expand.</div>
+  <input class="search-bar" type="text" placeholder="Search dashboard rows..." oninput="filterCards(this.value)">
+  <div class="dashboard-grid" id="dashGrid">
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">MODE</div>
+        <div class="row-values">
+          <span class="pill pill-teal">SPY/OPTIONS</span>
+          <span class="pill pill-yellow">PENNY</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">Tells you which trading mode the system is operating in. AUTO mode detects based on price — above $5 = SPY/OPTIONS, below $5 = PENNY. You can force it manually.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-teal">SPY/OPTIONS</span></div><div class="state-meaning">Full ORB, sweep, and options signal suite active. Trading SPY calls/puts.</div><div class="state-action">Normal ops</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-yellow">PENNY</span></div><div class="state-meaning">Penny stock logic active — tighter pivots, ATR filter, sweep low/high alerts.</div><div class="state-action">Penny mode</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">BIAS</div>
+        <div class="row-values">
+          <span class="pill pill-green">BULLISH</span>
+          <span class="pill pill-red">BEARISH</span>
+          <span class="pill pill-gray">NEUTRAL</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">The overall market bias based on EMA20 vs EMA50, RSI threshold, and price momentum. This is your directional filter — it tells you which side of the market to favor.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">BULLISH</span></div><div class="state-meaning">EMA20 > EMA50, RSI ≥ 50, price > price[3]. Favor calls and longs.</div><div class="state-action">Look for CALLS</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-red">BEARISH</span></div><div class="state-meaning">EMA20 < EMA50, RSI ≤ 50, price < price[3]. Favor puts and shorts.</div><div class="state-action">Look for PUTS</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">NEUTRAL</span></div><div class="state-meaning">Conditions don't cleanly align either direction. High chop risk.</div><div class="state-action">Wait / reduce size</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">SIGNAL</div>
+        <div class="row-values">
+          <span class="pill pill-gray">WAIT</span>
+          <span class="pill pill-green">BUY CALL</span>
+          <span class="pill pill-red">BUY PUT</span>
+          <span class="pill pill-blue">HOLD</span>
+          <span class="pill pill-orange">EXIT</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary"><strong>This is the gate. SIGNAL = WAIT overrides everything.</strong> No matter how bullish the environment or how strong the volume — if SIGNAL says WAIT, you wait. Period. The signal aggregates ORB crosses, SPY setup conditions, triangle breakouts, and sweep reversals into one clear directive.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">WAIT</span></div><div class="state-meaning">No confirmed edge present. Do not enter. The most important state.</div><div class="state-action">HANDS OFF</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">BUY CALL</span></div><div class="state-meaning">ORB breakout, SPY call setup, or triangle breakout up confirmed.</div><div class="state-action">Enter calls</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-red">BUY PUT</span></div><div class="state-meaning">ORB breakdown, SPY put setup, or triangle breakout down confirmed.</div><div class="state-action">Enter puts</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-blue">HOLD</span></div><div class="state-meaning">In position, trend intact, bias + RSI + EMA all confirm. Stay in.</div><div class="state-action">Hold runner</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-orange">EXIT</span></div><div class="state-meaning">RSI overbought/oversold, range invalidated, or flatten window hit.</div><div class="state-action">Take profit</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-white">★ SWEEP REV</span></div><div class="state-meaning">Composite sweep reversal — highest probability signal in the system.</div><div class="state-action">PRIME ENTRY</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">RSI</div>
+        <div class="row-values">
+          <span class="pill pill-gray">0–100</span>
+          <span class="pill pill-green">≤ 30 OS</span>
+          <span class="pill pill-red">≥ 70 OB</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">14-period RSI. Used as a bias filter, exit trigger, and exhaustion warning. RSI overbought triggers EXIT CALLS signal. RSI oversold triggers COVER PUTS signal.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-red">≥ 70</span></div><div class="state-meaning">Overbought — calls are extended, consider exiting longs.</div><div class="state-action">EXIT CALLS</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">≤ 30</span></div><div class="state-meaning">Oversold — puts are extended, consider covering shorts.</div><div class="state-action">COVER PUTS</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">50–65</span></div><div class="state-meaning">Bullish range. RSI turning up here in uptrend = call setup forming.</div><div class="state-action">Bullish zone</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">35–50</span></div><div class="state-meaning">Bearish range. RSI turning down here in downtrend = put setup forming.</div><div class="state-action">Bearish zone</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">VWAP</div>
+        <div class="row-values">
+          <span class="pill pill-green">Above VWAP</span>
+          <span class="pill pill-orange">Below VWAP</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">Volume Weighted Average Price — the institutional fair value line. Above VWAP = buyers in control, institutional buying support. Below VWAP = sellers in control, distribution pressure.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">Above VWAP</span></div><div class="state-meaning">Price above institutional fair value. Call setups carry higher probability.</div><div class="state-action">Favor calls</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-orange">Below VWAP</span></div><div class="state-meaning">Price below institutional fair value. Put setups carry higher probability.</div><div class="state-action">Favor puts</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">ORB</div>
+        <div class="row-values">
+          <span class="pill pill-yellow">665.66 - 667.83</span>
+          <span class="pill pill-gray">Building...</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">Opening Range Breakout — the high and low of the first 15 minutes of RTH. The most reliable intraday levels. When price breaks above the ORB high, system fires ORB CALL. Break below ORB low fires ORB PUT.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">Building...</span></div><div class="state-meaning">Still in the first 15 min window. ORB not yet locked. No signal available.</div><div class="state-action">Wait for lock</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-yellow">Levels showing</span></div><div class="state-meaning">ORB locked. These are your key breakout levels for the session.</div><div class="state-action">Watch these levels</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">RANGE</div>
+        <div class="row-values">
+          <span class="pill pill-teal">699.10 - 700.50</span>
+          <span class="pill pill-gray">No range yet</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">Equal high/equal low consolidation range detected using pivot structure. This is the liquidity trap zone — smart money stacks stops above and below these equal highs/lows, then sweeps them. Your bread-and-butter setup.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">No range yet</span></div><div class="state-meaning">No equal high/low structure detected. System is scanning.</div><div class="state-action">Wait for structure</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-teal">Levels showing</span></div><div class="state-meaning">Range locked. Watch for sweep above rangeTop or below rangeBot.</div><div class="state-action">Prepare for sweep</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">SWEEP</div>
+        <div class="row-values">
+          <span class="pill pill-gray">No sweep</span>
+          <span class="pill pill-red">SWEPT HIGH</span>
+          <span class="pill pill-green">SWEPT LOW</span>
+          <span class="pill pill-green">REVERSAL ▲</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">Liquidity sweep detection — when price pokes above rangeTop or below rangeBot by the sweep threshold. Sweeps by themselves are just alerts. The REVERSAL is the signal — sweep + fail + reclaim = entry.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-red">SWEPT HIGH</span></div><div class="state-meaning">Price poked above equal highs. Liquidity grabbed. Watch for failure to hold.</div><div class="state-action">Watch for FAIL</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">SWEPT LOW</span></div><div class="state-meaning">Price poked below equal lows. Liquidity grabbed. Watch for reclaim.</div><div class="state-action">Watch for FAIL</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">REVERSAL ▲</span></div><div class="state-meaning">Low swept + price reclaimed rangeBot. PUT/CALL signal depending on direction.</div><div class="state-action">Entry signal</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">FAIL</div>
+        <div class="row-values">
+          <span class="pill pill-gray">No fail</span>
+          <span class="pill pill-green">FAIL LONG</span>
+          <span class="pill pill-red">FAIL SHORT</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">The sweep failure window. After a sweep, the system watches for price to fail back inside the range within the failBars window (default 5 bars). FAIL LONG = sweep low failed back above rangeBot = buy signal. FAIL SHORT = sweep high failed back below rangeTop = sell signal.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">FAIL LONG</span></div><div class="state-meaning">Lows swept, price recovered above rangeBot. Trap sprung on sellers.</div><div class="state-action">BUY CALLS</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-red">FAIL SHORT</span></div><div class="state-meaning">Highs swept, price failed back below rangeTop. Trap sprung on buyers.</div><div class="state-action">BUY PUTS</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">LEVEL</div>
+        <div class="row-values">
+          <span class="pill pill-yellow">AT LEVEL</span>
+          <span class="pill pill-gray">Mid-range</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">Checks if price is near a mapped key level — VWAP, EMA20, EMA50, pre-market high/low, daily pivots (P/R1/S1/R2/S2), or manually entered Barchart resistance/support levels. Signals AT a mapped level carry higher probability.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-yellow">AT LEVEL</span></div><div class="state-meaning">Price within the proximity zone of a key mapped level. Higher probability signal location.</div><div class="state-action">Higher confidence</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">Mid-range</span></div><div class="state-meaning">Price is between levels. Signals here have lower probability. Reduce size or wait.</div><div class="state-action">Reduce size</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">ZONE</div>
+        <div class="row-values">
+          <span class="pill pill-green">CONFLUENCE</span>
+          <span class="pill pill-yellow">AT ZONE</span>
+          <span class="pill pill-blue">NEAR ZONE</span>
+          <span class="pill pill-gray">MID-RANGE</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">S&R zone detection using Dapo Method — weekly and daily highs/lows from the last 3 periods. CONFLUENCE = weekly and daily zones overlap within ATR threshold = the highest probability location in the entire system.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">CONFLUENCE</span></div><div class="state-meaning">Weekly AND daily S&R zones stacked. Highest probability location. Trade everything here.</div><div class="state-action">MAX SIZE</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-yellow">AT ZONE</span></div><div class="state-meaning">Price inside a weekly or daily zone box. High probability location.</div><div class="state-action">Full size</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-blue">NEAR ZONE</span></div><div class="state-meaning">Price approaching a zone within ATR distance. Setup loading.</div><div class="state-action">Get ready</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">MID-RANGE</span></div><div class="state-meaning">Between zones. Low probability location for new entries.</div><div class="state-action">Wait or skip</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">TRIANGLE</div>
+        <div class="row-values">
+          <span class="pill pill-teal">BRK ▲</span>
+          <span class="pill pill-orange">COMPRESS ⚠</span>
+          <span class="pill pill-blue">FORMING</span>
+          <span class="pill pill-gray">NONE</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">Smart Triangle Engine detects ascending, descending, and symmetrical triangles using dynamic pivot trendlines. APEX = breakout imminent (trendlines crossed). COMPRESSING = getting close. BRK = confirmed breakout.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-teal">BRK ▲ ASCENDING</span></div><div class="state-meaning">Ascending triangle breakout up — bias match required. High probability call setup.</div><div class="state-action">CALL signal</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-orange">COMPRESS ⚠</span></div><div class="state-meaning">Trendlines within 1.5x ATR. Breakout is imminent — prepare but don't enter yet.</div><div class="state-action">Get ready</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-blue">FORMING</span></div><div class="state-meaning">Triangle structure detected but not compressing yet. Monitor.</div><div class="state-action">Watch only</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">EARLY STRUCT</span></div><div class="state-meaning">Loose early structure detected. Possible triangle forming. RADAR mode.</div><div class="state-action">Stay aware</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">APEX</div>
+        <div class="row-values">
+          <span class="pill pill-white">🎯 APEX</span>
+          <span class="pill pill-gray">---</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary"><strong>APEX = Preparation signal. NOT an entry signal.</strong> Fires when triangle trendlines cross. This means the breakout window has opened — the system is coiled. But direction is unknown until price confirms. Wait for the SIGNAL row to show BUY CALL or BUY PUT.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-white">🎯 APEX</span></div><div class="state-meaning">Triangle trendlines crossed. Breakout imminent. Do NOT enter — wait for direction confirmation.</div><div class="state-action">WAIT for signal</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">BO INTEL</div>
+        <div class="row-values">
+          <span class="pill pill-yellow">🔥 STRONG</span>
+          <span class="pill pill-gray">VOL ✓</span>
+          <span class="pill pill-red">⚠ FAKEOUT</span>
+          <span class="pill pill-gray">H: 1.08</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">Breakout Intelligence Layer evaluates the quality of a triangle breakout using volume spike (1.5x avg) AND candle size expansion (1.5x avg). STRONG = both confirmed. Also detects fakeouts — if price reverses back inside trendlines within 3 bars after breakout.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-yellow">🔥 STRONG</span></div><div class="state-meaning">Volume spike + candle expansion both confirmed. Highest conviction breakout.</div><div class="state-action">Full size</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">VOL ✓</span></div><div class="state-meaning">Volume confirmed but candle small. Participation present, conviction lower.</div><div class="state-action">Half size</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-red">⚠ FAKEOUT</span></div><div class="state-meaning">Price reversed back inside after breakout. DO NOT ENTER. Wait for retest.</div><div class="state-action">DO NOT ENTER</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">H: 1.08</span></div><div class="state-meaning">Triangle height = measured move target distance. Used to project price target after breakout.</div><div class="state-action">Set target</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">VOL</div>
+        <div class="row-values">
+          <span class="pill pill-green">🔥 VERY FAT 3.6x</span>
+          <span class="pill pill-green">FAT 1.8x</span>
+          <span class="pill pill-gray">SKINNY 0.7x</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">Volume Intelligence Layer — classifies current volume as SKINNY, FAT, or VERY FAT relative to 20-bar average. Context-aware coloring: green at breakout = participation confirmed. Orange at resistance = possible absorption. Red after extended move = possible exhaustion.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">🔥 VERY FAT</span></div><div class="state-meaning">Volume ≥ 2.5x average. Institutional participation. At breakout = maximum conviction.</div><div class="state-action">Full size</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">FAT</span></div><div class="state-meaning">Volume 1.5–2.5x average. Solid participation. Trade normally.</div><div class="state-action">Normal size</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">SKINNY</span></div><div class="state-meaning">Volume below 1.5x average. No participation. Skip or reduce size significantly.</div><div class="state-action">SKIP or min size</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">CANDLE</div>
+        <div class="row-values">
+          <span class="pill pill-green">MARUBOZU ▲</span>
+          <span class="pill pill-yellow">DOJI ⚖</span>
+          <span class="pill pill-green">HAMMER ▲</span>
+          <span class="pill pill-red">ENGULF ▼</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary">Live candle pattern detection — updates in real time as the current bar forms. Reads the forming candle's body, wicks, and structure. Most powerful when combined with VOL (FAT + HAMMER at zone = A+ setup).</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">MARUBOZU ▲</span></div><div class="state-meaning">Body ≥ 85% of range. No wicks. Pure conviction. Strongest bullish candle.</div><div class="state-action">Strong bull</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-red">MARUBOZU ▼</span></div><div class="state-meaning">Body ≥ 85% of range. No wicks. Pure conviction. Strongest bearish candle.</div><div class="state-action">Strong bear</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">HAMMER ▲</span></div><div class="state-meaning">Long lower wick, small body near top. Sellers rejected. Bullish reversal signal.</div><div class="state-action">Bullish reversal</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-red">SHOOT STAR ▼</span></div><div class="state-meaning">Long upper wick, small body near bottom. Buyers rejected. Bearish reversal signal.</div><div class="state-action">Bearish reversal</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-green">ENGULF ▲</span></div><div class="state-meaning">Green body completely engulfs prior candle. Institutional takeover.</div><div class="state-action">Strong bull</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-yellow">DOJI ⚖</span></div><div class="state-meaning">Body ≤ 10% of range. Pure indecision. At key level = decision point ahead.</div><div class="state-action">Wait for resolve</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-card" onclick="toggleCard(this)">
+      <div class="row-header">
+        <div class="row-label">COMPRESS</div>
+        <div class="row-values">
+          <span class="pill pill-orange">⚠ VOL TRAP</span>
+          <span class="pill pill-gray">---</span>
+        </div>
+        <div class="row-expand">▼</div>
+      </div>
+      <div class="row-detail">
+        <div class="detail-summary"><strong>Effort vs Result detector — institutional behavior detection.</strong> Fires when FAT/VERY FAT volume is present but candle body AND range are both small. This means big money is active but hiding direction. Classic absorption/compression setup that precedes breakouts, fakeouts, or sweeps.</div>
+        <div class="detail-states">
+          <div class="state-row"><div class="state-signal"><span class="pill pill-orange">⚠ VOL TRAP</span></div><div class="state-meaning">FAT vol + small body + small range + not at breakout. Smart money hiding direction. DO NOT ENTER.</div><div class="state-action">STAND DOWN</div></div>
+          <div class="state-row"><div class="state-signal"><span class="pill pill-gray">---</span></div><div class="state-meaning">No trap condition. Volume and price action are aligned. Normal read.</div><div class="state-action">Normal ops</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SIGNAL LOGIC -->
+<div id="signals" class="section">
+  <div class="section-title">Signal Logic</div>
+  <div class="section-desc">The rules and hierarchy behind every signal in the system.</div>
+
+  <div class="rules-grid">
+    <div class="rule-card red">
+      <div class="rule-number">RULE #1 — ABSOLUTE</div>
+      <div class="rule-title">SIGNAL = WAIT means hands off</div>
+      <div class="rule-body">No matter how bullish the environment. No matter how strong the volume. No matter what BIAS, VWAP, or QQQ say. <strong>If SIGNAL says WAIT, you do not enter.</strong> This single rule will save you more money than any other.</div>
+    </div>
+    <div class="rule-card red">
+      <div class="rule-number">RULE #2 — ABSOLUTE</div>
+      <div class="rule-title">APEX fires first. Signal fires second.</div>
+      <div class="rule-body">APEX = preparation. It tells you the coil is loaded. <strong>APEX is NOT an entry signal.</strong> Wait for the SIGNAL row to show BUY CALL or BUY PUT after APEX fires. The direction is unknown at APEX.</div>
+    </div>
+    <div class="rule-card orange">
+      <div class="rule-number">RULE #3 — CRITICAL</div>
+      <div class="rule-title">Confluence = decision point, not direction</div>
+      <div class="rule-body">When multiple signals align — BIAS, VWAP, Zone, Volume — this tells you a decision point is near. <strong>It does not tell you which direction.</strong> You still need SIGNAL to confirm the entry.</div>
+    </div>
+    <div class="rule-card orange">
+      <div class="rule-number">RULE #4 — CRITICAL</div>
+      <div class="rule-title">VOL TRAP = stand down</div>
+      <div class="rule-body">FAT volume with no price expansion = smart money hiding direction. <strong>Do not force a trade during VOL TRAP.</strong> Wait for the trap to resolve — price will either break out or reverse. Let it show you.</div>
+    </div>
+    <div class="rule-card yellow">
+      <div class="rule-number">RULE #5</div>
+      <div class="rule-title">AT LEVEL + AT ZONE = highest probability</div>
+      <div class="rule-body">A signal that fires AT a mapped level AND at a zone (especially CONFLUENCE) is the best entry the system can give you. <strong>This is where you use maximum size.</strong> Mid-range signals with no zone = minimum size or skip.</div>
+    </div>
+    <div class="rule-card yellow">
+      <div class="rule-number">RULE #6</div>
+      <div class="rule-title">SKINNY volume = no trade</div>
+      <div class="rule-body">No volume = no institutional participation = no follow-through. <strong>SKINNY volume on any breakout signal reduces conviction to zero.</strong> The signal might be technically valid, but without participation it won't move. Skip or use minimum size.</div>
+    </div>
+    <div class="rule-card blue">
+      <div class="rule-number">RULE #7</div>
+      <div class="rule-title">Sweep then Fail = the trade</div>
+      <div class="rule-body">The core of the LT system: price sweeps above equal highs or below equal lows (liquidity grab), then fails back inside the range. <strong>That failure is the entry.</strong> SWEEP + FAIL LONG = calls. SWEEP + FAIL SHORT = puts.</div>
+    </div>
+    <div class="rule-card blue">
+      <div class="rule-number">RULE #8</div>
+      <div class="rule-title">Environment confirms, signal executes</div>
+      <div class="rule-body">QQQ + VIX + ES1! tell you the playing field. <strong>They confirm but do not create entries.</strong> All three green = trust your call signals. Mixed = reduce size and require more confirmation. All three red = only take put signals.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ ENVIRONMENT -->
+<div id="environment" class="section">
+  <div class="section-title">Environment Scanner</div>
+  <div class="section-desc">QQQ, VIX, and ES1! — your pre-trade field assessment. Green = bullish for SPY. Red = bearish for SPY.</div>
+
+  <table class="env-table">
+    <thead>
+      <tr><th>Row</th><th>Green means</th><th>Red means</th><th>Logic</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>QQQ</strong></td>
+        <td><span class="dot dot-g"></span> QQQ trending up (price &gt; 9 EMA)</td>
+        <td><span class="dot dot-r"></span> QQQ trending down</td>
+        <td>Tech leading. QQQ moves with SPY — both green is confirmation.</td>
+      </tr>
+      <tr>
+        <td><strong>VIX</strong></td>
+        <td><span class="dot dot-g"></span> VIX trending DOWN (fear dropping)</td>
+        <td><span class="dot dot-r"></span> VIX trending UP (fear rising)</td>
+        <td><strong>Inverted logic.</strong> VIX down = low fear = bullish. VIX up = fear = bearish.</td>
+      </tr>
+      <tr>
+        <td><strong>ES1!</strong></td>
+        <td><span class="dot dot-g"></span> Futures trending up</td>
+        <td><span class="dot dot-r"></span> Futures trending down</td>
+        <td>Futures lead cash SPY. ES1! and SPY divergence = tell.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--teal);margin:20px 0 10px;letter-spacing:1px;">ENVIRONMENT COMBINATIONS</div>
+
+  <div class="combo-grid">
+    <div class="combo-card bull">
+      <div class="combo-title bull">Full Bull Confirmation</div>
+      <div class="combo-signals">
+        <span class="pill pill-green">QQQ ▲</span>
+        <span class="pill pill-green">VIX ▼</span>
+        <span class="pill pill-green">ES1 ▲</span>
+      </div>
+      <div class="combo-desc">All three aligned bullish. Best environment for calls. Trust your long setups fully.</div>
+      <div class="combo-action">→ Trust call signals at full size</div>
+    </div>
+    <div class="combo-card bear">
+      <div class="combo-title bear">Full Bear Confirmation</div>
+      <div class="combo-signals">
+        <span class="pill pill-red">QQQ ▼</span>
+        <span class="pill pill-red">VIX ▲</span>
+        <span class="pill pill-red">ES1 ▼</span>
+      </div>
+      <div class="combo-desc">All three aligned bearish. Best environment for puts. Trust your short setups fully.</div>
+      <div class="combo-action">→ Trust put signals at full size</div>
+    </div>
+    <div class="combo-card bull">
+      <div class="combo-title bull">Classic Risk-On</div>
+      <div class="combo-signals">
+        <span class="pill pill-green">QQQ ▲</span>
+        <span class="pill pill-green">VIX ▼</span>
+        <span class="pill pill-red">ES1 ▼</span>
+      </div>
+      <div class="combo-desc">QQQ and VIX both bullish but futures lagging. SPY-friendly but watch ES1 for catch-up or divergence.</div>
+      <div class="combo-action">→ Calls favored, watch ES1</div>
+    </div>
+    <div class="combo-card caution">
+      <div class="combo-title caution">ES1 Leading Down</div>
+      <div class="combo-signals">
+        <span class="pill pill-green">QQQ ▲</span>
+        <span class="pill pill-green">VIX ▼</span>
+        <span class="pill pill-red">ES1 ▼</span>
+      </div>
+      <div class="combo-desc">Tech looks ok but futures diverging. Caution — futures often lead. Wait for alignment.</div>
+      <div class="combo-action">→ Reduce size, wait for alignment</div>
+    </div>
+    <div class="combo-card caution">
+      <div class="combo-title caution">Mixed — No Edge</div>
+      <div class="combo-signals">
+        <span class="pill pill-green">QQQ ▲</span>
+        <span class="pill pill-red">VIX ▲</span>
+        <span class="pill pill-green">ES1 ▲</span>
+      </div>
+      <div class="combo-desc">Two bullish, one bearish. Conflicting signals. Let LTProv7 do the work — don't override the system.</div>
+      <div class="combo-action">→ Require more confirmation</div>
+    </div>
+    <div class="combo-card bear">
+      <div class="combo-title bear">Classic Risk-Off</div>
+      <div class="combo-signals">
+        <span class="pill pill-red">QQQ ▼</span>
+        <span class="pill pill-red">VIX ▲</span>
+        <span class="pill pill-green">ES1 ▲</span>
+      </div>
+      <div class="combo-desc">QQQ and VIX both bearish even as futures hold. Tech weakness + fear rising is a strong bearish tell.</div>
+      <div class="combo-action">→ Lean puts</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ EXECUTION FLOW -->
+<div id="execution" class="section">
+  <div class="section-title">Execution Flow</div>
+  <div class="section-desc">The exact decision sequence from market open to trade entry. Follow this every single session.</div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-content">
+        <div class="flow-title">Pre-Market Prep (Before 9:30am)</div>
+        <div class="flow-desc">Run your War Room prep. Check ES1! Sunday night bias. Load Barchart S/R levels into the manual inputs. Know your key levels before the open.</div>
+        <div class="flow-check">✓ ES1! weekly bias read<br>✓ R1/R2/S1/S2 entered<br>✓ PM H/L noted</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-content">
+        <div class="flow-title">Environment Check (9:30–9:45am)</div>
+        <div class="flow-desc">Look at QQQ, VIX, ES1! rows immediately at open. Are they aligned? Are you in a bull or bear environment? This frames everything that follows.</div>
+        <div class="flow-check">✓ All green = trust calls<br>✓ All red = trust puts<br>✓ Mixed = require more confirmation</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-content">
+        <div class="flow-title">Wait for ORB Lock (9:45am)</div>
+        <div class="flow-desc">ORB row changes from "Building..." to showing levels at 9:45. These are your session breakout levels. Price above ORB high = bullish. Below ORB low = bearish.</div>
+        <div class="flow-check">✓ ORB locked and showing levels<br>✓ Note which side price is on</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-content">
+        <div class="flow-title">Monitor Structure Building</div>
+        <div class="flow-desc">Watch RANGE row for equal high/low detection. Watch TRIANGLE row for pattern formation. Watch ZONE for when price approaches S/R zones. Don't force anything — let the system build the setup.</div>
+        <div class="flow-check">✓ RANGE shows levels<br>✓ ZONE shows AT ZONE or NEAR ZONE<br>✓ TRIANGLE shows FORMING or COMPRESS</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-content">
+        <div class="flow-title">Check VOL TRAP Before Every Entry</div>
+        <div class="flow-desc">Before any entry — glance at COMPRESS row. If it shows ⚠ VOL TRAP, stand down. Big money is hiding direction. The VOL TRAP clears when price commits to a direction.</div>
+        <div class="flow-check">✓ COMPRESS = --- (clear) ✓ ENTER<br>✓ COMPRESS = ⚠ VOL TRAP ✗ WAIT</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">6</div>
+      <div class="flow-content">
+        <div class="flow-title">Wait for SIGNAL Confirmation</div>
+        <div class="flow-desc">The only row that matters for entry. SIGNAL must show BUY CALL, BUY PUT, or SWEEP REV. Everything else is context. This is the gate. Do not enter on WAIT.</div>
+        <div class="flow-check">✓ SIGNAL = BUY CALL or BUY PUT<br>✓ LEVEL = AT LEVEL<br>✓ ZONE = AT ZONE or CONFLUENCE<br>✓ VOL = FAT or VERY FAT</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">7</div>
+      <div class="flow-content">
+        <div class="flow-title">Size Based on Conviction</div>
+        <div class="flow-desc">Not all signals are equal. Use the confluence stack to size your position.</div>
+        <div class="flow-check">★ CONFLUENCE + FAT VOL + AT LEVEL = FULL SIZE<br>◆ AT ZONE + FAT VOL = NORMAL SIZE<br>◇ NEAR ZONE only = HALF SIZE<br>○ MID-RANGE = SKIP</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">8</div>
+      <div class="flow-content">
+        <div class="flow-title">Manage the Trade</div>
+        <div class="flow-desc">Once in — watch SIGNAL for HOLD confirmation. Watch RSI for EXIT trigger (≥70 exit calls, ≤30 cover puts). Flatten at 3:55pm regardless.</div>
+        <div class="flow-check">✓ SIGNAL = HOLD → stay in<br>✓ RSI ≥ 70 → EXIT CALLS<br>✓ RSI ≤ 30 → COVER PUTS<br>✓ 3:55pm → FLATTEN all</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ COMBOS / SETUPS -->
+<div id="combos" class="section">
+  <div class="section-title">High-Probability Setups</div>
+  <div class="section-desc">The specific combinations that represent the system's best entries. When multiple signals stack — that's your edge.</div>
+  <div class="combo-grid">
+
+    <div class="combo-card bull">
+      <div class="combo-title bull">★ COMPOSITE SWEEP REVERSAL</div>
+      <div class="combo-signals">
+        <span class="pill pill-green">SWEEP REV ▲</span>
+        <span class="pill pill-yellow">AT LEVEL</span>
+        <span class="pill pill-green">AT/NEAR ZONE</span>
+      </div>
+      <div class="combo-desc">The crown jewel of the LT system. Sweep reversal + at a mapped level + at a zone. All three required. Highest probability signal in the entire system.</div>
+      <div class="combo-action">→ ★ MAXIMUM SIZE — best trade of the session</div>
+    </div>
+
+    <div class="combo-card bull">
+      <div class="combo-title bull">ORB CALL + FAT VOL</div>
+      <div class="combo-signals">
+        <span class="pill pill-green">ORB CALL</span>
+        <span class="pill pill-green">FAT / VERY FAT</span>
+        <span class="pill pill-green">BULLISH</span>
+      </div>
+      <div class="combo-desc">ORB breakout with volume confirming participation. Most reliable 9:45am setup. Don't take ORB signals on SKINNY volume.</div>
+      <div class="combo-action">→ Full size, clear stop below ORB high</div>
+    </div>
+
+    <div class="combo-card bull">
+      <div class="combo-title bull">HAMMER + FAT VOL + AT ZONE</div>
+      <div class="combo-signals">
+        <span class="pill pill-green">HAMMER ▲</span>
+        <span class="pill pill-green">FAT VOL</span>
+        <span class="pill pill-yellow">AT ZONE</span>
+      </div>
+      <div class="combo-desc">Live candle hammer forming at a zone with fat volume = institutional rejection of lower prices. High conviction long setup.</div>
+      <div class="combo-action">→ Enter calls on confirmation</div>
+    </div>
+
+    <div class="combo-card bull">
+      <div class="combo-title bull">TRIANGLE BRK + STRONG BO INTEL</div>
+      <div class="combo-signals">
+        <span class="pill pill-teal">TRI BRK ▲</span>
+        <span class="pill pill-yellow">🔥 STRONG</span>
+        <span class="pill pill-yellow">AT LEVEL</span>
+      </div>
+      <div class="combo-desc">Triangle breakout with both volume spike and candle expansion at a key level. Triple confirmation. One of the best setups in the system.</div>
+      <div class="combo-action">→ Full size, use measured move as target</div>
+    </div>
+
+    <div class="combo-card bear">
+      <div class="combo-title bear">SHOOT STAR + FAT VOL + AT LEVEL</div>
+      <div class="combo-signals">
+        <span class="pill pill-red">SHOOT STAR ▼</span>
+        <span class="pill pill-green">FAT VOL</span>
+        <span class="pill pill-yellow">AT LEVEL</span>
+      </div>
+      <div class="combo-desc">Shooting star at a resistance level with volume = institutional rejection of higher prices. High conviction short setup.</div>
+      <div class="combo-action">→ Enter puts on next bar confirmation</div>
+    </div>
+
+    <div class="combo-card caution">
+      <div class="combo-title caution">VOL TRAP + DOJI + AT LEVEL</div>
+      <div class="combo-signals">
+        <span class="pill pill-orange">⚠ VOL TRAP</span>
+        <span class="pill pill-yellow">DOJI ⚖</span>
+        <span class="pill pill-yellow">AT LEVEL</span>
+      </div>
+      <div class="combo-desc">The "do nothing" setup. FAT volume, no expansion, indecision candle at a key level = smart money absorbing. A breakout or reversal is loading. Wait for direction.</div>
+      <div class="combo-action">→ WAIT — breakout or reversal loading</div>
+    </div>
+
+    <div class="combo-card bull">
+      <div class="combo-title bull">BULL MARUBOZU + FAT + BREAKOUT</div>
+      <div class="combo-signals">
+        <span class="pill pill-green">MARUBOZU ▲</span>
+        <span class="pill pill-green">FAT VOL</span>
+        <span class="pill pill-teal">BRK POINT</span>
+      </div>
+      <div class="combo-desc">Marubozu (full body candle) + fat volume at a breakout = maximum conviction signal. Institutions showing their hand. The system fires "MAX CONVICTION" alert.</div>
+      <div class="combo-action">→ Full size — max conviction entry</div>
+    </div>
+
+    <div class="combo-card caution">
+      <div class="combo-title caution">APEX + COMPRESS ⚠ + AT LEVEL</div>
+      <div class="combo-signals">
+        <span class="pill pill-white">🎯 APEX</span>
+        <span class="pill pill-orange">COMPRESS ⚠</span>
+        <span class="pill pill-yellow">AT LEVEL</span>
+      </div>
+      <div class="combo-desc">Triangle at apex AND compressing at a key level = explosive move loading. Direction unknown. This is a "get ready" state — finger on the trigger, wait for SIGNAL.</div>
+      <div class="combo-action">→ WAIT for direction — then full size</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ ALERTS -->
+<div id="alerts" class="section">
+  <div class="section-title">Alert Conditions</div>
+  <div class="section-desc">Every alert condition in v7.15 — set these up in TradingView to get notified on your phone while away from the screen.</div>
+  <div class="alert-list">
+    <div class="alert-item"><div class="alert-icon">🔥</div><div><div class="alert-name">STRONG BRK AT LEVEL</div><div class="alert-desc">Triangle breakout + volume spike + candle expansion + at mapped level. Best entry of the day.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">★</div><div><div class="alert-name">SWEEP REVERSAL COMPOSITE</div><div class="alert-desc">Sweep reversal + at level + at/near zone all confirmed. Highest probability signal in the system.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">🔥</div><div><div class="alert-name">VERY FAT VOL AT BREAKOUT</div><div class="alert-desc">Very fat volume (2.5x+) on breakout. Maximum institutional participation.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">🎯</div><div><div class="alert-name">TRIANGLE APEX AT LEVEL</div><div class="alert-desc">Triangle at apex at a mapped level. Explosive move loading — get ready for direction.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">🔄</div><div><div class="alert-name">SWEEP REVERSAL UP/DOWN</div><div class="alert-desc">Liquidity sweep + failure confirmed. Core LT system signal.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">⚠</div><div><div class="alert-name">VOL TRAP DETECTED</div><div class="alert-desc">FAT volume + no expansion + not at breakout. Stand down — smart money hiding direction.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">△</div><div><div class="alert-name">TRIANGLE BREAKOUT CALL/PUT</div><div class="alert-desc">Triangle trendline broken with bias match confirmed.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">⚠</div><div><div class="alert-name">FAKEOUT DETECTED</div><div class="alert-desc">Price reversed back inside trendlines after breakout. Do not enter. Wait for retest.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">★</div><div><div class="alert-name">CONFLUENCE ZONE</div><div class="alert-desc">Weekly + daily S&R zones stacked. Highest probability location. Be ready.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">🔨</div><div><div class="alert-name">HAMMER + FAT VOL + ZONE</div><div class="alert-desc">Live hammer forming + fat volume + at zone. High conviction long setup firing in real time.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">⭐</div><div><div class="alert-name">SHOOT STAR + FAT VOL + ZONE</div><div class="alert-desc">Live shooting star forming + fat volume + at zone. High conviction short setup.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">📈</div><div><div class="alert-name">BULL/BEAR ENGULF + FAT VOL</div><div class="alert-desc">Engulfing candle + fat volume. Institutional takeover of price action.</div></div></div>
+    <div class="alert-item"><div class="alert-icon">📊</div><div><div class="alert-name">ORB CALL / PUT BREAKOUT</div><div class="alert-desc">Price broke above ORB high (call) or below ORB low (put).</div></div></div>
+    <div class="alert-item"><div class="alert-icon">❌</div><div><div class="alert-name">SKINNY VOL ON BREAKOUT</div><div class="alert-desc">Breakout signal fired but volume is low. Reduce size or skip entirely.</div></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ GLOSSARY -->
+<div id="glossary" class="section">
+  <div class="section-title">Glossary</div>
+  <div class="section-desc">Every term used in LTProv7 — plain language definitions.</div>
+  <input class="search-bar" type="text" placeholder="Search glossary..." oninput="filterGloss(this.value)">
+  <div class="glossary-grid" id="glossGrid">
+    <div class="gloss-item"><div class="gloss-term">ORB (Opening Range Breakout)</div><div class="gloss-def">The high and low of the first 15 minutes of RTH. Most reliable intraday breakout levels.</div></div>
+    <div class="gloss-item"><div class="gloss-term">RTH (Regular Trading Hours)</div><div class="gloss-def">9:30am – 4:00pm ET. The main session. ORB and entry signals only fire during RTH by default.</div></div>
+    <div class="gloss-item"><div class="gloss-term">VWAP</div><div class="gloss-def">Volume Weighted Average Price. Institutional fair value. Above = buyers in control. Below = sellers.</div></div>
+    <div class="gloss-item"><div class="gloss-term">EMA20 / EMA50</div><div class="gloss-def">20 and 50 period Exponential Moving Averages. EMA20 > EMA50 = bullish cloud. EMA20 < EMA50 = bearish cloud.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Liquidity Sweep</div><div class="gloss-def">Price spikes above equal highs or below equal lows to grab stop orders, then reverses. The core LT setup.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Equal Highs / Equal Lows</div><div class="gloss-def">Two or more pivot highs/lows at approximately the same price. These cluster stop orders above/below = liquidity pool.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Sweep Fail / Reversal</div><div class="gloss-def">After a sweep, price fails to hold outside the range and reverses back inside. This is the entry signal.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Range Box</div><div class="gloss-def">The gray box drawn between equal highs and equal lows. The consolidation zone the system is watching.</div></div>
+    <div class="gloss-item"><div class="gloss-term">ATR (Average True Range)</div><div class="gloss-def">14-period measure of average price movement. Used for stop placement (1.5x ATR), zone detection, and compression thresholds.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Triangle Apex</div><div class="gloss-def">When ascending and descending trendlines of a triangle cross. Breakout is imminent but direction unknown.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Measured Move</div><div class="gloss-def">The projected price target after a triangle breakout = triangle height added to the breakout point. Shown as 🎯 TARGET on chart.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Fakeout</div><div class="gloss-def">A false breakout — price breaks the triangle trendline then reverses back inside within 3 bars. Do not enter. Wait for retest.</div></div>
+    <div class="gloss-item"><div class="gloss-term">FAT Volume</div><div class="gloss-def">Volume 1.5–2.5x the 20-bar average. Solid institutional participation. Trade normally.</div></div>
+    <div class="gloss-item"><div class="gloss-term">VERY FAT Volume</div><div class="gloss-def">Volume 2.5x+ the 20-bar average. Strong institutional participation. At breakout = maximum conviction.</div></div>
+    <div class="gloss-item"><div class="gloss-term">SKINNY Volume</div><div class="gloss-def">Volume below 1.5x average. Low participation. Skip signals or use minimum size.</div></div>
+    <div class="gloss-item"><div class="gloss-term">VOL TRAP</div><div class="gloss-def">FAT volume + small body + small range + not at breakout. Effort vs Result mismatch. Smart money hiding direction.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Effort vs Result</div><div class="gloss-def">Trading concept: high volume (effort) should produce price movement (result). When it doesn't, institutions are absorbing orders.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Absorption</div><div class="gloss-def">Large orders being filled without moving price. Seen as high volume + small candle. Precedes explosive moves.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Confluence Zone</div><div class="gloss-def">Weekly AND daily S&R zones stacked within ATR distance. Highest probability location in the system.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Dapo Method</div><div class="gloss-def">S&R zone methodology using prior weekly/daily highs and lows as institutional reference levels. Used for zone detection.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Marubozu</div><div class="gloss-def">Candle with body ≥ 85% of range. Virtually no wicks. Pure directional conviction. Strongest candle type.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Doji</div><div class="gloss-def">Candle body ≤ 10% of range. Open and close nearly equal. Pure indecision. At key level = decision point ahead.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Hammer</div><div class="gloss-def">Small body near top, long lower wick ≥ 2x body. Sellers pushed price down but buyers rejected it. Bullish reversal.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Shooting Star</div><div class="gloss-def">Small body near bottom, long upper wick ≥ 2x body. Buyers pushed price up but sellers rejected it. Bearish reversal.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Engulfing</div><div class="gloss-def">Current candle body completely engulfs prior candle body. Shows complete directional takeover.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Pine Pullback</div><div class="gloss-def">Price pulls back to EMA20, then reclaims (call) or rejects (put) it while bias and RSI confirm. Secondary entry setup.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Flatten</div><div class="gloss-def">Close all positions at 3:55pm. Mandatory end-of-day risk management rule built into the system.</div></div>
+    <div class="gloss-item"><div class="gloss-term">ES1!</div><div class="gloss-def">S&P 500 E-mini futures continuous contract. Leads cash SPY. Used for overnight bias and environment reading.</div></div>
+    <div class="gloss-item"><div class="gloss-term">VIX</div><div class="gloss-def">CBOE Volatility Index. Fear gauge. VIX up = fear rising = bearish for SPY. VIX down = fear dropping = bullish for SPY.</div></div>
+    <div class="gloss-item"><div class="gloss-term">QQQ</div><div class="gloss-def">Nasdaq 100 ETF. Tech sector proxy. Moves with SPY. Both green = risk-on environment confirmed.</div></div>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<div class="footer">LTPROV7 FIELD MANUAL — MAVERICK EDITION — v7.15 — CLASSIFIED ⚡</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function toggleCard(card) {
+  card.classList.toggle('expanded');
+}
+
+function filterCards(val) {
+  const v = val.toLowerCase();
+  document.querySelectorAll('#dashGrid .row-card').forEach(card => {
+    card.style.display = card.textContent.toLowerCase().includes(v) ? '' : 'none';
+  });
+}
+
+function filterGloss(val) {
+  const v = val.toLowerCase();
+  document.querySelectorAll('#glossGrid .gloss-item').forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(v) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
