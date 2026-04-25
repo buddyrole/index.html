@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAVERICK'S WAR ROOM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0a0c0f;
+    --bg2: #0f1318;
+    --bg3: #141a22;
+    --border: #1e2a38;
+    --border2: #2a3a4a;
+    --green: #00ff88;
+    --green-dim: #00cc66;
+    --green-dark: #003322;
+    --red: #ff3355;
+    --red-dim: #cc2244;
+    --red-dark: #330011;
+    --amber: #ffaa00;
+    --amber-dim: #cc8800;
+    --amber-dark: #332200;
+    --blue: #00aaff;
+    --blue-dim: #0088cc;
+    --blue-dark: #001833;
+    --cyan: #00e5ff;
+    --text: #c8d8e8;
+    --text-dim: #6a8a9a;
+    --text-muted: #3a5060;
+    --white: #e8f0f8;
+    --phase-w: 100%;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border2);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .links-bar {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 73px;
+    z-index: 200;
+    overflow: visible;
+  }
+
+  .links-section {
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--border);
+  }
+  .links-section:last-child { border-right: none; }
+
+  .links-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    padding: 0 8px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  .ql-wrap {
+    position: relative;
+    border-right: 1px solid var(--border);
+  }
+  .ql-wrap:last-child { border-right: none; }
+
+  .ql-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 10px 10px 10px 10px;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    line-height: 1;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .ql-btn:hover { color: var(--white); background: var(--bg3); }
+  .ql-btn .ql-label { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; transition: color 0.15s; }
+  .ql-btn:hover .ql-label { color: var(--text-dim); }
+  .ql-btn .ql-arrow { font-size: 7px; color: var(--text-muted); margin-top: 1px; }
+
+  .ql-wrap.open .ql-dropdown { display: block; }
+
+  .ql-dropdown {
+    display: none;
+    position: fixed;
+    min-width: 190px;
+    background: #0f1318;
+    border: 1px solid #2a3a4a;
+    border-top: 2px solid #2a3a4a;
+    z-index: 9999;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+  }
+
+  .ql-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    transition: all 0.1s;
+    white-space: nowrap;
+  }
+  .ql-dropdown a:last-child { border-bottom: none; }
+  .ql-dropdown a:hover { background: var(--bg3); color: var(--white); }
+
+  .ql-src {
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    min-width: 70px;
+  }
+  .ql-src-name { color: var(--text); font-size: 11px; }
+
+  .ql-wrap.futures .ql-btn:hover { color: var(--amber); }
+  .ql-wrap.futures .ql-dropdown { border-top-color: var(--amber); }
+  .ql-wrap.futures .ql-dropdown a:hover { color: var(--amber); }
+
+  .ql-wrap.fear .ql-btn:hover { color: var(--red); }
+  .ql-wrap.fear .ql-dropdown { border-top-color: var(--red); }
+  .ql-wrap.fear .ql-dropdown a:hover { color: var(--red); }
+
+  .ql-wrap.equity .ql-btn:hover { color: var(--green); }
+  .ql-wrap.equity .ql-dropdown { border-top-color: var(--green); }
+  .ql-wrap.equity .ql-dropdown a:hover { color: var(--green); }
+
+  .ql-wrap.macro .ql-btn:hover { color: var(--blue); }
+  .ql-wrap.macro .ql-dropdown { border-top-color: var(--blue); }
+  .ql-wrap.macro .ql-dropdown a:hover { color: var(--blue); }
+
+  .ql-wrap.crypto .ql-btn:hover { color: var(--cyan); }
+  .ql-wrap.crypto .ql-dropdown { border-top-color: var(--cyan); }
+  .ql-wrap.crypto .ql-dropdown a:hover { color: var(--cyan); }
+
+  .ql-wrap.news .ql-btn:hover { color: var(--amber); }
+  .ql-wrap.news .ql-dropdown { border-top-color: var(--amber); }
+  .ql-wrap.news .ql-dropdown a:hover { color: var(--amber); }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .logo-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .logo-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    color: var(--green);
+    letter-spacing: 3px;
+    line-height: 1;
+  }
+
+  .logo-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+
+  .header-clock {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    color: var(--amber);
+    letter-spacing: 2px;
+  }
+
+  .header-date {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  .bias-badge {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 20px;
+    border: 1px solid;
+    cursor: default;
+    min-width: 210px;
+  }
+  .bias-badge-top { display: flex; align-items: center; gap: 8px; }
+  .bias-verdict {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .bias-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    opacity: 0.65;
+  }
+  .bias-badge.neutral { border-color: var(--text-muted); color: var(--text-dim); }
+  .bias-badge.bullish { border-color: var(--green); color: var(--green); background: rgba(0,255,136,0.05); }
+  .bias-badge.bearish { border-color: var(--red); color: var(--red); background: rgba(255,51,85,0.05); }
+  .bias-badge.watchonly { border-color: var(--amber); color: var(--amber); background: rgba(255,170,0,0.05); }
+
+  .bias-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+    flex-shrink: 0;
+  }
+  .bullish .bias-dot { background: var(--green); }
+  .bearish .bias-dot { background: var(--red); }
+  .watchonly .bias-dot { background: var(--amber); }
+  .neutral .bias-dot { background: var(--text-dim); animation: none; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .main { padding: 20px 24px; max-width: 1200px; margin: 0 auto; }
+
+  .phase-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .phase-full { grid-column: 1 / -1; }
+
+  .phase-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .phase-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .phase-card.p1::before { background: var(--amber); }
+  .phase-card.p2::before { background: var(--blue); }
+  .phase-card.p3::before { background: var(--cyan); }
+  .phase-card.p4::before { background: var(--green); }
+  .phase-card.maxims::before { background: var(--red); }
+
+  .phase-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .phase-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .phase-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 3px 8px;
+    border: 1px solid;
+  }
+
+  .p1 .phase-num { color: var(--amber); border-color: var(--amber); background: var(--amber-dark); }
+  .p2 .phase-num { color: var(--blue); border-color: var(--blue); background: var(--blue-dark); }
+  .p3 .phase-num { color: var(--cyan); border-color: var(--cyan); background: rgba(0,229,255,0.05); }
+  .p4 .phase-num { color: var(--green); border-color: var(--green); background: var(--green-dark); }
+  .maxims .phase-num { color: var(--red); border-color: var(--red); background: var(--red-dark); }
+
+  .phase-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .phase-time {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .phase-body { padding: 16px; }
+
+  /* INTEL TABLE */
+  .intel-table { width: 100%; border-collapse: collapse; }
+  .intel-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 0 0 8px 0;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+  }
+  .intel-table th:not(:first-child) { padding-left: 12px; }
+
+  .intel-row {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .intel-row:last-child { border-bottom: none; }
+  .intel-row:hover { background: var(--bg3); }
+  .intel-row.checked td { opacity: 0.5; }
+  .intel-row.checked .source-name { text-decoration: line-through; }
+
+  .intel-row td {
+    padding: 10px 0;
+    vertical-align: top;
+    font-size: 14px;
+  }
+  .intel-row td:not(:first-child) { padding-left: 12px; }
+
+  .check-col { width: 28px; }
+
+  .check-box {
+    width: 18px; height: 18px;
+    border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    margin-top: 1px;
+  }
+
+  .intel-row.checked .check-box {
+    background: var(--green-dark);
+    border-color: var(--green);
+  }
+
+  .check-mark {
+    color: var(--green);
+    font-size: 12px;
+    display: none;
+  }
+
+  .intel-row.checked .check-mark { display: block; }
+
+  .source-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--white);
+  }
+
+  .source-role {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .rule-text { color: var(--text); font-size: 13px; line-height: 1.5; }
+  .rule-alert {
+    color: var(--red);
+    font-size: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    margin-top: 4px;
+  }
+
+  .rule-go { color: var(--green); font-weight: 500; }
+  .rule-stop { color: var(--red); font-weight: 500; }
+
+  /* STATUS SELECTORS */
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .status-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .status-btn:hover { border-color: var(--text-muted); color: var(--text); }
+  .status-btn.green.active { border-color: var(--green); color: var(--green); background: var(--green-dark); }
+  .status-btn.red.active { border-color: var(--red); color: var(--red); background: var(--red-dark); }
+  .status-btn.amber.active { border-color: var(--amber); color: var(--amber); background: var(--amber-dark); }
+
+  /* ZONE MAPPER */
+  .zone-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .zone-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+  }
+
+  .zone-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .zone-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    padding: 5px 8px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .zone-input:focus { border-color: var(--blue); }
+  .zone-input::placeholder { color: var(--text-muted); font-size: 12px; }
+
+  .zone-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 5px;
+    line-height: 1.4;
+  }
+
+  /* BIAS SCORE */
+  .bias-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .bias-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+  }
+
+  .bias-item-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .bias-pts {
+    font-size: 10px;
+    padding: 1px 5px;
+    border: 1px solid;
+  }
+
+  .primary-pts { color: var(--amber); border-color: var(--amber); background: var(--amber-dark); }
+  .secondary-pts { color: var(--blue); border-color: var(--blue); background: var(--blue-dark); }
+  .tertiary-pts { color: var(--text-dim); border-color: var(--border2); }
+
+  .bias-buttons { display: flex; gap: 4px; }
+  .bias-btn {
+    flex: 1;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 4px 0;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .bias-btn:hover { color: var(--text); border-color: var(--text-muted); }
+  .bias-btn.bull.active { color: var(--green); border-color: var(--green); background: var(--green-dark); }
+  .bias-btn.bear.active { color: var(--red); border-color: var(--red); background: var(--red-dark); }
+  .bias-btn.neut.active { color: var(--amber); border-color: var(--amber); background: var(--amber-dark); }
+
+  /* SCORE METER */
+  .score-panel {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .score-number {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 42px;
+    line-height: 1;
+    min-width: 70px;
+  }
+
+  .score-details { flex: 1; }
+
+  .score-bar-wrap {
+    height: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-bar {
+    height: 100%;
+    transition: width 0.4s ease, background 0.4s ease;
+  }
+
+  .score-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+
+  .score-verdict {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* TRAP ALERT */
+  .trap-alert {
+    background: rgba(255,51,85,0.05);
+    border: 1px solid var(--red-dim);
+    padding: 12px 14px;
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .trap-icon {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .trap-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .trap-text strong { color: var(--red); font-weight: 600; }
+
+  /* ENGAGEMENT STEPS */
+  .step-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .step-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .step-item:hover { border-color: var(--border2); }
+  .step-item.done { opacity: 0.5; }
+  .step-item.done .step-num { background: var(--green-dark); border-color: var(--green); color: var(--green); }
+
+  .step-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    width: 28px; height: 28px;
+    border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-dim);
+    transition: all 0.15s;
+  }
+
+  .step-content { flex: 1; }
+
+  .step-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+
+  .step-desc { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  .step-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 2px 6px;
+    border: 1px solid;
+    align-self: flex-start;
+    flex-shrink: 0;
+    margin-top: 3px;
+    letter-spacing: 1px;
+  }
+
+  .tag-wait { color: var(--amber); border-color: var(--amber); background: var(--amber-dark); }
+  .tag-execute { color: var(--green); border-color: var(--green); background: var(--green-dark); }
+  .tag-check { color: var(--blue); border-color: var(--blue); background: var(--blue-dark); }
+  .tag-exit { color: var(--red); border-color: var(--red); background: var(--red-dark); }
+
+  /* MAXIMS */
+  .maxims-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .maxim-card {
+    background: var(--bg3);
+    border-left: 2px solid var(--red-dim);
+    padding: 10px 14px;
+  }
+
+  .maxim-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.4;
+  }
+
+  /* RESET / PROGRESS */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+  }
+
+  .toolbar-left { display: flex; align-items: center; gap: 12px; }
+
+  .progress-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .progress-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--green);
+  }
+
+  .reset-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+
+  /* LTPRO INTEGRATION BOX */
+  .ltpro-box {
+    background: rgba(0,255,136,0.03);
+    border: 1px solid rgba(0,255,136,0.2);
+    padding: 14px 16px;
+    margin-top: 14px;
+  }
+
+  .ltpro-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--green-dim);
+    margin-bottom: 10px;
+  }
+
+  .ltpro-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .ltpro-row:last-child { margin-bottom: 0; }
+
+  .ltpro-arrow {
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+  }
+
+  .signal-pill {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 2px 8px;
+    background: var(--green-dark);
+    border: 1px solid var(--green);
+    color: var(--green);
+    letter-spacing: 1px;
+  }
+
+  .signal-pill.wait {
+    background: var(--amber-dark);
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  /* ENTRY CRITERIA */
+  .criteria-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .criteria-card {
+    border: 1px solid var(--border);
+    padding: 12px;
+  }
+
+  .criteria-card.calls { border-top: 2px solid var(--green); }
+  .criteria-card.puts { border-top: 2px solid var(--red); }
+
+  .criteria-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+
+  .criteria-card.calls .criteria-title { color: var(--green); }
+  .criteria-card.puts .criteria-title { color: var(--red); }
+
+  .criteria-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    padding: 4px 6px;
+    transition: background 0.1s;
+  }
+
+  .criteria-item:hover { background: var(--bg3); }
+
+  .criteria-item.checked { opacity: 0.45; }
+
+  .crit-box {
+    width: 14px; height: 14px;
+    border: 1px solid var(--border2);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    transition: all 0.1s;
+  }
+
+  .criteria-item.checked .crit-box { background: var(--green-dark); border-color: var(--green); color: var(--green); }
+
+  /* EXTRACTION */
+  .extract-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .extract-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    text-align: center;
+  }
+
+  .extract-pct {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .extract-action {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  .extract-exits {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .exit-trigger {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    background: rgba(255,51,85,0.05);
+    border: 1px solid rgba(255,51,85,0.2);
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+
+  .exit-trigger.fired {
+    background: var(--red-dark);
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  .exit-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--red-dim);
+    flex-shrink: 0;
+    transition: background 0.1s;
+  }
+
+  .exit-trigger.fired .exit-dot { background: var(--red); }
+
+  /* NOTES */
+  .notes-area {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 10px 12px;
+    resize: vertical;
+    outline: none;
+    min-height: 80px;
+    transition: border-color 0.15s;
+    line-height: 1.6;
+  }
+  .notes-area:focus { border-color: var(--blue); }
+
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  .footer-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+  }
+
+  .footer-callsign {
+    color: var(--amber);
+  }
+
+  /* Opening Drive */
+  .drive-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .drive-card {
+    border: 1px solid var(--border);
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .drive-card.selected.trend { border-color: var(--green); background: var(--green-dark); }
+  .drive-card.selected.reversal { border-color: var(--red); background: var(--red-dark); }
+  .drive-card.selected.chop { border-color: var(--amber); background: var(--amber-dark); }
+
+  .drive-type {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .drive-card.selected.trend .drive-type { color: var(--green); }
+  .drive-card.selected.reversal .drive-type { color: var(--red); }
+  .drive-card.selected.chop .drive-type { color: var(--amber); }
+  .drive-card:not(.selected) .drive-type { color: var(--text-dim); }
+
+  .drive-action {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  .drive-card.selected .drive-action { color: var(--text); }
+
+  .drive-warning {
+    background: var(--amber-dark);
+    border: 1px solid var(--amber);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--amber);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    display: none;
+  }
+
+  .drive-warning.show { display: block; }
+
+  @media (max-width: 768px) {
+    .phase-grid { grid-template-columns: 1fr; }
+    .bias-grid { grid-template-columns: 1fr 1fr; }
+    .criteria-grid { grid-template-columns: 1fr; }
+    .drive-grid { grid-template-columns: 1fr; }
+    .maxims-grid { grid-template-columns: 1fr; }
+    .extract-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* CORRELATION PANEL */
+  .corr-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .corr-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--amber), var(--cyan), var(--green));
+  }
+  .corr-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .corr-header:hover { background: var(--bg3); }
+  .corr-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .corr-toggle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    transition: transform 0.2s;
+  }
+  .corr-panel.open .corr-toggle { transform: rotate(180deg); }
+  .corr-body {
+    display: none;
+    padding: 16px;
+  }
+  .corr-panel.open .corr-body { display: block; }
+
+  .corr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .corr-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    position: relative;
+  }
+
+  .corr-ticker {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+
+  .corr-name {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .corr-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 5px;
+    font-size: 13px;
+  }
+  .corr-row:last-child { margin-bottom: 0; }
+
+  .corr-dir {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 2px 7px;
+    border: 1px solid;
+    min-width: 36px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .corr-dir.up { color: var(--green); border-color: var(--green); background: var(--green-dark); }
+  .corr-dir.down { color: var(--red); border-color: var(--red); background: var(--red-dark); }
+
+  .corr-arrow {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .corr-spy {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  .spy-up { color: var(--green); }
+  .spy-down { color: var(--red); }
+
+  .corr-reason {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+    line-height: 1.5;
+  }
+
+  .corr-type {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 2px 6px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  .corr-type.inverse { color: var(--red); border: 1px solid var(--red-dim); background: var(--red-dark); }
+  .corr-type.positive { color: var(--green); border: 1px solid var(--green-dim); background: var(--green-dark); }
+  .corr-type.mixed { color: var(--amber); border: 1px solid var(--amber-dim); background: var(--amber-dark); }
+
+  .corr-summary {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 12px 16px;
+  }
+
+  .corr-sum-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .corr-sum-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 6px;
+  }
+
+  .corr-sum-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text);
+    padding: 4px 0;
+  }
+
+  .sum-ticker {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--white);
+    min-width: 45px;
+    letter-spacing: 1px;
+  }
+
+  .sum-rule {
+    color: var(--text-dim);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .sum-bull { color: var(--green); font-weight: 600; }
+  .sum-bear { color: var(--red); font-weight: 600; }
+
+
+  /* ZONES REFERENCE PANEL */
+  .zones-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .zones-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+  }
+  .zones-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .zones-header:hover { background: var(--bg3); }
+  .zones-toggle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    transition: transform 0.2s;
+  }
+  .zones-panel.open .zones-toggle { transform: rotate(180deg); }
+  .zones-body {
+    display: none;
+    padding: 16px;
+  }
+  .zones-panel.open .zones-body { display: block; }
+
+  .zones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .zone-ref-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .zone-ref-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+  .zone-ref-card.daily::before { background: var(--amber); }
+  .zone-ref-card.london::before { background: var(--blue); }
+  .zone-ref-card.fvg::before { background: var(--cyan); }
+  .zone-ref-card.ob::before { background: var(--green); }
+
+  .zone-ref-step {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+
+  .zone-ref-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+
+  .zone-ref-card.daily .zone-ref-title { color: var(--amber); }
+  .zone-ref-card.london .zone-ref-title { color: var(--blue); }
+  .zone-ref-card.fvg .zone-ref-title { color: var(--cyan); }
+  .zone-ref-card.ob .zone-ref-title { color: var(--green); }
+
+  .zone-ref-tf {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    padding: 2px 8px;
+    display: inline-block;
+    border: 1px solid;
+  }
+  .zone-ref-card.daily .zone-ref-tf { color: var(--amber); border-color: var(--amber); background: var(--amber-dark); }
+  .zone-ref-card.london .zone-ref-tf { color: var(--blue); border-color: var(--blue); background: var(--blue-dark); }
+  .zone-ref-card.fvg .zone-ref-tf { color: var(--cyan); border-color: var(--cyan); background: rgba(0,229,255,0.05); }
+  .zone-ref-card.ob .zone-ref-tf { color: var(--green); border-color: var(--green); background: var(--green-dark); }
+
+  .zone-ref-action {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .zone-ref-action strong { color: var(--white); }
+
+  .zone-ref-rules { display: flex; flex-direction: column; gap: 6px; }
+
+  .zone-rule-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .zone-rule-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border: 1px solid;
+    flex-shrink: 0;
+    margin-top: 1px;
+    letter-spacing: 1px;
+    min-width: 58px;
+    text-align: center;
+  }
+  .zone-rule-tag.bull { color: var(--green); border-color: var(--green); background: var(--green-dark); }
+  .zone-rule-tag.bear { color: var(--red); border-color: var(--red); background: var(--red-dark); }
+  .zone-rule-tag.note { color: var(--amber); border-color: var(--amber); background: var(--amber-dark); }
+
+  .zone-rule-text { color: var(--text); line-height: 1.5; }
+  .zone-rule-text .highlight { color: var(--white); font-weight: 500; }
+
+  .zone-svg-wrap {
+    margin: 10px 0 0 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .zone-svg-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .zones-maxim {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--cyan);
+    padding: 12px 16px;
+    margin-top: 4px;
+  }
+
+  .zones-maxim-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  .zones-maxim-text span { color: var(--cyan); }
+
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<header>
+  <div class="header-left">
+    <div class="logo-block">
+      <div class="logo-title">MAVERICK'S WAR ROOM</div>
+      <div class="logo-sub">SPY 1-5DTE // LTPROv7 INTEGRATED</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div id="biasBadge" class="bias-badge neutral">
+      <div class="bias-badge-top">
+        <div class="bias-dot"></div>
+        <div class="bias-verdict" id="biasText">AWAITING DATA</div>
+      </div>
+      <div class="bias-sub" id="biasSub">ENTER BIAS INPUTS TO GENERATE LAUNCH CODE</div>
+    </div>
+    <div>
+      <div class="header-clock" id="clock">--:--:--</div>
+      <div class="header-date" id="dateStr">--/--/----</div>
+    </div>
+  </div>
+</header>
+
+<div class="links-bar">
+
+  <div class="links-section">
+    <span class="links-label">FUTURES</span>
+    <div class="ql-wrap futures">
+      <div class="ql-btn">ES1!<span class="ql-label">S&P FUTURES</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://www.tradingview.com/chart/?symbol=CME_MINI%3AES1%21" target="_blank"><span class="ql-src">TRADINGVIEW</span><span class="ql-src-name">ES1! Chart</span></a>
+        <a href="https://finance.yahoo.com/quote/ES%3DF/" target="_blank"><span class="ql-src">YAHOO FIN</span><span class="ql-src-name">ES=F Quote</span></a>
+        <a href="https://www.cmegroup.com/markets/equities/sp/e-mini-sandp500.html" target="_blank"><span class="ql-src">CME GROUP</span><span class="ql-src-name">Official Data</span></a>
+      </div>
+    </div>
+    <div class="ql-wrap futures">
+      <div class="ql-btn">NQ1!<span class="ql-label">NAS FUTURES</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://www.tradingview.com/chart/?symbol=CME_MINI%3ANQ1%21" target="_blank"><span class="ql-src">TRADINGVIEW</span><span class="ql-src-name">NQ1! Chart</span></a>
+        <a href="https://finance.yahoo.com/quote/NQ%3DF/" target="_blank"><span class="ql-src">YAHOO FIN</span><span class="ql-src-name">NQ=F Quote</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="links-section">
+    <span class="links-label">EQUITIES</span>
+    <div class="ql-wrap equity">
+      <div class="ql-btn">SPY<span class="ql-label">S&P 500 ETF</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://www.tradingview.com/chart/?symbol=AMEX%3ASPY" target="_blank"><span class="ql-src">TRADINGVIEW</span><span class="ql-src-name">SPY Chart</span></a>
+        <a href="https://finance.yahoo.com/quote/SPY/" target="_blank"><span class="ql-src">YAHOO FIN</span><span class="ql-src-name">SPY Quote</span></a>
+        <a href="https://finviz.com/quote.ashx?t=SPY" target="_blank"><span class="ql-src">FINVIZ</span><span class="ql-src-name">SPY Overview</span></a>
+      </div>
+    </div>
+    <div class="ql-wrap equity">
+      <div class="ql-btn">QQQ<span class="ql-label">NASDAQ ETF</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://www.tradingview.com/chart/?symbol=NASDAQ%3AQQQ" target="_blank"><span class="ql-src">TRADINGVIEW</span><span class="ql-src-name">QQQ Chart</span></a>
+        <a href="https://finance.yahoo.com/quote/QQQ/" target="_blank"><span class="ql-src">YAHOO FIN</span><span class="ql-src-name">QQQ Quote</span></a>
+        <a href="https://finviz.com/quote.ashx?t=QQQ" target="_blank"><span class="ql-src">FINVIZ</span><span class="ql-src-name">QQQ Overview</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="links-section">
+    <span class="links-label">VOLATILITY</span>
+    <div class="ql-wrap fear">
+      <div class="ql-btn">VIX<span class="ql-label">FEAR GAUGE</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://www.tradingview.com/chart/?symbol=TVC%3AVIX" target="_blank"><span class="ql-src">TRADINGVIEW</span><span class="ql-src-name">VIX Chart</span></a>
+        <a href="https://finance.yahoo.com/quote/%5EVIX/" target="_blank"><span class="ql-src">YAHOO FIN</span><span class="ql-src-name">^VIX Quote</span></a>
+        <a href="https://www.cboe.com/tradable_products/vix/" target="_blank"><span class="ql-src">CBOE</span><span class="ql-src-name">Official VIX</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="links-section">
+    <span class="links-label">MACRO</span>
+    <div class="ql-wrap macro">
+      <div class="ql-btn">DXY<span class="ql-label">US DOLLAR</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://www.tradingview.com/chart/?symbol=TVC%3ADXY" target="_blank"><span class="ql-src">TRADINGVIEW</span><span class="ql-src-name">DXY Chart</span></a>
+        <a href="https://finance.yahoo.com/quote/DX-Y.NYB/" target="_blank"><span class="ql-src">YAHOO FIN</span><span class="ql-src-name">DX-Y Quote</span></a>
+      </div>
+    </div>
+    <div class="ql-wrap macro">
+      <div class="ql-btn">TNX<span class="ql-label">10Y YIELD</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://www.tradingview.com/chart/?symbol=TVC%3AUS10Y" target="_blank"><span class="ql-src">TRADINGVIEW</span><span class="ql-src-name">US10Y Chart</span></a>
+        <a href="https://finance.yahoo.com/quote/%5ETNX/" target="_blank"><span class="ql-src">YAHOO FIN</span><span class="ql-src-name">^TNX Quote</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="links-section">
+    <span class="links-label">CRYPTO</span>
+    <div class="ql-wrap crypto">
+      <div class="ql-btn">BTC<span class="ql-label">BITCOIN</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://www.tradingview.com/chart/?symbol=BITSTAMP%3ABTCUSD" target="_blank"><span class="ql-src">TRADINGVIEW</span><span class="ql-src-name">BTC/USD Chart</span></a>
+        <a href="https://finance.yahoo.com/quote/BTC-USD/" target="_blank"><span class="ql-src">YAHOO FIN</span><span class="ql-src-name">BTC-USD Quote</span></a>
+        <a href="https://coinmarketcap.com/currencies/bitcoin/" target="_blank"><span class="ql-src">COINMKTCAP</span><span class="ql-src-name">BTC Overview</span></a>
+      </div>
+    </div>
+    <div class="ql-wrap crypto">
+      <div class="ql-btn">HL SPY<span class="ql-label">TOKENIZED</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://coinmarketcap.com/currencies/spdr-sp-500-etf-trust-tokenized-etf-hyperliquid/" target="_blank"><span class="ql-src">COINMKTCAP</span><span class="ql-src-name">SPY Premium/Disc</span></a>
+        <a href="https://app.hyperliquid.xyz/trade/SPY" target="_blank"><span class="ql-src">HYPERLIQUID</span><span class="ql-src-name">Trade Interface</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="links-section">
+    <span class="links-label">CALENDAR</span>
+    <div class="ql-wrap news">
+      <div class="ql-btn">FF CAL<span class="ql-label">RED FOLDERS</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://www.forexfactory.com/calendar" target="_blank"><span class="ql-src">FOREXFACTORY</span><span class="ql-src-name">Economic Calendar</span></a>
+        <a href="https://www.investing.com/economic-calendar/" target="_blank"><span class="ql-src">INVESTING.COM</span><span class="ql-src-name">Alt Calendar</span></a>
+      </div>
+    </div>
+    <div class="ql-wrap news">
+      <div class="ql-btn">FINVIZ<span class="ql-label">HEATMAP</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://finviz.com/map.ashx?t=sec" target="_blank"><span class="ql-src">FINVIZ</span><span class="ql-src-name">S&P Heatmap</span></a>
+        <a href="https://finviz.com/futures.ashx" target="_blank"><span class="ql-src">FINVIZ</span><span class="ql-src-name">Futures Overview</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="links-section">
+    <span class="links-label">OPTIONS</span>
+    <div class="ql-wrap macro">
+      <div class="ql-btn">OPTIONS<span class="ql-label">ANALYSIS</span><span class="ql-arrow">▾</span></div>
+      <div class="ql-dropdown">
+        <a href="https://www.optionsstrat.com/analyze/SPY/" target="_blank"><span class="ql-src">OPT STRAT</span><span class="ql-src-name">SPY Chain</span></a>
+        <a href="https://finance.yahoo.com/quote/SPY/options/" target="_blank"><span class="ql-src">YAHOO FIN</span><span class="ql-src-name">SPY Options</span></a>
+        <a href="https://robinhood.com" target="_blank"><span class="ql-src">ROBINHOOD</span><span class="ql-src-name">Execute Trade</span></a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="main">
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="progress-label">CHECKLIST PROGRESS:</span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">RESET DAY</button>
+  </div>
+
+  <!-- BATTLEFIELD MAPPING REFERENCE PANEL -->
+  <div class="zones-panel" id="zonesPanel">
+    <div class="zones-header" onclick="toggleZones()">
+      <div class="corr-title-row">
+        <span class="phase-num" style="color:var(--blue);border-color:var(--blue);background:var(--blue-dark);">REF</span>
+        <span class="phase-title">Battlefield Mapping — How to Draw Your Zones</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-muted);">CLICK TO EXPAND</span>
+        <span class="zones-toggle">▼</span>
+      </div>
+    </div>
+    <div class="zones-body">
+
+      <div class="zones-grid">
+
+        <!-- DAILY TARGETS -->
+        <div class="zone-ref-card daily">
+          <div class="zone-ref-step">STEP 1 — DAILY CHART</div>
+          <div class="zone-ref-title">Daily Targets</div>
+          <span class="zone-ref-tf">DAILY TF</span>
+          <div class="zone-ref-action">
+            Mark the <strong>highest wick</strong> and <strong>lowest wick</strong> of yesterday's candle. These are your <strong>ultimate targets</strong> for the day. Algorithms magnetically pull price to sweep these extremes before reversing.
+          </div>
+          <div class="zone-ref-rules">
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag bull">BSL</span>
+              <span class="zone-rule-text"><span class="highlight">Buy-Side Liquidity</span> — Yesterday's highest wick. Calls target. Price sweeps this to grab stops above.</span>
+            </div>
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag bear">SSL</span>
+              <span class="zone-rule-text"><span class="highlight">Sell-Side Liquidity</span> — Yesterday's lowest wick. Puts target. Price sweeps this to grab stops below.</span>
+            </div>
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag note">NOTE</span>
+              <span class="zone-rule-text">These are <span class="highlight">wicks</span>, not candle bodies. The wick is where the stop hunt happens.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- LONDON FENCES -->
+        <div class="zone-ref-card london">
+          <div class="zone-ref-step">STEP 2 — 1H CHART</div>
+          <div class="zone-ref-title">London Fences</div>
+          <span class="zone-ref-tf">1H TF — 03:00–08:00 AM</span>
+          <div class="zone-ref-action">
+            Mark the <strong>highest and lowest wicks</strong> from the 03:00 AM to 08:00 AM session. This is the London Range — the global fence. The 9:30 AM open will often <strong>fake-out past one of these lines</strong> before reversing. That fake-out IS the Judas Swing.
+          </div>
+          <div class="zone-ref-rules">
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag bull">LONG</span>
+              <span class="zone-rule-text">Price sweeps <span class="highlight">below London Low</span> at open → watch for reversal back up. Judas complete.</span>
+            </div>
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag bear">SHORT</span>
+              <span class="zone-rule-text">Price sweeps <span class="highlight">above London High</span> at open → watch for reversal back down. Judas complete.</span>
+            </div>
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag note">RULE</span>
+              <span class="zone-rule-text">Do NOT trade the sweep itself. <span class="highlight">Wait for the reversal candle</span> after the sweep completes.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FVG -->
+        <div class="zone-ref-card fvg">
+          <div class="zone-ref-step">STEP 3 — 1H CHART</div>
+          <div class="zone-ref-title">Fair Value Gap</div>
+          <span class="zone-ref-tf">1H TF — IMBALANCE</span>
+          <div class="zone-ref-action">
+            Find the <strong>gap between Candle 1's wick and Candle 3's wick</strong> — the middle candle is the impulse move. This gap is unfilled imbalance. Price <strong>always wants to return</strong> to fill it before continuing.
+          </div>
+          <div class="zone-ref-rules">
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag bull">BULL FVG</span>
+              <span class="zone-rule-text">Price <span class="highlight">drops into the FVG</span> → expect a bounce UP. The gap acts as a demand magnet.</span>
+            </div>
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag bear">BEAR FVG</span>
+              <span class="zone-rule-text">Price <span class="highlight">rallies into the FVG</span> → expect a rejection DOWN. The gap acts as a supply ceiling.</span>
+            </div>
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag note">HOW TO</span>
+              <span class="zone-rule-text">C1 high wick to C3 low wick = Bullish FVG zone. C1 low wick to C3 high wick = Bearish FVG zone.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ORDER BLOCK -->
+        <div class="zone-ref-card ob">
+          <div class="zone-ref-step">STEP 4 — 1H CHART</div>
+          <div class="zone-ref-title">Order Block</div>
+          <span class="zone-ref-tf">1H TF — SUPPLY / DEMAND</span>
+          <div class="zone-ref-action">
+            Find the <strong>last opposing candle before a massive move</strong>. Mark its full body and wicks. This is where institutional orders were placed. Price returns to this zone to fill remaining orders before continuing the move. <strong>Unmitigated OBs are strongest</strong> — price has not yet returned.
+          </div>
+          <div class="zone-ref-rules">
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag bull">BULL OB</span>
+              <span class="zone-rule-text"><span class="highlight">Last RED candle before a massive GREEN move.</span> Demand zone. Price returns here to bounce UP.</span>
+            </div>
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag bear">BEAR OB</span>
+              <span class="zone-rule-text"><span class="highlight">Last GREEN candle before a massive RED drop.</span> Supply zone. Price returns here to reject DOWN.</span>
+            </div>
+            <div class="zone-rule-row">
+              <span class="zone-rule-tag note">KEY RULE</span>
+              <span class="zone-rule-text">Already-mitigated OBs (price returned once) are <span class="highlight">significantly weaker</span>. Prioritize fresh unmitigated OBs.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- How it all works together -->
+      <div class="zones-maxim">
+        <div class="zones-maxim-text">
+          The <span>Daily Wicks</span> are your destination. The <span>London Fences</span> are the trap door. The <span>FVG</span> and <span>Order Block</span> are the launchpad. Price sweeps a London level (Judas) → pulls back into an FVG or OB → you wait for the CBC confirmation → then ride it toward the Daily BSL or SSL. <span>That is the full play from map to target.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CORRELATION REFERENCE PANEL -->
+  <div class="corr-panel" id="corrPanel">
+    <div class="corr-header" onclick="toggleCorr()">
+      <div class="corr-title-row">
+        <span class="phase-num" style="color:var(--cyan);border-color:var(--cyan);background:rgba(0,229,255,0.05);">REF</span>
+        <span class="phase-title">SPY Correlation Matrix — If X moves, SPY moves...</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-muted);">CLICK TO EXPAND</span>
+        <span class="corr-toggle">▼</span>
+      </div>
+    </div>
+    <div class="corr-body">
+      <div class="corr-grid">
+
+        <!-- VIX -->
+        <div class="corr-card">
+          <span class="corr-type inverse">INVERSE</span>
+          <div class="corr-ticker">VIX</div>
+          <div class="corr-name">Fear / Volatility Index</div>
+          <div class="corr-row">
+            <span class="corr-dir up">UP</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-down">▼ SPY DOWN</span>
+          </div>
+          <div class="corr-row">
+            <span class="corr-dir down">DOWN</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-up">▲ SPY UP</span>
+          </div>
+          <div class="corr-reason">Fear is rising = institutions hedging = selling pressure. VIX spiking = never chase Calls. Watch for vol climax reversal.</div>
+        </div>
+
+        <!-- DXY -->
+        <div class="corr-card">
+          <span class="corr-type inverse">INVERSE</span>
+          <div class="corr-ticker">DXY</div>
+          <div class="corr-name">US Dollar Index</div>
+          <div class="corr-row">
+            <span class="corr-dir up">UP</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-down">▼ SPY DOWN</span>
+          </div>
+          <div class="corr-row">
+            <span class="corr-dir down">DOWN</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-up">▲ SPY UP</span>
+          </div>
+          <div class="corr-reason">Strong dollar = multinational earnings pressure + tighter global liquidity. Dropping DXY = fuel for equities. The Gravity rule.</div>
+        </div>
+
+        <!-- TNX -->
+        <div class="corr-card">
+          <span class="corr-type inverse">INVERSE</span>
+          <div class="corr-ticker">TNX</div>
+          <div class="corr-name">10-Year Treasury Yield</div>
+          <div class="corr-row">
+            <span class="corr-dir up">UP</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-down">▼ SPY DOWN</span>
+          </div>
+          <div class="corr-row">
+            <span class="corr-dir down">DOWN</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-up">▲ SPY UP</span>
+          </div>
+          <div class="corr-reason">Rising yields = bonds compete with stocks for capital + growth stocks repriced lower. Especially pressures QQQ/tech. Watch for yield divergence from equity rallies.</div>
+        </div>
+
+        <!-- ES1! -->
+        <div class="corr-card">
+          <span class="corr-type positive">DIRECT</span>
+          <div class="corr-ticker">ES1!</div>
+          <div class="corr-name">S&P 500 Futures</div>
+          <div class="corr-row">
+            <span class="corr-dir up">UP</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-up">▲ SPY UP</span>
+          </div>
+          <div class="corr-row">
+            <span class="corr-dir down">DOWN</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-down">▼ SPY DOWN</span>
+          </div>
+          <div class="corr-reason">ES1! IS SPY in futures form. ES÷10 ≈ SPY price. Green overnight = bullish cash open expected. Also check range size and gap into resistance.</div>
+        </div>
+
+        <!-- QQQ -->
+        <div class="corr-card">
+          <span class="corr-type positive">DIRECT</span>
+          <div class="corr-ticker">QQQ</div>
+          <div class="corr-name">Nasdaq-100 ETF</div>
+          <div class="corr-row">
+            <span class="corr-dir up">UP</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-up">▲ SPY UP</span>
+          </div>
+          <div class="corr-row">
+            <span class="corr-dir down">DOWN</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-down">▼ SPY DOWN</span>
+          </div>
+          <div class="corr-reason">When both agree = strong confirmation. SMT divergence = institutional signal. SPY Higher Low + QQQ Lower Low = Smart Money buying SPY (Bull SMT).</div>
+        </div>
+
+        <!-- BTC -->
+        <div class="corr-card">
+          <span class="corr-type mixed">MIXED</span>
+          <div class="corr-ticker">BTC</div>
+          <div class="corr-name">Bitcoin — Risk Proxy</div>
+          <div class="corr-row">
+            <span class="corr-dir up">UP</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-up">▲ SPY TENDS UP</span>
+          </div>
+          <div class="corr-row">
+            <span class="corr-dir down">DOWN</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-down">▼ SPY TENDS DOWN</span>
+          </div>
+          <div class="corr-reason">BTC is a risk-on/risk-off barometer. Correlation is loose — use as tertiary confirmation only (1pt). Breaks down during crypto-specific events.</div>
+        </div>
+
+        <!-- HL SPY -->
+        <div class="corr-card">
+          <span class="corr-type mixed">SENTIMENT</span>
+          <div class="corr-ticker">HL SPY</div>
+          <div class="corr-name">Hyperliquid Tokenized SPY</div>
+          <div class="corr-row">
+            <span class="corr-dir up">PREMIUM</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy" style="color:var(--amber);">⚠ TRAP RISK</span>
+          </div>
+          <div class="corr-row">
+            <span class="corr-dir down">DISCOUNT</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy spy-down">▼ RETAIL BEARISH</span>
+          </div>
+          <div class="corr-reason">Premium = retail is long and bullish overnight. If ES1! stalls at 9:15 AM with HL at premium = Wall Street traps the longs at 9:30. Do NOT chase the open.</div>
+        </div>
+
+        <!-- ForexFactory -->
+        <div class="corr-card">
+          <span class="corr-type inverse">RISK</span>
+          <div class="corr-ticker">RED FOLDER</div>
+          <div class="corr-name">High-Impact News Events</div>
+          <div class="corr-row">
+            <span class="corr-dir up" style="font-size:9px;min-width:50px;">RELEASE</span>
+            <span class="corr-arrow">→</span>
+            <span class="corr-spy" style="color:var(--amber);">⚠ STAND DOWN</span>
+          </div>
+          <div class="corr-reason">CPI / PPI / FOMC / NFP / GDP = trap volatility in both directions. Never trade during release. Wait 5–15 min for the dust to settle. The spike is not the move.</div>
+        </div>
+
+      </div>
+
+      <!-- Quick Reference Summary -->
+      <div class="corr-summary">
+        <div class="corr-sum-title">QUICK REFERENCE — THE RULES AT A GLANCE</div>
+        <div class="corr-sum-grid">
+          <div class="corr-sum-row"><span class="sum-ticker">VIX ▲</span><span class="sum-rule">→ <span class="sum-bear">SPY ▼</span> — Never buy Calls when VIX spikes</span></div>
+          <div class="corr-sum-row"><span class="sum-ticker">VIX ▼</span><span class="sum-rule">→ <span class="sum-bull">SPY ▲</span> — Wind at your back for Calls</span></div>
+          <div class="corr-sum-row"><span class="sum-ticker">DXY ▲</span><span class="sum-rule">→ <span class="sum-bear">SPY ▼</span> — Dollar strength = equity gravity</span></div>
+          <div class="corr-sum-row"><span class="sum-ticker">DXY ▼</span><span class="sum-rule">→ <span class="sum-bull">SPY ▲</span> — Dropping dollar fuels SPY</span></div>
+          <div class="corr-sum-row"><span class="sum-ticker">TNX ▲</span><span class="sum-rule">→ <span class="sum-bear">SPY ▼</span> — Yields compete with stocks</span></div>
+          <div class="corr-sum-row"><span class="sum-ticker">TNX ▼</span><span class="sum-rule">→ <span class="sum-bull">SPY ▲</span> — Cheaper money = equity bid</span></div>
+          <div class="corr-sum-row"><span class="sum-ticker">ES1! ▲</span><span class="sum-rule">→ <span class="sum-bull">SPY ▲</span> — The Engine confirms bullish open</span></div>
+          <div class="corr-sum-row"><span class="sum-ticker">QQQ ▲</span><span class="sum-rule">→ <span class="sum-bull">SPY ▲</span> — Both up = strong confirmation</span></div>
+          <div class="corr-sum-row"><span class="sum-ticker">BTC ▲</span><span class="sum-rule">→ <span class="sum-bull">SPY ▲</span> — Risk-on mode (tertiary only)</span></div>
+          <div class="corr-sum-row"><span class="sum-ticker">HL PREM</span><span class="sum-rule">→ <span class="sum-bear">TRAP RISK</span> — Retail long = 9:30 flush risk</span></div>
+          <div class="corr-sum-row"><span class="sum-ticker">RED FLD</span><span class="sum-rule">→ <span class="sum-bear">STAND DOWN</span> — No trades during releases</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 1 + PHASE 2 -->
+  <div class="phase-grid">
+
+    <!-- PHASE 1 -->
+    <div class="phase-card p1">
+      <div class="phase-header">
+        <div class="phase-label">
+          <span class="phase-num">PHASE 01</span>
+          <span class="phase-title">Macro Intelligence</span>
+        </div>
+        <span class="phase-time">08:00 EDT</span>
+      </div>
+      <div class="phase-body">
+        <table class="intel-table">
+          <thead>
+            <tr>
+              <th class="check-col"></th>
+              <th>SOURCE</th>
+              <th>OPERATIONAL RULE</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="intel-row" onclick="toggleCheck(this)">
+              <td><div class="check-box"><span class="check-mark">✓</span></div></td>
+              <td>
+                <div class="source-name">ForexFactory</div>
+                <div class="source-role">Radar</div>
+                <div class="status-row">
+                  <button class="status-btn green" onclick="setStatus(event,this,'green')">CLEAR</button>
+                  <button class="status-btn red" onclick="setStatus(event,this,'red')">RED FOLDER</button>
+                </div>
+              </td>
+              <td>
+                <div class="rule-text"><span class="rule-stop">STAND DOWN</span> during Red Folder releases. Wait 5–15 min after.</div>
+              </td>
+            </tr>
+            <tr class="intel-row" onclick="toggleCheck(this)">
+              <td><div class="check-box"><span class="check-mark">✓</span></div></td>
+              <td>
+                <div class="source-name">ES1! Futures</div>
+                <div class="source-role">The Engine</div>
+                <div class="status-row">
+                  <button class="status-btn green" onclick="setStatus(event,this,'green')">GREEN</button>
+                  <button class="status-btn red" onclick="setStatus(event,this,'red')">RED</button>
+                  <button class="status-btn amber" onclick="setStatus(event,this,'amber')">FLAT</button>
+                </div>
+              </td>
+              <td>
+                <div class="rule-text"><span class="rule-go">Green overnight</span> = Bullish bias. <span class="rule-stop">Red</span> = Bearish bias. <strong>Also check:</strong> range size, gap into resistance?, risk sentiment.</div>
+              </td>
+            </tr>
+            <tr class="intel-row" onclick="toggleCheck(this)">
+              <td><div class="check-box"><span class="check-mark">✓</span></div></td>
+              <td>
+                <div class="source-name">Hyperliquid SPY</div>
+                <div class="source-role">Retail Sentiment [NEW]</div>
+                <div class="status-row">
+                  <button class="status-btn green" onclick="setStatus(event,this,'green')">PREMIUM</button>
+                  <button class="status-btn red" onclick="setStatus(event,this,'red')">DISCOUNT</button>
+                </div>
+              </td>
+              <td>
+                <div class="rule-text">Premium (above Fri close) = retail bullish. Discount = retail bearish.</div>
+                <div class="rule-alert">⚠ HL PUMPED + ES1! STALLS @09:15 = TRAP OPEN LIKELY AT 9:30</div>
+              </td>
+            </tr>
+            <tr class="intel-row" onclick="toggleCheck(this)">
+              <td><div class="check-box"><span class="check-mark">✓</span></div></td>
+              <td>
+                <div class="source-name">VIX &amp; DXY</div>
+                <div class="source-role">Weather</div>
+                <div class="status-row">
+                  <button class="status-btn green" onclick="setStatus(event,this,'green')">TAILWIND</button>
+                  <button class="status-btn red" onclick="setStatus(event,this,'red')">HEADWIND</button>
+                  <button class="status-btn amber" onclick="setStatus(event,this,'amber')">MIXED</button>
+                </div>
+              </td>
+              <td>
+                <div class="rule-text"><span class="rule-go">Both dropping</span> = wind at your back for Calls. <span class="rule-stop">VIX spiking</span> = avoid chasing Calls. Watch for vol climax reversal.</div>
+              </td>
+            </tr>
+            <tr class="intel-row" onclick="toggleCheck(this)">
+              <td><div class="check-box"><span class="check-mark">✓</span></div></td>
+              <td>
+                <div class="source-name">TNX (Yields)</div>
+                <div class="source-role">Gravity Check</div>
+                <div class="status-row">
+                  <button class="status-btn green" onclick="setStatus(event,this,'green')">FALLING</button>
+                  <button class="status-btn red" onclick="setStatus(event,this,'red')">RISING</button>
+                </div>
+              </td>
+              <td>
+                <div class="rule-text"><span class="rule-stop">Rising yields</span> pressure growth/tech. Note if bond market diverges from equity bid.</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase-card p2">
+      <div class="phase-header">
+        <div class="phase-label">
+          <span class="phase-num">PHASE 02</span>
+          <span class="phase-title">Battlefield Mapping</span>
+        </div>
+        <span class="phase-time">09:00–09:29</span>
+      </div>
+      <div class="phase-body">
+        <div class="section-label">Mark Your Zones</div>
+        <div class="zone-grid">
+          <div class="zone-item">
+            <div class="zone-label">Yesterday High (BSL)</div>
+            <input class="zone-input" placeholder="e.g. 593.45" id="z_bsl" />
+            <div class="zone-desc">Ultimate Bull Target. Algorithms pull price to sweep this wick.</div>
+          </div>
+          <div class="zone-item">
+            <div class="zone-label">Yesterday Low (SSL)</div>
+            <input class="zone-input" placeholder="e.g. 589.20" id="z_ssl" />
+            <div class="zone-desc">Ultimate Bear Target. Algorithms pull price to sweep this wick.</div>
+          </div>
+          <div class="zone-item">
+            <div class="zone-label">London High (03–08AM)</div>
+            <input class="zone-input" placeholder="e.g. 591.75" id="z_lh" />
+            <div class="zone-desc">London fence. 9:30 Judas often sweeps this first.</div>
+          </div>
+          <div class="zone-item">
+            <div class="zone-label">London Low (03–08AM)</div>
+            <input class="zone-input" placeholder="e.g. 590.10" id="z_ll" />
+            <div class="zone-desc">London fence. Judas sweeps this on bearish days.</div>
+          </div>
+          <div class="zone-item">
+            <div class="zone-label">FVG Zone (1H Imbalance)</div>
+            <input class="zone-input" placeholder="e.g. 590.50–591.00" id="z_fvg" />
+            <div class="zone-desc">Gap between C1/C3 wicks. Price fills imbalances before resuming.</div>
+          </div>
+          <div class="zone-item">
+            <div class="zone-label">Order Block (1H OB)</div>
+            <input class="zone-input" placeholder="e.g. 590.20–590.60" id="z_ob" />
+            <div class="zone-desc">Last opposing candle before a large move. Unmitigated = stronger.</div>
+          </div>
+        </div>
+        <div class="section-label" style="margin-top:12px;">Opening Drive Classification (9:30–9:40)</div>
+        <div class="drive-grid">
+          <div class="drive-card trend" id="drive_trend" onclick="selectDrive('trend')">
+            <div class="drive-type">Trend Day</div>
+            <div class="drive-action">Open above VWAP, dips bought. Buy pullbacks, not tops.</div>
+          </div>
+          <div class="drive-card reversal" id="drive_reversal" onclick="selectDrive('reversal')">
+            <div class="drive-type">Reversal Day</div>
+            <div class="drive-action">Gap fails, VWAP rejected. Buy puts on failed bounces.</div>
+          </div>
+          <div class="drive-card chop" id="drive_chop" onclick="selectDrive('chop')">
+            <div class="drive-type">Chop Day</div>
+            <div class="drive-action">VWAP crossing, no momentum. Reduce size or sit out.</div>
+          </div>
+        </div>
+        <div class="drive-warning" id="chopWarning">
+          ⚠ CHOP DAY CLASSIFIED — STAND DOWN. NO NEW ENTRIES.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PHASE 3 FULL WIDTH -->
+  <div class="phase-grid">
+    <div class="phase-card p3 phase-full">
+      <div class="phase-header">
+        <div class="phase-label">
+          <span class="phase-num">PHASE 03</span>
+          <span class="phase-title">Quantitative Bias Score — The Gate</span>
+        </div>
+        <span class="phase-time">Pre-Entry Launch Code</span>
+      </div>
+      <div class="phase-body">
+        <div class="bias-grid">
+          <div class="bias-item">
+            <div class="bias-item-label">ES1! <span class="bias-pts primary-pts">3 PTS</span></div>
+            <div class="bias-buttons">
+              <button class="bias-btn bull" onclick="setBias(this,'es1','bull',3)">BULL</button>
+              <button class="bias-btn bear" onclick="setBias(this,'es1','bear',3)">BEAR</button>
+              <button class="bias-btn neut" onclick="setBias(this,'es1','neut',0)">NEUT</button>
+            </div>
+          </div>
+          <div class="bias-item">
+            <div class="bias-item-label">VIX <span class="bias-pts primary-pts">3 PTS</span></div>
+            <div class="bias-buttons">
+              <button class="bias-btn bull" onclick="setBias(this,'vix','bull',3)">FALLING</button>
+              <button class="bias-btn bear" onclick="setBias(this,'vix','bear',3)">SPIKING</button>
+              <button class="bias-btn neut" onclick="setBias(this,'vix','neut',0)">FLAT</button>
+            </div>
+          </div>
+          <div class="bias-item">
+            <div class="bias-item-label">QQQ SMT <span class="bias-pts primary-pts">3 PTS</span></div>
+            <div class="bias-buttons">
+              <button class="bias-btn bull" onclick="setBias(this,'qqq','bull',3)">SPY HL</button>
+              <button class="bias-btn bear" onclick="setBias(this,'qqq','bear',3)">SPY LH</button>
+              <button class="bias-btn neut" onclick="setBias(this,'qqq','neut',0)">NO DIV</button>
+            </div>
+          </div>
+          <div class="bias-item">
+            <div class="bias-item-label">TNX <span class="bias-pts secondary-pts">2 PTS</span></div>
+            <div class="bias-buttons">
+              <button class="bias-btn bull" onclick="setBias(this,'tnx','bull',2)">FALLING</button>
+              <button class="bias-btn bear" onclick="setBias(this,'tnx','bear',2)">RISING</button>
+              <button class="bias-btn neut" onclick="setBias(this,'tnx','neut',0)">FLAT</button>
+            </div>
+          </div>
+          <div class="bias-item">
+            <div class="bias-item-label">DXY <span class="bias-pts secondary-pts">2 PTS</span></div>
+            <div class="bias-buttons">
+              <button class="bias-btn bull" onclick="setBias(this,'dxy','bull',2)">FALLING</button>
+              <button class="bias-btn bear" onclick="setBias(this,'dxy','bear',2)">RISING</button>
+              <button class="bias-btn neut" onclick="setBias(this,'dxy','neut',0)">FLAT</button>
+            </div>
+          </div>
+          <div class="bias-item">
+            <div class="bias-item-label">BTC <span class="bias-pts tertiary-pts">1 PT</span></div>
+            <div class="bias-buttons">
+              <button class="bias-btn bull" onclick="setBias(this,'btc','bull',1)">BULL</button>
+              <button class="bias-btn bear" onclick="setBias(this,'btc','bear',1)">BEAR</button>
+              <button class="bias-btn neut" onclick="setBias(this,'btc','neut',0)">NEUT</button>
+            </div>
+          </div>
+          <div class="bias-item">
+            <div class="bias-item-label">Hyperliquid SPY <span class="bias-pts tertiary-pts">1 PT</span></div>
+            <div class="bias-buttons">
+              <button class="bias-btn bull" onclick="setBias(this,'hl','bull',1)">PREMIUM</button>
+              <button class="bias-btn bear" onclick="setBias(this,'hl','bear',1)">DISCOUNT</button>
+              <button class="bias-btn neut" onclick="setBias(this,'hl','neut',0)">FLAT</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="score-panel">
+          <div id="scoreNumber" class="score-number" style="color:var(--text-dim)">--</div>
+          <div class="score-details">
+            <div class="score-bar-wrap">
+              <div class="score-bar" id="scoreBar" style="width:0%;background:var(--border2)"></div>
+            </div>
+            <div class="score-label" id="scoreLabel">NO DATA</div>
+            <div class="score-verdict" id="scoreVerdict">Set bias inputs above to generate your Launch Code.</div>
+          </div>
+        </div>
+
+        <div class="trap-alert">
+          <div class="trap-icon">TRAP<br>ALERT</div>
+          <div class="trap-text">
+            <strong>THE HYPERLIQUID TRAP:</strong> If HL is pumped all night (+Premium) but ES1! stalls at 09:15 AM — prepare for the 9:30 Trap Open. Wall Street will flush the retail premium down. <strong>Do NOT chase the open. Wait for the Judas Swing to complete.</strong>
+          </div>
+        </div>
+
+        <div class="ltpro-box">
+          <div class="ltpro-title">// LTPROv7 INTEGRATION GATE</div>
+          <div class="ltpro-row"><span class="ltpro-arrow">▶</span> Bias Score confirms macro direction. LTPROv7 BIAS row must agree before proceeding.</div>
+          <div class="ltpro-row"><span class="ltpro-arrow">▶</span> Score ≥ +7 Bull + BIAS=BULL = high-confidence long setup window.</div>
+          <div class="ltpro-row"><span class="ltpro-arrow">▶</span> <span class="signal-pill wait">SIGNAL = WAIT</span> is the absolute gate. Score means nothing if SIGNAL is WAIT.</div>
+          <div class="ltpro-row"><span class="ltpro-arrow">▶</span> Entry sequence: APEX fires → liquidity sweep → <span class="signal-pill">SIGNAL = BUY</span> → ENTER.</div>
+          <div class="ltpro-row"><span class="ltpro-arrow">▶</span> 1-5DTE: Extra days = safety net for winners only. Exit same day in profit when possible. When DTE = 1, treat as 0DTE — theta accelerates.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase-grid">
+    <div class="phase-card p4">
+      <div class="phase-header">
+        <div class="phase-label">
+          <span class="phase-num">PHASE 04</span>
+          <span class="phase-title">Tactical Engagement</span>
+        </div>
+        <span class="phase-time">09:45 AM+</span>
+      </div>
+      <div class="phase-body">
+
+        <div class="section-label">Entry Criteria</div>
+        <div class="criteria-grid" style="margin-bottom:14px;">
+          <div class="criteria-card calls">
+            <div class="criteria-title">CALLS (BULL)</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div>Above VWAP</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div>Higher Low forms on 5M</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div>QQQ confirms (SPY HL / QQQ LL)</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div>VIX falling or flat</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div>CBC: 5M body CLOSES above red candle high</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div><span style="color:var(--green)">SIGNAL = BUY</span> on LTPROv7</div>
+          </div>
+          <div class="criteria-card puts">
+            <div class="criteria-title">PUTS (BEAR)</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div>Below VWAP</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div>Lower High forms on 5M</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div>QQQ weak (SPY LH / QQQ HH)</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div>VIX rising</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div>CBC: 5M body CLOSES below green candle low</div>
+            <div class="criteria-item" onclick="toggleCrit(this)"><div class="crit-box"></div><span style="color:var(--red)">SIGNAL = SELL</span> on LTPROv7</div>
+          </div>
+        </div>
+
+        <div class="section-label">Engagement Steps</div>
+        <div class="step-list">
+          <div class="step-item" onclick="toggleStep(this)">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-name">The Judas Swing</div>
+              <div class="step-desc">Watch the 9:30 open. Let amateurs panic. Wait for price to violently sweep London High/Low, FVG, or Order Block. Do NOT trade the first 5 minutes.</div>
+            </div>
+            <span class="step-tag tag-wait">WAIT</span>
+          </div>
+          <div class="step-item" onclick="toggleStep(this)">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-name">SMT Check</div>
+              <div class="step-desc">Glance at QQQ vs SPY on same 5M chart over 2–3 candles. Bull SMT: SPY Higher Low while QQQ makes Lower Low. Bear SMT: SPY Lower High while QQQ makes Higher High.</div>
+            </div>
+            <span class="step-tag tag-check">CONFIRM</span>
+          </div>
+          <div class="step-item" onclick="toggleStep(this)">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-name">CBC Filter — The Trigger</div>
+              <div class="step-desc">Do NOT buy the wick. Wait for a 5M candle BODY to fully close above the red testing candle (Calls) or below the green testing candle (Puts). The trigger is the breach, not the color.</div>
+            </div>
+            <span class="step-tag tag-check">CONFIRM</span>
+          </div>
+          <div class="step-item" onclick="toggleStep(this)">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-name">Strike Selection</div>
+              <div class="step-desc">1-5DTE: Delta 0.60+ (ATM or 1 strike ITM). Choose expiry 1-5 days out as a safety net — goal is still same-day exit in profit. Extra DTE protects against temporary pullbacks. Stop = below manipulation wick or OB zone.</div>
+            </div>
+            <span class="step-tag tag-execute">EXECUTE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXTRACTION -->
+    <div class="phase-card p4">
+      <div class="phase-header">
+        <div class="phase-label">
+          <span class="phase-num">EXTRACTION</span>
+          <span class="phase-title">Pay the Operator</span>
+        </div>
+        <span class="phase-time">Exit Protocol</span>
+      </div>
+      <div class="phase-body">
+
+        <div class="section-label">Scale-Out Model</div>
+        <div class="extract-grid">
+          <div class="extract-card">
+            <div class="extract-pct">50%</div>
+            <div class="extract-action">Sell at first target or +25–50% premium same day</div>
+          </div>
+          <div class="extract-card">
+            <div class="extract-pct">25%</div>
+            <div class="extract-action">Sell at +75–100% or next day strength</div>
+          </div>
+          <div class="extract-card">
+            <div class="extract-pct">25%</div>
+            <div class="extract-action">Trail until structure breaks or DTE hits 1 — then treat as 0DTE</div>
+          </div>
+        </div>
+
+        <div class="section-label">Full Exit Triggers — Click when fired</div>
+        <div class="extract-exits" style="margin-bottom:14px;">
+          <div class="exit-trigger" onclick="this.classList.toggle('fired')">
+            <div class="exit-dot"></div>Daily BSL/SSL reached (Draw complete)
+          </div>
+          <div class="exit-trigger" onclick="this.classList.toggle('fired')">
+            <div class="exit-dot"></div>RSI 70+ overbought (Calls) / 30- oversold (Puts)
+          </div>
+          <div class="exit-trigger" onclick="this.classList.toggle('fired')">
+            <div class="exit-dot"></div>11:30 AM EDT — No new entries. Manage open positions only.
+          </div>
+          <div class="exit-trigger" onclick="this.classList.toggle('fired')">
+            <div class="exit-dot"></div>Opposite candle impulse on 5M
+          </div>
+          <div class="exit-trigger" onclick="this.classList.toggle('fired')">
+            <div class="exit-dot"></div>LTPROv7 SIGNAL flips to WAIT
+          </div>
+          <div class="exit-trigger" onclick="this.classList.toggle('fired')">
+            <div class="exit-dot"></div>VWAP lost (recross against position)
+          </div>
+        </div>
+
+        <div class="section-label">Days to Stand Down</div>
+        <div style="background:rgba(255,51,85,0.04);border:1px solid rgba(255,51,85,0.2);padding:12px;font-size:13px;line-height:2;color:var(--text);">
+          Red Folder within 10 minutes &nbsp;•&nbsp; Chop Day classified at open &nbsp;•&nbsp; Revenge energy detected &nbsp;•&nbsp; HL Trap open in progress &nbsp;•&nbsp; Triple fake open &nbsp;•&nbsp; Inside day compression &nbsp;•&nbsp; No clean Judas Swing setup by 10:15 AM &nbsp;•&nbsp; Red Folder event during active hold period — close or size down before release
+        </div>
+
+        <div class="section-label" style="margin-top:14px;">Commander's Notes</div>
+        <textarea class="notes-area" placeholder="Log today's bias, key levels, setup observations, entry price, DTE selected, post-trade notes..."></textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MAXIMS -->
+  <div class="phase-card maxims" style="margin-bottom:16px;">
+    <div class="phase-header">
+      <div class="phase-label">
+        <span class="phase-num">MAXIMS</span>
+        <span class="phase-title">War Room Doctrine</span>
+      </div>
+    </div>
+    <div class="phase-body">
+      <div class="maxims-grid">
+        <div class="maxim-card"><div class="maxim-text">Wicks do the damage. Bodies tell the story.</div></div>
+        <div class="maxim-card"><div class="maxim-text">The trigger is the breach, not the color.</div></div>
+        <div class="maxim-card"><div class="maxim-text">Amateurs predict. Professionals react.</div></div>
+        <div class="maxim-card"><div class="maxim-text">Pay the Operator.</div></div>
+        <div class="maxim-card"><div class="maxim-text">SIGNAL = WAIT is the absolute gate. Period.</div></div>
+        <div class="maxim-card"><div class="maxim-text">First move lies. Second move pays.</div></div>
+        <div class="maxim-card"><div class="maxim-text">The setup is not the edge. Discipline is the edge.</div></div>
+        <div class="maxim-card"><div class="maxim-text">If you feel revenge energy — close the platform.</div></div>
+        <div class="maxim-card"><div class="maxim-text">Extra DTE is a safety net for winners. Never life support for losers.</div></div>
+        <div class="maxim-card"><div class="maxim-text">Goal: in, profitable, out same day. Extra days are the parachute, not the plan.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-text">MAVERICK'S WAR ROOM v4.0 &nbsp;|&nbsp; <span class="footer-callsign">MAVERICK</span> &amp; GOOSE &nbsp;|&nbsp; LTPROv7 INTEGRATED &nbsp;|&nbsp; SPY 1-5DTE OPERATIONS</div>
+</footer>
+
+<script>
+  // Dropdowns
+  document.querySelectorAll('.ql-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const wrap = this.closest('.ql-wrap');
+      const dropdown = wrap.querySelector('.ql-dropdown');
+      const isOpen = wrap.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.ql-wrap.open').forEach(w => w.classList.remove('open'));
+      if (!isOpen) {
+        const rect = wrap.getBoundingClientRect();
+        dropdown.style.top = (rect.bottom) + 'px';
+        dropdown.style.left = rect.left + 'px';
+        wrap.classList.add('open');
+      }
+    });
+  });
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.ql-wrap.open').forEach(w => w.classList.remove('open'));
+  });
+  document.querySelectorAll('.ql-dropdown').forEach(dd => {
+    dd.addEventListener('click', function(e) { e.stopPropagation(); });
+  });
+
+  // Clock
+  function updateClock() {
+    const now = new Date();
+    const t = now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:'America/New_York'});
+    const d = now.toLocaleDateString('en-US', {month:'2-digit',day:'2-digit',year:'numeric',timeZone:'America/New_York'});
+    document.getElementById('clock').textContent = t + ' EDT';
+    document.getElementById('dateStr').textContent = d;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Check rows
+  function toggleCheck(row) {
+    row.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function setStatus(e, btn, color) {
+    e.stopPropagation();
+    const row = btn.closest('.status-row');
+    row.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active', color);
+    updateBiasHeader();
+  }
+
+  // Bias scoring
+  const biasState = {};
+
+  function setBias(btn, key, dir, pts) {
+    const item = btn.closest('.bias-item');
+    item.querySelectorAll('.bias-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    biasState[key] = { dir, pts };
+    calcScore();
+  }
+
+  function calcScore() {
+    let bull = 0, bear = 0;
+    const maxPts = 3+3+3+2+2+1+1; // 15
+    Object.values(biasState).forEach(v => {
+      if (v.dir === 'bull') bull += v.pts;
+      else if (v.dir === 'bear') bear += v.pts;
+    });
+    const net = bull - bear;
+    const pct = Math.max(0, Math.min(100, Math.round(((net + maxPts) / (maxPts * 2)) * 100)));
+
+    const numEl = document.getElementById('scoreNumber');
+    const barEl = document.getElementById('scoreBar');
+    const labelEl = document.getElementById('scoreLabel');
+    const verdictEl = document.getElementById('scoreVerdict');
+
+    const sign = net > 0 ? '+' : '';
+    numEl.textContent = sign + net;
+
+    barEl.style.width = pct + '%';
+
+    if (net >= 9) {
+      numEl.style.color = 'var(--green)';
+      barEl.style.background = 'var(--green)';
+      labelEl.textContent = 'A+ BULL — FULL SIZE';
+      labelEl.style.color = 'var(--green)';
+      verdictEl.textContent = 'Strong macro alignment. Await LTPROv7 SIGNAL = BUY to execute.';
+    } else if (net >= 5) {
+      numEl.style.color = 'var(--green-dim)';
+      barEl.style.background = 'var(--green-dim)';
+      labelEl.textContent = 'B BULL — HALF SIZE';
+      labelEl.style.color = 'var(--green-dim)';
+      verdictEl.textContent = 'Moderate bull bias. One factor missing. Reduce size, tighten stop.';
+    } else if (net <= -9) {
+      numEl.style.color = 'var(--red)';
+      barEl.style.background = 'var(--red)';
+      labelEl.textContent = 'A+ BEAR — FULL SIZE';
+      labelEl.style.color = 'var(--red)';
+      verdictEl.textContent = 'Strong macro alignment. Await LTPROv7 SIGNAL = SELL to execute.';
+    } else if (net <= -5) {
+      numEl.style.color = 'var(--red-dim)';
+      barEl.style.background = 'var(--red-dim)';
+      labelEl.textContent = 'B BEAR — HALF SIZE';
+      labelEl.style.color = 'var(--red-dim)';
+      verdictEl.textContent = 'Moderate bear bias. One factor missing. Reduce size, tighten stop.';
+    } else if (net > 0 && net < 5) {
+      numEl.style.color = 'var(--amber)';
+      barEl.style.background = 'var(--amber)';
+      labelEl.textContent = 'C — WATCH ONLY';
+      labelEl.style.color = 'var(--amber)';
+      verdictEl.textContent = 'Mixed signals. Lean bull but no strong confluence. Observe only.';
+    } else if (net < 0 && net > -5) {
+      numEl.style.color = 'var(--amber)';
+      barEl.style.background = 'var(--amber)';
+      labelEl.textContent = 'C — WATCH ONLY';
+      labelEl.style.color = 'var(--amber)';
+      verdictEl.textContent = 'Mixed signals. Lean bear but no strong confluence. Observe only.';
+    } else {
+      numEl.style.color = 'var(--text-dim)';
+      barEl.style.background = 'var(--border2)';
+      labelEl.textContent = 'NEUTRAL — STAND DOWN';
+      labelEl.style.color = 'var(--text-dim)';
+      verdictEl.textContent = 'No directional edge. Wait for clarity or skip the day.';
+    }
+
+    updateBiasHeader();
+  }
+
+  function updateBiasHeader() {
+    const badge = document.getElementById('biasBadge');
+    const text = document.getElementById('biasText');
+    const sub = document.getElementById('biasSub');
+    const label = document.getElementById('scoreLabel').textContent;
+    const verdict = document.getElementById('scoreVerdict').textContent;
+    badge.className = 'bias-badge';
+    if (label.includes('A+ BULL')) {
+      badge.classList.add('bullish');
+      text.textContent = 'A+ BULL — FULL SIZE';
+      sub.textContent = 'AWAIT SIGNAL = BUY + CBC CONFIRMATION';
+    } else if (label.includes('B BULL')) {
+      badge.classList.add('bullish');
+      text.textContent = 'B BULL — HALF SIZE';
+      sub.textContent = 'MIXED — REDUCE SIZE, TIGHTEN STOP';
+    } else if (label.includes('A+ BEAR')) {
+      badge.classList.add('bearish');
+      text.textContent = 'A+ BEAR — FULL SIZE';
+      sub.textContent = 'AWAIT SIGNAL = SELL + CBC CONFIRMATION';
+    } else if (label.includes('B BEAR')) {
+      badge.classList.add('bearish');
+      text.textContent = 'B BEAR — HALF SIZE';
+      sub.textContent = 'MIXED — REDUCE SIZE, TIGHTEN STOP';
+    } else if (label.includes('WATCH')) {
+      badge.classList.add('watchonly');
+      text.textContent = 'WATCH ONLY';
+      sub.textContent = 'NO EDGE — OBSERVE, DO NOT TRADE';
+    } else if (label.includes('NEUTRAL')) {
+      badge.classList.add('neutral');
+      text.textContent = 'STAND DOWN';
+      sub.textContent = 'NO DIRECTIONAL EDGE TODAY';
+    } else {
+      badge.classList.add('neutral');
+      text.textContent = 'AWAITING DATA';
+      sub.textContent = 'ENTER BIAS INPUTS TO GENERATE LAUNCH CODE';
+    }
+  }
+
+  // Steps
+  function toggleStep(el) {
+    el.classList.toggle('done');
+  }
+
+  function toggleCrit(el) {
+    el.classList.toggle('checked');
+    const box = el.querySelector('.crit-box');
+    if (el.classList.contains('checked')) box.textContent = '✓';
+    else box.textContent = '';
+  }
+
+  // Drive classification
+  function selectDrive(type) {
+    ['trend','reversal','chop'].forEach(t => {
+      document.getElementById('drive_' + t).classList.remove('selected');
+    });
+    document.getElementById('drive_' + type).classList.add('selected');
+    const warn = document.getElementById('chopWarning');
+    warn.classList.toggle('show', type === 'chop');
+  }
+
+  // Progress
+  function updateProgress() {
+    const total = document.querySelectorAll('.intel-row').length;
+    const done = document.querySelectorAll('.intel-row.checked').length;
+    document.getElementById('progressCount').textContent = done + ' / ' + total;
+  }
+  updateProgress();
+
+  // Reset
+  function toggleZones() {
+    document.getElementById('zonesPanel').classList.toggle('open');
+  }
+
+  function toggleCorr() {
+    document.getElementById('corrPanel').classList.toggle('open');
+  }
+
+  function resetAll() {
+    if (!confirm('Reset all checklist data for a new trading day?')) return;
+    document.querySelectorAll('.intel-row').forEach(r => r.classList.remove('checked'));
+    document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.bias-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.step-item').forEach(s => s.classList.remove('done'));
+    document.querySelectorAll('.criteria-item').forEach(c => {
+      c.classList.remove('checked');
+      c.querySelector('.crit-box').textContent = '';
+    });
+    document.querySelectorAll('.exit-trigger').forEach(e => e.classList.remove('fired'));
+    ['trend','reversal','chop'].forEach(t => document.getElementById('drive_' + t).classList.remove('selected'));
+    document.getElementById('chopWarning').classList.remove('show');
+    document.querySelector('.notes-area').value = '';
+    ['z_bsl','z_ssl','z_lh','z_ll','z_fvg','z_ob'].forEach(id => document.getElementById(id).value = '');
+    Object.keys(biasState).forEach(k => delete biasState[k]);
+    document.getElementById('scoreNumber').textContent = '--';
+    document.getElementById('scoreNumber').style.color = 'var(--text-dim)';
+    document.getElementById('scoreBar').style.width = '0%';
+    document.getElementById('scoreLabel').textContent = 'NO DATA';
+    document.getElementById('scoreLabel').style.color = 'var(--text-dim)';
+    document.getElementById('scoreVerdict').textContent = 'Set bias inputs above to generate your Launch Code.';
+    document.getElementById('biasBadge').className = 'bias-badge neutral';
+    document.getElementById('biasText').textContent = 'AWAITING DATA';
+    updateProgress();
+  }
+</script>
+</body>
+</html>
