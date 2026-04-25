@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAVERICK'S ORB BACKTESTER</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #0a0c0f;
+  --bg2: #0f1318;
+  --bg3: #141a22;
+  --bg4: #1a2230;
+  --border: #1e2a38;
+  --border2: #2a3a4a;
+  --green: #00ff88;
+  --green-dim: #00cc66;
+  --green-dark: #003322;
+  --red: #ff3355;
+  --red-dim: #cc2244;
+  --red-dark: #330011;
+  --amber: #ffaa00;
+  --amber-dim: #cc8800;
+  --amber-dark: #332200;
+  --blue: #00aaff;
+  --blue-dim: #0088cc;
+  --blue-dark: #001833;
+  --cyan: #00e5ff;
+  --text: #c8d8e8;
+  --text-dim: #6a8a9a;
+  --text-muted: #3a5060;
+  --white: #e8f0f8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.scanline {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+  pointer-events: none;
+  z-index: 999;
+}
+
+header {
+  background: var(--bg2);
+  border-bottom: 2px solid var(--cyan);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 18px;
+  color: var(--cyan);
+  letter-spacing: 3px;
+}
+
+.logo-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.header-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.hstat {
+  text-align: center;
+}
+
+.hstat-val {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.hstat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.main { padding: 20px 24px; max-width: 1400px; margin: 0 auto; }
+
+/* TABS */
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  margin-bottom: -1px;
+}
+
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ENTRY FORM */
+.form-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--cyan);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.form-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-title-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  background: rgba(0,229,255,0.05);
+  letter-spacing: 2px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+
+.form-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.form-input, .form-select {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--white);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.form-input:focus, .form-select:focus { border-color: var(--cyan); }
+.form-input::placeholder { color: var(--text-muted); font-size: 12px; }
+.form-select option { background: var(--bg3); }
+
+.form-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  padding: 10px 20px;
+  border: 1px solid;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+
+.btn-primary {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+.btn-primary:hover { background: rgba(0,229,255,0.1); }
+
+.btn-success {
+  border-color: var(--green);
+  color: var(--green);
+}
+.btn-success:hover { background: var(--green-dark); }
+
+.btn-danger {
+  border-color: var(--red);
+  color: var(--red);
+}
+.btn-danger:hover { background: var(--red-dark); }
+
+.btn-amber {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.btn-amber:hover { background: var(--amber-dark); }
+
+/* OUTCOME PREVIEW */
+.outcome-preview {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.op-item { display: flex; flex-direction: column; gap: 2px; }
+.op-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 2px; }
+.op-val { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--white); }
+
+/* STATS GRID */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.stat-card.positive::after { background: var(--green); }
+.stat-card.negative::after { background: var(--red); }
+.stat-card.neutral::after { background: var(--cyan); }
+.stat-card.amber::after { background: var(--amber); }
+
+.stat-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.stat-val {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.stat-sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* CHART */
+.chart-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.chart-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+#equityChart {
+  width: 100%;
+  height: 200px;
+  display: block;
+}
+
+/* TRADE LOG */
+.trade-log {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+}
+
+.log-header {
+  display: grid;
+  grid-template-columns: 90px 80px 70px 70px 70px 70px 70px 80px 80px 60px 50px;
+  gap: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border2);
+  background: var(--bg3);
+}
+
+.log-header-cell {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.log-row {
+  display: grid;
+  grid-template-columns: 90px 80px 70px 70px 70px 70px 70px 80px 80px 60px 50px;
+  gap: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+  align-items: center;
+}
+
+.log-row:hover { background: var(--bg3); }
+.log-row:last-child { border-bottom: none; }
+
+.log-row.win { border-left: 2px solid var(--green); }
+.log-row.loss { border-left: 2px solid var(--red); }
+.log-row.time-stop { border-left: 2px solid var(--amber); }
+
+.log-cell {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.log-cell.green { color: var(--green); }
+.log-cell.red { color: var(--red); }
+.log-cell.amber { color: var(--amber); }
+.log-cell.dim { color: var(--text-dim); }
+
+.del-btn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text-muted);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.del-btn:hover { border-color: var(--red); color: var(--red); }
+
+.empty-log {
+  padding: 40px;
+  text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+/* FILTER BAR */
+.filter-bar {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+.filter-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { color: var(--text); border-color: var(--text-muted); }
+.filter-btn.active { color: var(--cyan); border-color: var(--cyan); background: rgba(0,229,255,0.05); }
+
+/* ANALYSIS GRID */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.analysis-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 16px;
+}
+
+.analysis-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.breakdown-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.breakdown-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  min-width: 80px;
+}
+
+.breakdown-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.breakdown-bar { height: 100%; transition: width 0.4s ease; }
+
+.breakdown-val {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--white);
+  min-width: 60px;
+  text-align: right;
+}
+
+/* SETTINGS */
+.settings-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.settings-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg2);
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 10px 16px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+.toast.error { border-color: var(--red); color: var(--red); }
+
+/* RULE BOX */
+.rule-box {
+  background: rgba(0,229,255,0.03);
+  border: 1px solid rgba(0,229,255,0.15);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.rule-box-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  margin-bottom: 10px;
+}
+
+.rule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.rule-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.rule-arrow { color: var(--cyan); font-family: 'Share Tech Mono', monospace; font-size: 12px; flex-shrink: 0; }
+.rule-val { color: var(--white); font-weight: 500; }
+
+/* MAVERICK FILTER */
+.maverick-box {
+  background: rgba(0,255,136,0.03);
+  border: 1px solid rgba(0,255,136,0.15);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.maverick-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+
+.maverick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.mav-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  transition: all 0.1s;
+}
+
+.mav-item:hover { background: var(--bg3); }
+.mav-check {
+  width: 14px; height: 14px;
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+
+.mav-item.checked .mav-check {
+  background: var(--green-dark);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+@media (max-width: 900px) {
+  .log-header, .log-row {
+    grid-template-columns: 80px 70px 60px 60px 60px 70px 70px 60px;
+  }
+  .log-header-cell:nth-child(9),
+  .log-header-cell:nth-child(10),
+  .log-header-cell:nth-child(11),
+  .log-cell:nth-child(9),
+  .log-cell:nth-child(10),
+  .log-cell:nth-child(11) { display: none; }
+  .analysis-grid { grid-template-columns: 1fr; }
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+.footer-callsign { color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<header>
+  <div>
+    <div class="logo-title">MAVERICK'S ORB BACKTESTER</div>
+    <div class="logo-sub">SPY 0DTE / 1-5DTE // Opening Range Breakout</div>
+  </div>
+  <div class="header-stats">
+    <div class="hstat">
+      <div class="hstat-val" id="h_trades" style="color:var(--cyan)">0</div>
+      <div class="hstat-label">Trades</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" id="h_winrate" style="color:var(--text-dim)">--%</div>
+      <div class="hstat-label">Win Rate</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" id="h_pnl" style="color:var(--text-dim)">$0</div>
+      <div class="hstat-label">Net P&L</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" id="h_pf" style="color:var(--text-dim)">--</div>
+      <div class="hstat-label">Profit Factor</div>
+    </div>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('log')">TRADE LOG</button>
+    <button class="tab-btn" onclick="switchTab('analysis')">ANALYSIS</button>
+    <button class="tab-btn" onclick="switchTab('settings')">SETTINGS</button>
+  </div>
+
+  <!-- TRADE LOG TAB -->
+  <div id="tab-log" class="tab-panel active">
+
+    <!-- Strategy Rules -->
+    <div class="rule-box">
+      <div class="rule-box-title">// ACTIVE STRATEGY RULES</div>
+      <div class="rule-grid">
+        <div class="rule-item"><span class="rule-arrow">▶</span><span>Opening Range: <span class="rule-val" id="r_range">9:30–9:35 AM (5 min)</span></span></div>
+        <div class="rule-item"><span class="rule-arrow">▶</span><span>Entry: <span class="rule-val" id="r_entry">First breakout ATM option</span></span></div>
+        <div class="rule-item"><span class="rule-arrow">▶</span><span>Profit Target: <span class="rule-val" id="r_target">+100%</span></span></div>
+        <div class="rule-item"><span class="rule-arrow">▶</span><span>Stop Loss: <span class="rule-val" id="r_stop">-50%</span></span></div>
+        <div class="rule-item"><span class="rule-arrow">▶</span><span>Position Size: <span class="rule-val" id="r_size">$500</span></span></div>
+        <div class="rule-item"><span class="rule-arrow">▶</span><span>Trade Days: <span class="rule-val" id="r_days">Mon / Wed / Fri</span></span></div>
+        <div class="rule-item"><span class="rule-arrow">▶</span><span>Max Range Filter: <span class="rule-val" id="r_maxrange">$2.00</span></span></div>
+        <div class="rule-item"><span class="rule-arrow">▶</span><span>Time Stop: <span class="rule-val" id="r_timestop">3:30 PM ET</span></span></div>
+      </div>
+    </div>
+
+    <!-- Maverick Filters -->
+    <div class="maverick-box">
+      <div class="maverick-title">// MAVERICK CONFLUENCE FILTERS (Check before entry)</div>
+      <div class="maverick-grid">
+        <div class="mav-item" id="mf1" onclick="toggleMav(this)"><div class="mav-check"></div>Bias Score aligns with ORB direction</div>
+        <div class="mav-item" id="mf2" onclick="toggleMav(this)"><div class="mav-check"></div>ORB break near London H/L zone</div>
+        <div class="mav-item" id="mf3" onclick="toggleMav(this)"><div class="mav-check"></div>LTPROv7 SIGNAL moving toward BUY/SELL</div>
+        <div class="mav-item" id="mf4" onclick="toggleMav(this)"><div class="mav-check"></div>Opening range width under $2.00</div>
+        <div class="mav-item" id="mf5" onclick="toggleMav(this)"><div class="mav-check"></div>No Red Folder within 10 min</div>
+        <div class="mav-item" id="mf6" onclick="toggleMav(this)"><div class="mav-check"></div>VIX not spiking at open</div>
+      </div>
+    </div>
+
+    <!-- Entry Form -->
+    <div class="form-card">
+      <div class="form-title">
+        <span class="form-title-badge">NEW TRADE</span>
+        Log Trade Entry
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input" id="f_date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Day of Week</label>
+          <select class="form-select" id="f_dow">
+            <option value="">-- Select --</option>
+            <option value="Mon">Monday</option>
+            <option value="Tue">Tuesday</option>
+            <option value="Wed">Wednesday</option>
+            <option value="Thu">Thursday</option>
+            <option value="Fri">Friday</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ORB High ($)</label>
+          <input type="number" class="form-input" id="f_orb_high" placeholder="e.g. 602.50" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">ORB Low ($)</label>
+          <input type="number" class="form-input" id="f_orb_low" placeholder="e.g. 600.50" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Direction</label>
+          <select class="form-select" id="f_dir" onchange="calcOutcome()">
+            <option value="">-- Wait for break --</option>
+            <option value="CALL">CALL (Broke Above)</option>
+            <option value="PUT">PUT (Broke Below)</option>
+            <option value="SKIP">SKIP (No breakout / Range too wide)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Entry Price ($)</label>
+          <input type="number" class="form-input" id="f_entry" placeholder="e.g. 1.25" step="0.01" onchange="calcOutcome()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Exit Price ($)</label>
+          <input type="number" class="form-input" id="f_exit" placeholder="Auto or manual" step="0.01" onchange="calcOutcome()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Exit Reason</label>
+          <select class="form-select" id="f_exit_reason" onchange="calcOutcome()">
+            <option value="">-- Select --</option>
+            <option value="TARGET">Profit Target (+100%)</option>
+            <option value="STOP">Stop Loss (-50%)</option>
+            <option value="TIME">Time Stop (3:30 PM)</option>
+            <option value="MANUAL">Manual Exit</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contracts</label>
+          <input type="number" class="form-input" id="f_contracts" placeholder="e.g. 2" step="1" min="1" value="1" onchange="calcOutcome()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">DTE Used</label>
+          <select class="form-select" id="f_dte">
+            <option value="0">0DTE</option>
+            <option value="1">1DTE</option>
+            <option value="2">2DTE</option>
+            <option value="3">3DTE</option>
+            <option value="4">4DTE</option>
+            <option value="5">5DTE</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Maverick Filters Met</label>
+          <input type="number" class="form-input" id="f_mav_filters" placeholder="0-6" min="0" max="6" value="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" class="form-input" id="f_notes" placeholder="Optional notes..." />
+        </div>
+      </div>
+
+      <!-- Outcome Preview -->
+      <div class="outcome-preview" id="outcomePreview">
+        <div class="op-item"><div class="op-label">ORB Range</div><div class="op-val" id="op_range">--</div></div>
+        <div class="op-item"><div class="op-label">Range Width</div><div class="op-val" id="op_width">--</div></div>
+        <div class="op-item"><div class="op-label">Target Price</div><div class="op-val" id="op_target">--</div></div>
+        <div class="op-item"><div class="op-label">Stop Price</div><div class="op-val" id="op_stop">--</div></div>
+        <div class="op-item"><div class="op-label">Max Profit</div><div class="op-val" id="op_maxprofit" style="color:var(--green)">--</div></div>
+        <div class="op-item"><div class="op-label">Max Loss</div><div class="op-val" id="op_maxloss" style="color:var(--red)">--</div></div>
+        <div class="op-item"><div class="op-label">Actual P&L</div><div class="op-val" id="op_pnl">--</div></div>
+        <div class="op-item"><div class="op-label">Range Filter</div><div class="op-val" id="op_filter">--</div></div>
+      </div>
+
+      <div class="form-row">
+        <button class="btn btn-success" onclick="addTrade()">+ LOG TRADE</button>
+        <button class="btn btn-amber" onclick="clearForm()">CLEAR FORM</button>
+        <button class="btn btn-primary" onclick="exportCSV()">EXPORT CSV</button>
+        <button class="btn btn-danger" onclick="clearAll()">CLEAR ALL DATA</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card neutral">
+        <div class="stat-label">Total Trades</div>
+        <div class="stat-val" id="s_trades" style="color:var(--cyan)">0</div>
+        <div class="stat-sub" id="s_trades_sub">No trades logged</div>
+      </div>
+      <div class="stat-card positive">
+        <div class="stat-label">Win Rate</div>
+        <div class="stat-val" id="s_winrate" style="color:var(--text-dim)">--%</div>
+        <div class="stat-sub" id="s_winrate_sub">Break even: 34%</div>
+      </div>
+      <div class="stat-card neutral">
+        <div class="stat-label">Net P&L</div>
+        <div class="stat-val" id="s_pnl" style="color:var(--text-dim)">$0</div>
+        <div class="stat-sub" id="s_pnl_sub">Starting: $0</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-label">Profit Factor</div>
+        <div class="stat-val" id="s_pf" style="color:var(--text-dim)">--</div>
+        <div class="stat-sub">Target: &gt;1.40</div>
+      </div>
+      <div class="stat-card neutral">
+        <div class="stat-label">Avg Win</div>
+        <div class="stat-val" id="s_avgwin" style="color:var(--green)">--</div>
+        <div class="stat-sub">Target: ~$417</div>
+      </div>
+      <div class="stat-card neutral">
+        <div class="stat-label">Avg Loss</div>
+        <div class="stat-val" id="s_avgloss" style="color:var(--red)">--</div>
+        <div class="stat-sub">Target: ~$210</div>
+      </div>
+      <div class="stat-card neutral">
+        <div class="stat-label">Payoff Ratio</div>
+        <div class="stat-val" id="s_ratio" style="color:var(--text-dim)">--</div>
+        <div class="stat-sub">Target: ~2:1</div>
+      </div>
+      <div class="stat-card negative">
+        <div class="stat-label">Max Drawdown</div>
+        <div class="stat-val" id="s_dd" style="color:var(--red)">$0</div>
+        <div class="stat-sub">Target: &lt;8%</div>
+      </div>
+      <div class="stat-card neutral">
+        <div class="stat-label">Wins / Losses</div>
+        <div class="stat-val" id="s_wl" style="color:var(--text-dim)">0 / 0</div>
+        <div class="stat-sub" id="s_wl_sub">Time stops: 0</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-label">Maverick Edge</div>
+        <div class="stat-val" id="s_mav_wr" style="color:var(--text-dim)">--%</div>
+        <div class="stat-sub">High filter win rate</div>
+      </div>
+    </div>
+
+    <!-- Equity Chart -->
+    <div class="chart-wrap">
+      <div class="chart-title">// EQUITY CURVE</div>
+      <canvas id="equityChart"></canvas>
+      <div id="chartEmpty" style="text-align:center;padding:60px 0;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text-muted);letter-spacing:2px;">NO TRADES LOGGED YET — EQUITY CURVE WILL APPEAR HERE</div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <span class="filter-label">FILTER:</span>
+      <button class="filter-btn active" onclick="setFilter('ALL',this)">ALL</button>
+      <button class="filter-btn" onclick="setFilter('Mon',this)">MON</button>
+      <button class="filter-btn" onclick="setFilter('Tue',this)">TUE</button>
+      <button class="filter-btn" onclick="setFilter('Wed',this)">WED</button>
+      <button class="filter-btn" onclick="setFilter('Thu',this)">THU</button>
+      <button class="filter-btn" onclick="setFilter('Fri',this)">FRI</button>
+      <button class="filter-btn" onclick="setFilter('CALL',this)">CALLS</button>
+      <button class="filter-btn" onclick="setFilter('PUT',this)">PUTS</button>
+      <button class="filter-btn" onclick="setFilter('WIN',this)">WINS</button>
+      <button class="filter-btn" onclick="setFilter('LOSS',this)">LOSSES</button>
+      <button class="filter-btn" onclick="setFilter('HIGH_MAV',this)">HIGH CONFLUENCE</button>
+    </div>
+
+    <!-- Trade Log Table -->
+    <div class="trade-log">
+      <div class="log-header">
+        <div class="log-header-cell">Date</div>
+        <div class="log-header-cell">Day</div>
+        <div class="log-header-cell">Dir</div>
+        <div class="log-header-cell">Entry</div>
+        <div class="log-header-cell">Exit</div>
+        <div class="log-header-cell">Reason</div>
+        <div class="log-header-cell">P&L</div>
+        <div class="log-header-cell">Range W</div>
+        <div class="log-header-cell">DTE</div>
+        <div class="log-header-cell">Mav</div>
+        <div class="log-header-cell">Del</div>
+      </div>
+      <div id="tradeLog">
+        <div class="empty-log">NO TRADES LOGGED — ADD YOUR FIRST TRADE ABOVE</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ANALYSIS TAB -->
+  <div id="tab-analysis" class="tab-panel">
+
+    <div class="analysis-grid">
+
+      <div class="analysis-card">
+        <div class="analysis-title">// DAY OF WEEK BREAKDOWN</div>
+        <div id="dow_breakdown">
+          <div class="empty-log" style="padding:20px">No data yet</div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-title">// DIRECTION BREAKDOWN</div>
+        <div id="dir_breakdown">
+          <div class="empty-log" style="padding:20px">No data yet</div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-title">// EXIT REASON BREAKDOWN</div>
+        <div id="exit_breakdown">
+          <div class="empty-log" style="padding:20px">No data yet</div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-title">// MAVERICK FILTER IMPACT</div>
+        <div id="mav_breakdown">
+          <div class="empty-log" style="padding:20px">No data yet</div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-title">// DTE BREAKDOWN</div>
+        <div id="dte_breakdown">
+          <div class="empty-log" style="padding:20px">No data yet</div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-title">// RANGE WIDTH IMPACT</div>
+        <div id="range_breakdown">
+          <div class="empty-log" style="padding:20px">No data yet</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Monthly P&L -->
+    <div class="analysis-card" style="margin-bottom:16px;">
+      <div class="analysis-title">// MONTHLY P&L</div>
+      <div id="monthly_breakdown">
+        <div class="empty-log" style="padding:20px">No data yet</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div id="tab-settings" class="tab-panel">
+
+    <div class="settings-card">
+      <div class="settings-title">Strategy Parameters</div>
+      <div class="settings-grid">
+        <div class="form-group">
+          <label class="form-label">Profit Target (%)</label>
+          <input type="number" class="form-input" id="cfg_target" value="100" min="10" max="500" step="5" onchange="saveSettings()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stop Loss (%)</label>
+          <input type="number" class="form-input" id="cfg_stop" value="50" min="10" max="100" step="5" onchange="saveSettings()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Default Position Size ($)</label>
+          <input type="number" class="form-input" id="cfg_size" value="500" min="100" step="50" onchange="saveSettings()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Starting Capital ($)</label>
+          <input type="number" class="form-input" id="cfg_capital" value="25000" min="1000" step="1000" onchange="saveSettings()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Max Range Width ($)</label>
+          <input type="number" class="form-input" id="cfg_maxrange" value="2.00" min="0.50" max="10" step="0.25" onchange="saveSettings()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">ORB Window (min)</label>
+          <select class="form-select" id="cfg_orbmin" onchange="saveSettings()">
+            <option value="5" selected>5 minutes</option>
+            <option value="10">10 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-title">Data Management</div>
+      <div class="form-row">
+        <button class="btn btn-primary" onclick="exportCSV()">EXPORT CSV</button>
+        <button class="btn btn-amber" onclick="exportJSON()">EXPORT JSON</button>
+        <button class="btn btn-danger" onclick="clearAll()">CLEAR ALL TRADES</button>
+      </div>
+      <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-muted);">
+        All data is stored locally in your browser. Export regularly to preserve your records.
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-title">How to Use This Tool</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.8;">
+        <p style="margin-bottom:8px;"><span style="color:var(--cyan);font-family:'Share Tech Mono',monospace;">STEP 1</span> — Run your full War Room pre-market drill (Phases 1-3). Check confluence filters above.</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--cyan);font-family:'Share Tech Mono',monospace;">STEP 2</span> — At 9:30 AM watch the first 5 minutes. At 9:35 AM record the ORB High and Low.</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--cyan);font-family:'Share Tech Mono',monospace;">STEP 3</span> — When price breaks above or below the range, enter ATM call or put. Log direction and entry price.</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--cyan);font-family:'Share Tech Mono',monospace;">STEP 4</span> — Set 100% profit target and 50% stop loss. Walk away. Most trades resolve in 90 minutes.</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--cyan);font-family:'Share Tech Mono',monospace;">STEP 5</span> — Log the exit price and reason. Track Maverick Filters met to measure confluence impact.</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--cyan);font-family:'Share Tech Mono',monospace;">STEP 6</span> — After 30+ trades check the Analysis tab. Compare your win rate vs the 41% backtest baseline.</p>
+        <p style="margin-bottom:0;"><span style="color:var(--amber);font-family:'Share Tech Mono',monospace;">KEY INSIGHT</span> — Track whether high Maverick confluence (4+ filters) improves your win rate vs blind ORB. That data will tell you if your framework adds real edge.</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  MAVERICK'S ORB BACKTESTER v1.0 &nbsp;|&nbsp; <span class="footer-callsign">MAVERICK</span> &amp; GOOSE &nbsp;|&nbsp; SPY 1-5DTE OPERATIONS
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let trades = JSON.parse(localStorage.getItem('orb_trades') || '[]');
+let settings = JSON.parse(localStorage.getItem('orb_settings') || '{}');
+let currentFilter = 'ALL';
+
+const defaults = {
+  target: 100,
+  stop: 50,
+  size: 500,
+  capital: 25000,
+  maxrange: 2.00,
+  orbmin: 5
+};
+
+function getSetting(key) {
+  return settings[key] !== undefined ? settings[key] : defaults[key];
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = function() {
+  loadSettings();
+  setTodayDate();
+  setDayFromDate();
+  renderAll();
+  updateRuleDisplay();
+};
+
+function setTodayDate() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f_date').value = today;
+  setDayFromDate();
+}
+
+function setDayFromDate() {
+  const d = document.getElementById('f_date').value;
+  if (!d) return;
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const day = days[new Date(d + 'T12:00:00').getDay()];
+  const sel = document.getElementById('f_dow');
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === day) { sel.selectedIndex = i; break; }
+  }
+}
+
+document.getElementById('f_date').addEventListener('change', setDayFromDate);
+document.getElementById('f_orb_high').addEventListener('input', calcOutcome);
+document.getElementById('f_orb_low').addEventListener('input', calcOutcome);
+
+// ============================================================
+// CALC OUTCOME
+// ============================================================
+function calcOutcome() {
+  const entry = parseFloat(document.getElementById('f_entry').value);
+  const exitP = parseFloat(document.getElementById('f_exit').value);
+  const dir = document.getElementById('f_dir').value;
+  const reason = document.getElementById('f_exit_reason').value;
+  const contracts = parseInt(document.getElementById('f_contracts').value) || 1;
+  const orbH = parseFloat(document.getElementById('f_orb_high').value);
+  const orbL = parseFloat(document.getElementById('f_orb_low').value);
+  const target = getSetting('target') / 100;
+  const stop = getSetting('stop') / 100;
+  const size = getSetting('size');
+
+  if (orbH && orbL) {
+    const width = (orbH - orbL).toFixed(2);
+    document.getElementById('op_range').textContent = `$${orbL.toFixed(2)} – $${orbH.toFixed(2)}`;
+    document.getElementById('op_width').textContent = `$${width}`;
+    const maxR = getSetting('maxrange');
+    const filterOk = parseFloat(width) <= maxR;
+    document.getElementById('op_filter').textContent = filterOk ? 'PASS' : 'SKIP (too wide)';
+    document.getElementById('op_filter').style.color = filterOk ? 'var(--green)' : 'var(--red)';
+  }
+
+  if (!entry || entry <= 0) return;
+
+  const targetPrice = (entry * (1 + target)).toFixed(2);
+  const stopPrice = (entry * (1 - stop)).toFixed(2);
+  const numContracts = contracts;
+  const costPerContract = entry * 100;
+  const maxProfit = (entry * target * 100 * numContracts).toFixed(2);
+  const maxLoss = (entry * stop * 100 * numContracts).toFixed(2);
+
+  document.getElementById('op_target').textContent = `$${targetPrice}`;
+  document.getElementById('op_stop').textContent = `$${stopPrice}`;
+  document.getElementById('op_maxprofit').textContent = `+$${maxProfit}`;
+  document.getElementById('op_maxloss').textContent = `-$${maxLoss}`;
+
+  if (exitP && exitP > 0) {
+    let pnl = 0;
+    if (reason === 'TARGET') {
+      pnl = parseFloat(maxProfit);
+    } else if (reason === 'STOP') {
+      pnl = -parseFloat(maxLoss);
+    } else {
+      pnl = (exitP - entry) * 100 * numContracts;
+    }
+    const pnlEl = document.getElementById('op_pnl');
+    pnlEl.textContent = (pnl >= 0 ? '+' : '') + '$' + pnl.toFixed(2);
+    pnlEl.style.color = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  }
+}
+
+// ============================================================
+// ADD TRADE
+// ============================================================
+function addTrade() {
+  const date = document.getElementById('f_date').value;
+  const dow = document.getElementById('f_dow').value;
+  const orbH = parseFloat(document.getElementById('f_orb_high').value);
+  const orbL = parseFloat(document.getElementById('f_orb_low').value);
+  const dir = document.getElementById('f_dir').value;
+  const entry = parseFloat(document.getElementById('f_entry').value);
+  const exitP = parseFloat(document.getElementById('f_exit').value);
+  const reason = document.getElementById('f_exit_reason').value;
+  const contracts = parseInt(document.getElementById('f_contracts').value) || 1;
+  const dte = parseInt(document.getElementById('f_dte').value);
+  const mavFilters = parseInt(document.getElementById('f_mav_filters').value) || 0;
+  const notes = document.getElementById('f_notes').value;
+
+  if (!date) { showToast('Please enter a date', true); return; }
+  if (!dow) { showToast('Please select day of week', true); return; }
+  if (dir === 'SKIP') {
+    const trade = { id: Date.now(), date, dow, orbH: orbH||0, orbL: orbL||0, dir: 'SKIP', entry: 0, exit: 0, reason: 'SKIP', contracts, dte, mavFilters, notes, pnl: 0, rangeWidth: orbH && orbL ? orbH - orbL : 0, outcome: 'SKIP' };
+    trades.push(trade);
+    saveTrades();
+    renderAll();
+    clearForm();
+    showToast('Trade skipped and logged');
+    return;
+  }
+  if (!orbH || !orbL) { showToast('Please enter ORB High and Low', true); return; }
+  if (!dir) { showToast('Please select direction', true); return; }
+  if (!entry || entry <= 0) { showToast('Please enter entry price', true); return; }
+  if (!reason) { showToast('Please select exit reason', true); return; }
+
+  const target = getSetting('target') / 100;
+  const stop = getSetting('stop') / 100;
+  const rangeWidth = orbH - orbL;
+
+  let pnl = 0;
+  let outcome = '';
+  let actualExit = exitP;
+
+  if (reason === 'TARGET') {
+    pnl = entry * target * 100 * contracts;
+    actualExit = entry * (1 + target);
+    outcome = 'WIN';
+  } else if (reason === 'STOP') {
+    pnl = -(entry * stop * 100 * contracts);
+    actualExit = entry * (1 - stop);
+    outcome = 'LOSS';
+  } else if (reason === 'TIME') {
+    if (!exitP || exitP <= 0) { showToast('Please enter exit price for time stop', true); return; }
+    pnl = (exitP - entry) * 100 * contracts;
+    outcome = pnl >= 0 ? 'WIN' : 'LOSS';
+    actualExit = exitP;
+  } else if (reason === 'MANUAL') {
+    if (!exitP || exitP <= 0) { showToast('Please enter exit price for manual exit', true); return; }
+    pnl = (exitP - entry) * 100 * contracts;
+    outcome = pnl >= 0 ? 'WIN' : 'LOSS';
+    actualExit = exitP;
+  }
+
+  const trade = { id: Date.now(), date, dow, orbH, orbL, dir, entry, exit: actualExit, reason, contracts, dte, mavFilters, notes, pnl: parseFloat(pnl.toFixed(2)), rangeWidth: parseFloat(rangeWidth.toFixed(2)), outcome };
+
+  trades.push(trade);
+  saveTrades();
+  renderAll();
+  clearForm();
+  showToast('Trade logged successfully');
+}
+
+// ============================================================
+// DELETE TRADE
+// ============================================================
+function deleteTrade(id) {
+  if (!confirm('Delete this trade?')) return;
+  trades = trades.filter(t => t.id !== id);
+  saveTrades();
+  renderAll();
+  showToast('Trade deleted');
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderAll() {
+  renderStats();
+  renderLog();
+  renderChart();
+  renderAnalysis();
+  updateHeader();
+}
+
+function getFilteredTrades() {
+  if (currentFilter === 'ALL') return trades;
+  if (currentFilter === 'WIN') return trades.filter(t => t.outcome === 'WIN');
+  if (currentFilter === 'LOSS') return trades.filter(t => t.outcome === 'LOSS');
+  if (currentFilter === 'CALL') return trades.filter(t => t.dir === 'CALL');
+  if (currentFilter === 'PUT') return trades.filter(t => t.dir === 'PUT');
+  if (currentFilter === 'HIGH_MAV') return trades.filter(t => t.mavFilters >= 4);
+  return trades.filter(t => t.dow === currentFilter);
+}
+
+function calcStats(tradeSet) {
+  const real = tradeSet.filter(t => t.dir !== 'SKIP');
+  const wins = real.filter(t => t.outcome === 'WIN');
+  const losses = real.filter(t => t.outcome === 'LOSS');
+  const totalPnl = real.reduce((s, t) => s + t.pnl, 0);
+  const grossWin = wins.reduce((s, t) => s + t.pnl, 0);
+  const grossLoss = Math.abs(losses.reduce((s, t) => s + t.pnl, 0));
+  const winRate = real.length > 0 ? (wins.length / real.length * 100) : 0;
+  const avgWin = wins.length > 0 ? grossWin / wins.length : 0;
+  const avgLoss = losses.length > 0 ? grossLoss / losses.length : 0;
+  const payoffRatio = avgLoss > 0 ? avgWin / avgLoss : 0;
+  const profitFactor = grossLoss > 0 ? grossWin / grossLoss : (grossWin > 0 ? 999 : 0);
+  const timeStops = real.filter(t => t.reason === 'TIME').length;
+
+  // Max drawdown
+  let peak = 0, dd = 0, maxDd = 0, equity = getSetting('capital');
+  real.forEach(t => {
+    equity += t.pnl;
+    if (equity > peak) peak = equity;
+    dd = peak - equity;
+    if (dd > maxDd) maxDd = dd;
+  });
+
+  // Maverick high confluence win rate
+  const highMav = real.filter(t => t.mavFilters >= 4);
+  const highMavWins = highMav.filter(t => t.outcome === 'WIN');
+  const highMavWR = highMav.length > 0 ? highMavWins.length / highMav.length * 100 : null;
+
+  return { total: real.length, wins: wins.length, losses: losses.length, timeStops, totalPnl, grossWin, grossLoss, winRate, avgWin, avgLoss, payoffRatio, profitFactor, maxDd, highMavWR, highMavCount: highMav.length };
+}
+
+function renderStats() {
+  const s = calcStats(trades);
+  const fmt = v => v >= 0 ? '+$' + v.toFixed(2) : '-$' + Math.abs(v).toFixed(2);
+
+  document.getElementById('s_trades').textContent = s.total;
+  document.getElementById('s_trades_sub').textContent = `Skipped: ${trades.filter(t=>t.dir==='SKIP').length}`;
+
+  const wrEl = document.getElementById('s_winrate');
+  wrEl.textContent = s.total > 0 ? s.winRate.toFixed(1) + '%' : '--%';
+  wrEl.style.color = s.winRate >= 41 ? 'var(--green)' : s.winRate >= 34 ? 'var(--amber)' : 'var(--red)';
+
+  const pnlEl = document.getElementById('s_pnl');
+  pnlEl.textContent = fmt(s.totalPnl);
+  pnlEl.style.color = s.totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('s_pnl_sub').textContent = `Capital: $${(getSetting('capital') + s.totalPnl).toFixed(0)}`;
+
+  const pfEl = document.getElementById('s_pf');
+  pfEl.textContent = s.total > 0 ? s.profitFactor.toFixed(2) : '--';
+  pfEl.style.color = s.profitFactor >= 1.4 ? 'var(--green)' : s.profitFactor >= 1 ? 'var(--amber)' : 'var(--red)';
+
+  document.getElementById('s_avgwin').textContent = s.wins > 0 ? '+$' + s.avgWin.toFixed(2) : '--';
+  document.getElementById('s_avgloss').textContent = s.losses > 0 ? '-$' + s.avgLoss.toFixed(2) : '--';
+
+  const ratioEl = document.getElementById('s_ratio');
+  ratioEl.textContent = s.avgLoss > 0 ? s.payoffRatio.toFixed(2) + ':1' : '--';
+  ratioEl.style.color = s.payoffRatio >= 2 ? 'var(--green)' : s.payoffRatio >= 1.5 ? 'var(--amber)' : 'var(--red)';
+
+  document.getElementById('s_dd').textContent = '-$' + s.maxDd.toFixed(2);
+  document.getElementById('s_wl').textContent = s.wins + ' / ' + s.losses;
+  document.getElementById('s_wl_sub').textContent = 'Time stops: ' + s.timeStops;
+
+  const mavEl = document.getElementById('s_mav_wr');
+  if (s.highMavWR !== null && s.highMavCount >= 3) {
+    mavEl.textContent = s.highMavWR.toFixed(1) + '%';
+    mavEl.style.color = s.highMavWR >= 50 ? 'var(--green)' : 'var(--amber)';
+  } else {
+    mavEl.textContent = '--';
+    mavEl.style.color = 'var(--text-dim)';
+  }
+}
+
+function renderLog() {
+  const container = document.getElementById('tradeLog');
+  const filtered = getFilteredTrades();
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty-log">NO TRADES MATCH CURRENT FILTER</div>';
+    return;
+  }
+
+  container.innerHTML = [...filtered].reverse().map(t => {
+    const isWin = t.outcome === 'WIN';
+    const isSkip = t.dir === 'SKIP';
+    const rowClass = isSkip ? '' : isWin ? 'win' : (t.reason === 'TIME' ? 'time-stop' : 'loss');
+    const pnlStr = t.pnl >= 0 ? '+$' + t.pnl.toFixed(2) : '-$' + Math.abs(t.pnl).toFixed(2);
+    const pnlClass = t.pnl > 0 ? 'green' : t.pnl < 0 ? 'red' : 'dim';
+    const dirClass = t.dir === 'CALL' ? 'green' : t.dir === 'PUT' ? 'red' : 'dim';
+    return `<div class="log-row ${rowClass}">
+      <div class="log-cell dim">${t.date}</div>
+      <div class="log-cell">${t.dow}</div>
+      <div class="log-cell ${dirClass}">${t.dir}</div>
+      <div class="log-cell">$${t.entry > 0 ? t.entry.toFixed(2) : '--'}</div>
+      <div class="log-cell">$${t.exit > 0 ? t.exit.toFixed(2) : '--'}</div>
+      <div class="log-cell dim">${t.reason}</div>
+      <div class="log-cell ${pnlClass}">${isSkip ? 'SKIP' : pnlStr}</div>
+      <div class="log-cell">$${t.rangeWidth.toFixed(2)}</div>
+      <div class="log-cell dim">${t.dte}DTE</div>
+      <div class="log-cell" style="color:var(--cyan)">${t.mavFilters}/6</div>
+      <div class="log-cell"><button class="del-btn" onclick="deleteTrade(${t.id})">X</button></div>
+    </div>`;
+  }).join('');
+}
+
+function renderChart() {
+  const canvas = document.getElementById('equityChart');
+  const ctx = canvas.getContext('2d');
+  const empty = document.getElementById('chartEmpty');
+  const real = trades.filter(t => t.dir !== 'SKIP');
+
+  if (real.length === 0) {
+    canvas.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+
+  canvas.style.display = 'block';
+  empty.style.display = 'none';
+
+  const W = canvas.offsetWidth || 800;
+  const H = 200;
+  canvas.width = W;
+  canvas.height = H;
+
+  const startCap = getSetting('capital');
+  const points = [startCap];
+  let equity = startCap;
+  real.forEach(t => { equity += t.pnl; points.push(equity); });
+
+  const minVal = Math.min(...points);
+  const maxVal = Math.max(...points);
+  const range = maxVal - minVal || 1;
+  const pad = 20;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = '#1e2a38';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad + (H - pad * 2) * (i / 4);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Starting capital line
+  const baseY = pad + (H - pad * 2) * (1 - (startCap - minVal) / range);
+  ctx.strokeStyle = '#2a3a4a';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(0, baseY); ctx.lineTo(W, baseY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Equity curve
+  const xStep = (W - pad * 2) / Math.max(points.length - 1, 1);
+
+  // Fill area
+  ctx.beginPath();
+  points.forEach((p, i) => {
+    const x = pad + i * xStep;
+    const y = pad + (H - pad * 2) * (1 - (p - minVal) / range);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  const lastX = pad + (points.length - 1) * xStep;
+  ctx.lineTo(lastX, H - pad);
+  ctx.lineTo(pad, H - pad);
+  ctx.closePath();
+  const finalEquity = points[points.length - 1];
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  if (finalEquity >= startCap) {
+    grad.addColorStop(0, 'rgba(0,255,136,0.3)');
+    grad.addColorStop(1, 'rgba(0,255,136,0.02)');
+  } else {
+    grad.addColorStop(0, 'rgba(255,51,85,0.3)');
+    grad.addColorStop(1, 'rgba(255,51,85,0.02)');
+  }
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = finalEquity >= startCap ? '#00ff88' : '#ff3355';
+  ctx.lineWidth = 2;
+  points.forEach((p, i) => {
+    const x = pad + i * xStep;
+    const y = pad + (H - pad * 2) * (1 - (p - minVal) / range);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Dots for wins/losses
+  real.forEach((t, i) => {
+    const x = pad + (i + 1) * xStep;
+    const y = pad + (H - pad * 2) * (1 - (points[i + 1] - minVal) / range);
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = t.outcome === 'WIN' ? '#00ff88' : '#ff3355';
+    ctx.fill();
+  });
+
+  // Labels
+  ctx.fillStyle = '#3a5060';
+  ctx.font = '10px Share Tech Mono';
+  ctx.fillText('$' + maxVal.toFixed(0), 4, pad + 10);
+  ctx.fillText('$' + minVal.toFixed(0), 4, H - pad + 4);
+  ctx.fillText('$' + finalEquity.toFixed(0), W - 70, pad + 10);
+}
+
+function renderAnalysis() {
+  const real = trades.filter(t => t.dir !== 'SKIP');
+  if (real.length === 0) return;
+
+  // DOW
+  const days = ['Mon','Tue','Wed','Thu','Fri'];
+  const dowHtml = days.map(d => {
+    const dt = real.filter(t => t.dow === d);
+    if (dt.length === 0) return '';
+    const wins = dt.filter(t => t.outcome === 'WIN').length;
+    const wr = (wins / dt.length * 100).toFixed(1);
+    const pnl = dt.reduce((s,t) => s + t.pnl, 0);
+    const barW = Math.round(parseFloat(wr));
+    const col = parseFloat(wr) >= 41 ? 'var(--green)' : parseFloat(wr) >= 34 ? 'var(--amber)' : 'var(--red)';
+    return `<div class="breakdown-row">
+      <div class="breakdown-label">${d}</div>
+      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${barW}%;background:${col}"></div></div>
+      <div class="breakdown-val" style="color:${col}">${wr}% (${dt.length})</div>
+    </div>`;
+  }).join('');
+  document.getElementById('dow_breakdown').innerHTML = dowHtml || '<div class="empty-log" style="padding:20px">No data</div>';
+
+  // Direction
+  ['CALL','PUT'].forEach(dir => {
+    const dt = real.filter(t => t.dir === dir);
+    const wins = dt.filter(t => t.outcome === 'WIN').length;
+    const wr = dt.length > 0 ? (wins / dt.length * 100).toFixed(1) : '--';
+    const pnl = dt.reduce((s,t) => s + t.pnl, 0);
+    return { dir, trades: dt.length, wins, wr, pnl };
+  });
+  const dirData = ['CALL','PUT'].map(dir => {
+    const dt = real.filter(t => t.dir === dir);
+    const wins = dt.filter(t => t.outcome === 'WIN').length;
+    const wr = dt.length > 0 ? (wins / dt.length * 100).toFixed(1) : '--';
+    const pnl = dt.reduce((s,t) => s + t.pnl, 0);
+    const col = dt.length > 0 ? (parseFloat(wr) >= 41 ? 'var(--green)' : 'var(--amber)') : 'var(--text-dim)';
+    return `<div class="breakdown-row">
+      <div class="breakdown-label" style="color:${dir==='CALL'?'var(--green)':'var(--red)'}">${dir}</div>
+      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${dt.length>0?wr:0}%;background:${col}"></div></div>
+      <div class="breakdown-val">${wr}% | ${pnl>=0?'+':''}$${pnl.toFixed(0)} (${dt.length})</div>
+    </div>`;
+  }).join('');
+  document.getElementById('dir_breakdown').innerHTML = dirData;
+
+  // Exit reasons
+  const reasons = ['TARGET','STOP','TIME','MANUAL'];
+  const exitHtml = reasons.map(r => {
+    const dt = real.filter(t => t.reason === r);
+    if (dt.length === 0) return '';
+    const pnl = dt.reduce((s,t) => s + t.pnl, 0);
+    const pct = (dt.length / real.length * 100).toFixed(0);
+    const col = r === 'TARGET' ? 'var(--green)' : r === 'STOP' ? 'var(--red)' : 'var(--amber)';
+    return `<div class="breakdown-row">
+      <div class="breakdown-label">${r}</div>
+      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${pct}%;background:${col}"></div></div>
+      <div class="breakdown-val">${dt.length} trades | ${pnl>=0?'+':''}$${pnl.toFixed(0)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('exit_breakdown').innerHTML = exitHtml || '<div class="empty-log" style="padding:20px">No data</div>';
+
+  // Maverick filter levels
+  let mavHtml = '';
+  for (let m = 0; m <= 6; m++) {
+    const dt = real.filter(t => t.mavFilters === m);
+    if (dt.length === 0) continue;
+    const wins = dt.filter(t => t.outcome === 'WIN').length;
+    const wr = (wins / dt.length * 100).toFixed(1);
+    const col = parseFloat(wr) >= 50 ? 'var(--green)' : parseFloat(wr) >= 41 ? 'var(--cyan)' : 'var(--amber)';
+    mavHtml += `<div class="breakdown-row">
+      <div class="breakdown-label">${m}/6 filters</div>
+      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${wr}%;background:${col}"></div></div>
+      <div class="breakdown-val" style="color:${col}">${wr}% (${dt.length})</div>
+    </div>`;
+  }
+  document.getElementById('mav_breakdown').innerHTML = mavHtml || '<div class="empty-log" style="padding:20px">No data</div>';
+
+  // DTE breakdown
+  let dteHtml = '';
+  for (let d = 0; d <= 5; d++) {
+    const dt = real.filter(t => t.dte === d);
+    if (dt.length === 0) continue;
+    const wins = dt.filter(t => t.outcome === 'WIN').length;
+    const wr = (wins / dt.length * 100).toFixed(1);
+    const pnl = dt.reduce((s,t) => s + t.pnl, 0);
+    const col = parseFloat(wr) >= 41 ? 'var(--green)' : 'var(--amber)';
+    dteHtml += `<div class="breakdown-row">
+      <div class="breakdown-label">${d}DTE</div>
+      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${wr}%;background:${col}"></div></div>
+      <div class="breakdown-val">${wr}% | ${pnl>=0?'+':''}$${pnl.toFixed(0)} (${dt.length})</div>
+    </div>`;
+  }
+  document.getElementById('dte_breakdown').innerHTML = dteHtml || '<div class="empty-log" style="padding:20px">No data</div>';
+
+  // Range width breakdown
+  const narrow = real.filter(t => t.rangeWidth <= 1.0);
+  const medium = real.filter(t => t.rangeWidth > 1.0 && t.rangeWidth <= 2.0);
+  const wide = real.filter(t => t.rangeWidth > 2.0);
+  const rangeGroups = [
+    { label: '≤$1.00', data: narrow },
+    { label: '$1–$2', data: medium },
+    { label: '>$2', data: wide }
+  ];
+  const rangeHtml = rangeGroups.map(g => {
+    if (g.data.length === 0) return '';
+    const wins = g.data.filter(t => t.outcome === 'WIN').length;
+    const wr = (wins / g.data.length * 100).toFixed(1);
+    const col = parseFloat(wr) >= 41 ? 'var(--green)' : 'var(--amber)';
+    return `<div class="breakdown-row">
+      <div class="breakdown-label">${g.label}</div>
+      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${wr}%;background:${col}"></div></div>
+      <div class="breakdown-val" style="color:${col}">${wr}% (${g.data.length})</div>
+    </div>`;
+  }).join('');
+  document.getElementById('range_breakdown').innerHTML = rangeHtml || '<div class="empty-log" style="padding:20px">No data</div>';
+
+  // Monthly P&L
+  const monthly = {};
+  real.forEach(t => {
+    const key = t.date ? t.date.substring(0, 7) : 'Unknown';
+    if (!monthly[key]) monthly[key] = { pnl: 0, trades: 0, wins: 0 };
+    monthly[key].pnl += t.pnl;
+    monthly[key].trades++;
+    if (t.outcome === 'WIN') monthly[key].wins++;
+  });
+  const monthlyHtml = Object.keys(monthly).sort().reverse().map(m => {
+    const d = monthly[m];
+    const wr = (d.wins / d.trades * 100).toFixed(0);
+    const col = d.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+    return `<div class="breakdown-row">
+      <div class="breakdown-label">${m}</div>
+      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${Math.min(Math.abs(d.pnl)/50,100)}%;background:${col}"></div></div>
+      <div class="breakdown-val" style="color:${col}">${d.pnl>=0?'+':''}$${d.pnl.toFixed(0)} | ${wr}% WR | ${d.trades} trades</div>
+    </div>`;
+  }).join('');
+  document.getElementById('monthly_breakdown').innerHTML = monthlyHtml || '<div class="empty-log" style="padding:20px">No data</div>';
+}
+
+function updateHeader() {
+  const s = calcStats(trades);
+  document.getElementById('h_trades').textContent = s.total;
+  document.getElementById('h_winrate').textContent = s.total > 0 ? s.winRate.toFixed(1) + '%' : '--%';
+  document.getElementById('h_winrate').style.color = s.winRate >= 41 ? 'var(--green)' : s.winRate >= 34 ? 'var(--amber)' : s.total > 0 ? 'var(--red)' : 'var(--text-dim)';
+  const pnlEl = document.getElementById('h_pnl');
+  pnlEl.textContent = (s.totalPnl >= 0 ? '+$' : '-$') + Math.abs(s.totalPnl).toFixed(0);
+  pnlEl.style.color = s.totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('h_pf').textContent = s.total > 0 ? s.profitFactor.toFixed(2) : '--';
+  document.getElementById('h_pf').style.color = s.profitFactor >= 1.4 ? 'var(--green)' : s.profitFactor >= 1 ? 'var(--amber)' : s.total > 0 ? 'var(--red)' : 'var(--text-dim)';
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function loadSettings() {
+  document.getElementById('cfg_target').value = getSetting('target');
+  document.getElementById('cfg_stop').value = getSetting('stop');
+  document.getElementById('cfg_size').value = getSetting('size');
+  document.getElementById('cfg_capital').value = getSetting('capital');
+  document.getElementById('cfg_maxrange').value = getSetting('maxrange');
+  document.getElementById('cfg_orbmin').value = getSetting('orbmin');
+}
+
+function saveSettings() {
+  settings.target = parseFloat(document.getElementById('cfg_target').value);
+  settings.stop = parseFloat(document.getElementById('cfg_stop').value);
+  settings.size = parseFloat(document.getElementById('cfg_size').value);
+  settings.capital = parseFloat(document.getElementById('cfg_capital').value);
+  settings.maxrange = parseFloat(document.getElementById('cfg_maxrange').value);
+  settings.orbmin = parseInt(document.getElementById('cfg_orbmin').value);
+  localStorage.setItem('orb_settings', JSON.stringify(settings));
+  updateRuleDisplay();
+  showToast('Settings saved');
+}
+
+function updateRuleDisplay() {
+  document.getElementById('r_target').textContent = '+' + getSetting('target') + '%';
+  document.getElementById('r_stop').textContent = '-' + getSetting('stop') + '%';
+  document.getElementById('r_size').textContent = '$' + getSetting('size');
+  document.getElementById('r_maxrange').textContent = '$' + getSetting('maxrange').toFixed(2);
+  document.getElementById('r_range').textContent = '9:30–9:' + (30 + getSetting('orbmin')).toString().padStart(2,'0') + ' AM (' + getSetting('orbmin') + ' min)';
+}
+
+// ============================================================
+// FILTER
+// ============================================================
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLog();
+}
+
+// ============================================================
+// MAVERICK CHECKBOXES
+// ============================================================
+function toggleMav(el) {
+  el.classList.toggle('checked');
+  const box = el.querySelector('.mav-check');
+  box.textContent = el.classList.contains('checked') ? '✓' : '';
+  // Count checked and update f_mav_filters
+  const count = document.querySelectorAll('.mav-item.checked').length;
+  document.getElementById('f_mav_filters').value = count;
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'analysis') renderAnalysis();
+  if (name === 'log') setTimeout(renderChart, 50);
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportCSV() {
+  if (trades.length === 0) { showToast('No trades to export', true); return; }
+  const headers = ['Date','Day','Direction','ORB_High','ORB_Low','Range_Width','Entry','Exit','Reason','Contracts','DTE','Mav_Filters','PnL','Outcome','Notes'];
+  const rows = trades.map(t => [t.date,t.dow,t.dir,t.orbH,t.orbL,t.rangeWidth,t.entry,t.exit,t.reason,t.contracts,t.dte,t.mavFilters,t.pnl,t.outcome,`"${t.notes||''}"`].join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  download('orb_trades.csv', csv, 'text/csv');
+  showToast('CSV exported');
+}
+
+function exportJSON() {
+  download('orb_trades.json', JSON.stringify(trades, null, 2), 'application/json');
+  showToast('JSON exported');
+}
+
+function download(filename, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = filename;
+  a.click();
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function clearForm() {
+  document.getElementById('f_orb_high').value = '';
+  document.getElementById('f_orb_low').value = '';
+  document.getElementById('f_dir').value = '';
+  document.getElementById('f_entry').value = '';
+  document.getElementById('f_exit').value = '';
+  document.getElementById('f_exit_reason').value = '';
+  document.getElementById('f_contracts').value = '1';
+  document.getElementById('f_dte').value = '0';
+  document.getElementById('f_notes').value = '';
+  document.getElementById('f_mav_filters').value = '0';
+  document.querySelectorAll('.mav-item').forEach(el => { el.classList.remove('checked'); el.querySelector('.mav-check').textContent = ''; });
+  document.getElementById('op_range').textContent = '--';
+  document.getElementById('op_width').textContent = '--';
+  document.getElementById('op_target').textContent = '--';
+  document.getElementById('op_stop').textContent = '--';
+  document.getElementById('op_maxprofit').textContent = '--';
+  document.getElementById('op_maxloss').textContent = '--';
+  document.getElementById('op_pnl').textContent = '--';
+  document.getElementById('op_filter').textContent = '--';
+  setTodayDate();
+}
+
+function clearAll() {
+  if (!confirm('Delete ALL trade data? This cannot be undone.')) return;
+  trades = [];
+  saveTrades();
+  renderAll();
+  showToast('All data cleared');
+}
+
+function saveTrades() {
+  localStorage.setItem('orb_trades', JSON.stringify(trades));
+}
+
+function showToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (error ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 2500);
+}
+
+window.addEventListener('resize', renderChart);
+</script>
+</body>
+</html>
