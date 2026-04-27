@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Chameleon SPY Cheat Code — Maverick</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --panel: #0f1318;
+    --border: #1e2a38;
+    --accent: #00e5ff;
+    --green: #00ff88;
+    --red: #ff3355;
+    --yellow: #ffd700;
+    --orange: #ff8c00;
+    --text: #c8d8e8;
+    --dim: #4a6070;
+    --glow: 0 0 12px rgba(0,229,255,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+    background-image: 
+      radial-gradient(ellipse at 20% 0%, rgba(0,229,255,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(0,255,136,0.04) 0%, transparent 50%);
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 30px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 50%; transform: translateX(-50%);
+    width: 200px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .callsign {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 6px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(18px, 4vw, 28px);
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 2px;
+    line-height: 1.2;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle {
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 8px;
+    letter-spacing: 3px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* GRID LAYOUT */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .full-width { grid-column: 1 / -1; }
+
+  /* PANELS */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .panel.cyan::before { background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+  .panel.green::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+  .panel.yellow::before { background: linear-gradient(90deg, transparent, var(--yellow), transparent); }
+  .panel.orange::before { background: linear-gradient(90deg, transparent, var(--orange), transparent); }
+  .panel.red::before { background: linear-gradient(90deg, transparent, var(--red), transparent); }
+
+  .stop-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .stop-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: 2px;
+  }
+  .cyan .stop-num { background: rgba(0,229,255,0.15); color: var(--accent); border: 1px solid rgba(0,229,255,0.3); }
+  .green .stop-num { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid rgba(0,255,136,0.3); }
+  .yellow .stop-num { background: rgba(255,215,0,0.15); color: var(--yellow); border: 1px solid rgba(255,215,0,0.3); }
+  .orange .stop-num { background: rgba(255,140,0,0.15); color: var(--orange); border: 1px solid rgba(255,140,0,0.3); }
+  .red .stop-num { background: rgba(255,51,85,0.15); color: var(--red); border: 1px solid rgba(255,51,85,0.3); }
+
+  .stop-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+  }
+
+  .nav-path {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .nav-path .arrow { color: var(--accent); }
+
+  /* RULES */
+  .rule {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    align-items: flex-start;
+  }
+  .rule-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    margin-top: 1px;
+  }
+  .icon-green { background: rgba(0,255,136,0.2); color: var(--green); }
+  .icon-red { background: rgba(255,51,85,0.2); color: var(--red); }
+  .icon-yellow { background: rgba(255,215,0,0.2); color: var(--yellow); }
+  .icon-cyan { background: rgba(0,229,255,0.2); color: var(--accent); }
+
+  .tag-green { color: var(--green); font-weight: 600; }
+  .tag-red { color: var(--red); font-weight: 600; }
+  .tag-yellow { color: var(--yellow); font-weight: 600; }
+  .tag-cyan { color: var(--accent); font-weight: 600; }
+  .tag-white { color: #fff; font-weight: 600; }
+
+  /* VWAP SANDWICH */
+  .sandwich-box {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 12px;
+  }
+  .sandwich-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .sandwich-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot-red { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+  /* 30/30/30 RULE */
+  .triple-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .triple-card {
+    background: rgba(0,255,136,0.05);
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 6px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .triple-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--green);
+    line-height: 1;
+  }
+  .triple-label {
+    font-size: 10px;
+    color: var(--dim);
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+  .triple-desc {
+    font-size: 11px;
+    color: var(--text);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* IV TABLE */
+  .iv-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+  .iv-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--dim);
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .iv-table td {
+    padding: 7px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .iv-table tr:last-child td { border-bottom: none; }
+
+  /* GO/NO-GO TABLE */
+  .gonogo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  .gonogo-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--dim);
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .gonogo-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+  .gonogo-table tr:last-child td { border-bottom: none; }
+  .gonogo-table .indicator {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: #fff;
+  }
+  .bull-cell { color: var(--green); font-size: 11px; line-height: 1.5; }
+  .bear-cell { color: var(--red); font-size: 11px; line-height: 1.5; }
+  .time-cell { color: var(--accent); font-family: 'Share Tech Mono', monospace; font-size: 10px; }
+
+  /* MORNING ROUTINE */
+  .routine-steps {
+    counter-reset: steps;
+    margin-top: 10px;
+  }
+  .step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .step-time {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 3px;
+    padding: 3px 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-content { font-size: 12px; line-height: 1.6; }
+  .step-content strong { color: #fff; }
+
+  /* FINAL GATE */
+  .gate-box {
+    background: rgba(255,215,0,0.05);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    margin-top: 0;
+  }
+  .gate-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+  .gate-rule {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(13px, 2.5vw, 16px);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .gate-rule span { color: var(--yellow); }
+  .gate-sub {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 8px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* DISCIPLINE BOX */
+  .discipline {
+    background: rgba(255,51,85,0.06);
+    border: 1px solid rgba(255,51,85,0.25);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 0;
+  }
+  .discipline-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--red);
+    margin-bottom: 10px;
+  }
+  .discipline-rule {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 12px;
+    align-items: flex-start;
+  }
+  .x-mark { color: var(--red); font-weight: 900; flex-shrink: 0; margin-top: 1px; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 2px;
+  }
+
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+    .full-width { grid-column: 1; }
+    .triple-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="callsign">⚡ CALLSIGN: MAVERICK ⚡</div>
+  <h1>MARKET CHAMELEON <span>SPY</span> CHEAT CODE</h1>
+  <div class="subtitle">// INSTITUTIONAL GRADE · PRE-FLIGHT EDITION //</div>
+</div>
+
+<div class="grid">
+
+  <!-- STOP 1A -->
+  <div class="panel cyan">
+    <div class="stop-badge">
+      <span class="stop-num">STOP 1A</span>
+      <span class="stop-title">DARK POOL — VOLUME</span>
+    </div>
+    <div class="nav-path">
+      Price Action <span class="arrow">→</span> Dark Pool Trading <span class="arrow">→</span> <strong style="color:#fff">Volume</strong>
+    </div>
+
+    <div class="rule">
+      <div class="rule-icon icon-cyan">📊</div>
+      <div><span class="tag-cyan">Top Number (+6% green)</span> — Dark pool share vs 30-day avg. Green = institutions MORE active than usual. <span class="tag-green">+3% or higher = accumulation signal.</span></div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-cyan">🥧</div>
+      <div><span class="tag-cyan">Donut Chart</span> — Grey slice = Dark Pool. Watch for grey slice growing day over day = big money hiding moves.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-cyan">📈</div>
+      <div><span class="tag-cyan">Blue Line (Intraday Chart)</span> — This IS your VWAP. Price closing above it = bullish structure.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-green">✓</div>
+      <div><span class="tag-white">OBV Column</span> = "On-Balance Volume [Cumulative]" in the minute table. <span class="tag-green">All green rows = sustained buying.</span> <span class="tag-red">Red rows appearing = selling pressure entering.</span></div>
+    </div>
+
+    <div class="sandwich-box">
+      <div class="sandwich-title">⚡ THE VWAP SANDWICH RULE</div>
+      <div class="sandwich-row">
+        <div class="dot dot-green"></div>
+        <div><span class="tag-green">Price ABOVE VWAP + OBV all green</span> = HIGH CONVICTION trend. Stay in the trade.</div>
+      </div>
+      <div class="sandwich-row">
+        <div class="dot dot-red"></div>
+        <div><span class="tag-red">Price ABOVE VWAP + OBV flipping red</span> = FAKEOUT / EXHAUSTION. Tighten stop or exit.</div>
+      </div>
+      <div class="sandwich-row">
+        <div class="dot dot-red"></div>
+        <div><span class="tag-red">Price BELOW VWAP + OBV red</span> = Full bearish confirmation. No calls.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOP 1B -->
+  <div class="panel green">
+    <div class="stop-badge">
+      <span class="stop-num">STOP 1B</span>
+      <span class="stop-title">DARK POOL — TRADER SIZE</span>
+    </div>
+    <div class="nav-path">
+      Price Action <span class="arrow">→</span> Dark Pool Trading <span class="arrow">→</span> <strong style="color:#fff">Volume by Trader Size</strong>
+    </div>
+
+    <div class="rule">
+      <div class="rule-icon icon-green">👁</div>
+      <div>Four donut charts: Small / Retail / Professional / <span class="tag-green">Institutional</span>. Focus on the bottom row — today vs 30-day average.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-green">✓</div>
+      <div><span class="tag-green">Institutional +5% (today)</span> = Smart money was quietly accumulating above their own average. Strongest signal on this page.</div>
+    </div>
+
+    <div class="triple-grid">
+      <div class="triple-card">
+        <div class="triple-num">1</div>
+        <div class="triple-label">Institutional %<br>Above Average</div>
+        <div class="triple-desc">Big funds buying more than usual in the dark</div>
+      </div>
+      <div class="triple-card">
+        <div class="triple-num">2</div>
+        <div class="triple-label">Professional %<br>Above Average</div>
+        <div class="triple-desc">Prop desks and hedge funds also active</div>
+      </div>
+      <div class="triple-card">
+        <div class="triple-num">3</div>
+        <div class="triple-label">Dark Pool Share %<br>Above Average</div>
+        <div class="triple-desc">Overall dark pool slice growing vs norm</div>
+      </div>
+    </div>
+    <div style="margin-top:10px; padding:8px 10px; background:rgba(0,255,136,0.08); border-radius:5px; font-size:12px; border:1px solid rgba(0,255,136,0.2);">
+      🎯 <span class="tag-green">TRIPLE GREEN = Smart money isn't just active — they are DOMINANT.</span> Highest conviction setup.
+    </div>
+  </div>
+
+  <!-- STOP 2 -->
+  <div class="panel yellow">
+    <div class="stop-badge">
+      <span class="stop-num">STOP 2</span>
+      <span class="stop-title">IV RANK + IV PERCENTILE</span>
+    </div>
+    <div class="nav-path">
+      Left Sidebar <span class="arrow">→</span> Options <span class="arrow">→</span> <strong style="color:#fff">Implied Volatility</strong> &nbsp;|&nbsp; Also visible on SPY Summary header as "IV30 % Rank"
+    </div>
+
+    <div class="rule">
+      <div class="rule-icon icon-yellow">⚡</div>
+      <div><span class="tag-yellow">IV Rank</span> = Where current IV sits between the year's HIGH and LOW. 0% = at yearly low, 100% = at yearly high.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-yellow">⚡</div>
+      <div><span class="tag-yellow">IV Percentile</span> = How many days this year had LOWER IV than today. Both above 60% = strong expensive signal.</div>
+    </div>
+
+    <table class="iv-table">
+      <tr>
+        <th>IV RANK</th>
+        <th>SIGNAL</th>
+        <th>YOUR MOVE</th>
+      </tr>
+      <tr>
+        <td class="tag-green">0–30%</td>
+        <td class="tag-green">Options CHEAP</td>
+        <td>BUY calls or puts — good premium value</td>
+      </tr>
+      <tr>
+        <td style="color:var(--text)">30–60%</td>
+        <td style="color:var(--text)">Moderate</td>
+        <td>Trade normally, standard sizing</td>
+      </tr>
+      <tr>
+        <td class="tag-yellow">60–80%</td>
+        <td class="tag-yellow">Elevated</td>
+        <td>Options pricey — size down on buys</td>
+      </tr>
+      <tr>
+        <td class="tag-red">80–100%</td>
+        <td class="tag-red">EXPENSIVE</td>
+        <td>Avoid buying premium — sell spreads instead</td>
+      </tr>
+    </table>
+
+    <div style="margin-top:10px; padding:8px 10px; background:rgba(255,215,0,0.06); border-radius:5px; font-size:11px; border:1px solid rgba(255,215,0,0.2); font-family:'Share Tech Mono',monospace;">
+      ⚡ TODAY: IV30 Rank = 64% (Moderate/Elevated) — Options not cheap but not extreme. Standard sizing.
+    </div>
+  </div>
+
+  <!-- STOP 3 -->
+  <div class="panel orange">
+    <div class="stop-badge">
+      <span class="stop-num">STOP 3</span>
+      <span class="stop-title">UNUSUAL OPTIONS VOLUME</span>
+    </div>
+    <div class="nav-path">
+      Top Nav <span class="arrow">→</span> Options <span class="arrow">→</span> <strong style="color:#fff">Unusual Option Volume</strong> <span class="arrow">→</span> Set "In ETF" dropdown to <strong style="color:var(--orange)">ETF</strong>
+    </div>
+
+    <div class="rule">
+      <div class="rule-icon icon-yellow">⚠</div>
+      <div><span class="tag-white">IMPORTANT:</span> Search "SPY" returns 0 results by default. Must change <span class="tag-orange">"In ETF" filter to "ETF"</span> first — then SPY populates.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-cyan">📊</div>
+      <div><span class="tag-cyan">Relative Volume column</span> — anything above <span class="tag-white">2.0x</span> is unusual. Above 5.0x = major institutional positioning.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-green">✓</div>
+      <div><span class="tag-cyan">Bullish/Bearish column</span> — shows net call vs put sentiment. Green = call-heavy = directional bull bet.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-green">✓</div>
+      <div><span class="tag-cyan">Net Delta column</span> — <span class="tag-green">Positive = net call buying.</span> <span class="tag-red">Negative = net put buying.</span></div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-green">🎯</div>
+      <div>Look for large call volume at <span class="tag-white">$718-720 strikes</span> expiring this week = smart money targeting breakout level.</div>
+    </div>
+    <div style="margin-top:8px; padding:8px 10px; background:rgba(255,140,0,0.06); border-radius:5px; font-size:11px; border:1px solid rgba(255,140,0,0.2);">
+      🔒 <span style="color:var(--orange)">Full data = Premium feature.</span> Free tier shows limited results. Barchart.com has free unusual flow as alternative.
+    </div>
+  </div>
+
+  <!-- STOP 4 -->
+  <div class="panel cyan">
+    <div class="stop-badge">
+      <span class="stop-num">STOP 4</span>
+      <span class="stop-title">SESSION SUMMARY — MORNING READ</span>
+    </div>
+    <div class="nav-path">
+      Left Sidebar <span class="arrow">→</span> Price Action <span class="arrow">→</span> Right sidebar shows <strong style="color:#fff">Session Summary</strong>
+    </div>
+
+    <div class="rule">
+      <div class="rule-icon icon-cyan">🕘</div>
+      <div>Run this at <span class="tag-cyan">8:45–9:15 AM</span> before the open. The table breaks trading into 5 sessions with VWAP for each.</div>
+    </div>
+
+    <table class="iv-table">
+      <tr>
+        <th>SESSION</th>
+        <th>WHAT TO LOOK FOR</th>
+        <th>SIGNAL</th>
+      </tr>
+      <tr>
+        <td style="color:var(--accent)">Premarket VWAP</td>
+        <td>vs yesterday's close</td>
+        <td class="tag-green">Above = overnight buying ✅</td>
+      </tr>
+      <tr>
+        <td style="color:var(--accent)">Premarket Dark Pool %</td>
+        <td>Normal = 15–20%</td>
+        <td class="tag-green">Above 25% = heavy institutional</td>
+      </tr>
+      <tr>
+        <td style="color:var(--accent)">Regular Hours VWAP</td>
+        <td>Your intraday anchor</td>
+        <td class="tag-green">Price above = bullish structure</td>
+      </tr>
+      <tr>
+        <td style="color:var(--accent)">OBV Rows</td>
+        <td>Color of cumulative column</td>
+        <td><span class="tag-green">All green = buying</span> / <span class="tag-red">Red = selling</span></td>
+      </tr>
+    </table>
+
+    <div style="margin-top:10px; padding:8px 10px; background:rgba(0,229,255,0.05); border-radius:5px; font-size:11px; border:1px solid rgba(0,229,255,0.2);">
+      💡 <span class="tag-cyan">Pro tip:</span> Read the auto-generated plain-English paragraph at the bottom of the page — Market Chameleon writes your morning brief for you.
+    </div>
+  </div>
+
+  <!-- STOP 5 -->
+  <div class="panel green">
+    <div class="stop-badge">
+      <span class="stop-num">STOP 5</span>
+      <span class="stop-title">EXPECTED / IMPLIED MOVE</span>
+    </div>
+    <div class="nav-path">
+      Left Sidebar <span class="arrow">→</span> Options <span class="arrow">→</span> <strong style="color:#fff">Implied Moves</strong> &nbsp;|&nbsp; 🔒 Premium &nbsp;|&nbsp; <span style="color:var(--green)">FREE ALT: barchart.com/etfs-funds/quotes/SPY/expected-move</span>
+    </div>
+
+    <div class="rule">
+      <div class="rule-icon icon-green">📐</div>
+      <div>Shows the <span class="tag-green">options-implied price range</span> for tomorrow's session. Example: ±$4 = market expects SPY between $711–$719.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-green">✓</div>
+      <div><span class="tag-white">DIY method on Robinhood:</span> ATM Call price + ATM Put price (same strike, tomorrow expiry) = expected move. Example: $2.10 + $1.90 = <span class="tag-green">±$4.00 move.</span></div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-cyan">🎯</div>
+      <div>Use this to <span class="tag-white">set realistic call targets.</span> Don't buy a $725 call if implied move only gives you $719. Match your target to the range.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon icon-yellow">⚡</div>
+      <div>If <span class="tag-cyan">ES1!</span> is already pricing ABOVE the implied move upper range = momentum stronger than expected = <span class="tag-green">potential extended move.</span></div>
+    </div>
+  </div>
+
+  <!-- GO/NO-GO TABLE -->
+  <div class="panel cyan full-width">
+    <div class="stop-badge">
+      <span class="stop-num">GO / NO-GO</span>
+      <span class="stop-title">10-SECOND PRE-FLIGHT CHECK</span>
+    </div>
+
+    <table class="gonogo-table">
+      <tr>
+        <th>INDICATOR</th>
+        <th>WHEN TO CHECK</th>
+        <th>✅ BULLISH SIGNAL</th>
+        <th>🚫 BEARISH SIGNAL</th>
+      </tr>
+      <tr>
+        <td class="indicator">Dark Pool Share</td>
+        <td class="time-cell">Pre-market</td>
+        <td class="bull-cell">Green +3% or higher above avg</td>
+        <td class="bear-cell">Red — below average</td>
+      </tr>
+      <tr>
+        <td class="indicator">Triple Green (1B)</td>
+        <td class="time-cell">Pre-market</td>
+        <td class="bull-cell">Inst + Prof + Dark Pool all above avg</td>
+        <td class="bear-cell">2 or more showing red/below avg</td>
+      </tr>
+      <tr>
+        <td class="indicator">OBV Cumulative</td>
+        <td class="time-cell">9:35 AM</td>
+        <td class="bull-cell">Consistent green streak from open</td>
+        <td class="bear-cell">Red rows appearing early</td>
+      </tr>
+      <tr>
+        <td class="indicator">Intraday VWAP</td>
+        <td class="time-cell">9:45 ORB</td>
+        <td class="bull-cell">Price holding above blue VWAP line</td>
+        <td class="bear-cell">Price rejected at or below VWAP</td>
+      </tr>
+      <tr>
+        <td class="indicator">VWAP Sandwich</td>
+        <td class="time-cell">Continuous</td>
+        <td class="bull-cell">Above VWAP AND OBV all green</td>
+        <td class="bear-cell">Above VWAP but OBV flipping red = fakeout</td>
+      </tr>
+      <tr>
+        <td class="indicator">IV Rank</td>
+        <td class="time-cell">Pre-market</td>
+        <td class="bull-cell">Below 30% — options cheap, buy calls</td>
+        <td class="bear-cell">Above 70% — avoid buying premium</td>
+      </tr>
+      <tr>
+        <td class="indicator">IV Rank + Percentile</td>
+        <td class="time-cell">Pre-market</td>
+        <td class="bull-cell">Both below 30% = very cheap premium</td>
+        <td class="bear-cell">Both above 60% = strong expensive signal</td>
+      </tr>
+      <tr>
+        <td class="indicator">Expected Move</td>
+        <td class="time-cell">Pre-market</td>
+        <td class="bull-cell">Know the ±range, set target within it</td>
+        <td class="bear-cell">Price breaks range = volatility spike risk</td>
+      </tr>
+      <tr>
+        <td class="indicator">ES1! (TradingView)</td>
+        <td class="time-cell">6 AM + 9 AM</td>
+        <td class="bull-cell">Holding 7,200+ overnight</td>
+        <td class="bear-cell">Dropped back below 7,175</td>
+      </tr>
+      <tr>
+        <td class="indicator">Kalshi 7,175+</td>
+        <td class="time-cell">Pre-market</td>
+        <td class="bull-cell">65% or higher probability</td>
+        <td class="bear-cell">Dropping below 50%</td>
+      </tr>
+      <tr>
+        <td class="indicator">LTPROv7 SIGNAL</td>
+        <td class="time-cell">9:45+ ONLY</td>
+        <td class="bull-cell">SIGNAL = BUY</td>
+        <td class="bear-cell">SIGNAL = WAIT or EXIT</td>
+      </tr>
+    </table>
+
+    <div style="margin-top:12px; padding:8px 12px; background:rgba(0,229,255,0.05); border-radius:5px; font-size:12px; border:1px solid rgba(0,229,255,0.2);">
+      🎯 <span class="tag-cyan">Rule:</span> <strong style="color:#fff">5+ green signals = high conviction entry. Missing 3+ = wait or skip the trade entirely.</strong> Market Chameleon feeds the decision — LTPROv7 pulls the trigger.
+    </div>
+  </div>
+
+  <!-- MORNING ROUTINE -->
+  <div class="panel yellow full-width">
+    <div class="stop-badge">
+      <span class="stop-num">ROUTINE</span>
+      <span class="stop-title">5-MINUTE MORNING COCKPIT — 8:45 AM</span>
+    </div>
+
+    <div class="routine-steps">
+      <div class="step">
+        <span class="step-time">8:45 AM</span>
+        <div class="step-content"><strong>Stop 4 → Session Summary</strong> — Check premarket VWAP vs yesterday's close. Above = institutions bought overnight. Read the auto-generated paragraph.</div>
+      </div>
+      <div class="step">
+        <span class="step-time">8:50 AM</span>
+        <div class="step-content"><strong>Stop 1A → Dark Pool Volume</strong> — Check the +/- % number. Green +3% or more = accumulation. Check OBV column color in the minute table.</div>
+      </div>
+      <div class="step">
+        <span class="step-time">8:53 AM</span>
+        <div class="step-content"><strong>Stop 1B → Volume by Trader Size</strong> — Look for Triple Green. Institutional + Professional + Dark Pool all above average = smart money dominant.</div>
+      </div>
+      <div class="step">
+        <span class="step-time">8:56 AM</span>
+        <div class="step-content"><strong>Stop 2 → IV Rank</strong> — Found on SPY summary header as "IV30 % Rank." Under 30% = buy calls freely. Over 70% = size down or skip.</div>
+      </div>
+      <div class="step">
+        <span class="step-time">8:58 AM</span>
+        <div class="step-content"><strong>Stop 5 → Expected Move</strong> — Check Barchart.com or calculate via ATM straddle on Robinhood. Set your call target WITHIN the implied range.</div>
+      </div>
+      <div class="step">
+        <span class="step-time">9:00 AM</span>
+        <div class="step-content"><strong>Cross-reference:</strong> TradingView ES1! holding level? Kalshi probability holding? VIX under 20? QQQ green?</div>
+      </div>
+      <div class="step">
+        <span class="step-time">9:45 AM</span>
+        <div class="step-content"><strong>ORB Confirmation</strong> — Wait for candle close. LTPROv7 SIGNAL = BUY is the final gate. <strong style="color:var(--yellow)">No signal = no entry. Period.</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINAL GATE + DISCIPLINE side by side -->
+  <div class="gate-box panel full-width" style="background:rgba(255,215,0,0.04); border-color:rgba(255,215,0,0.3);">
+    <div class="gate-label">⚡ THE ABSOLUTE FINAL GATE ⚡</div>
+    <div class="gate-rule">ALL Market Chameleon data is <span>PRE-FLIGHT CONTEXT.</span><br>LTPROv7 <span>SIGNAL = BUY</span> is the only trigger that opens the throttle.</div>
+    <div class="gate-sub">APEX = preparation warning · SIGNAL = WAIT means hands off · Never enter before zone · Never chase the open</div>
+  </div>
+
+  <div class="discipline panel full-width">
+    <div class="discipline-title">🚫 MAVERICK'S KNOWN DISCIPLINE VIOLATIONS — DO NOT REPEAT</div>
+    <div class="discipline-rule">
+      <span class="x-mark">✗</span>
+      <span>Entering on candlestick signal <strong style="color:#fff">before confirmation candle closes.</strong> Today's mistake: entered call before price reached the zone. Wait for the zone.</span>
+    </div>
+    <div class="discipline-rule">
+      <span class="x-mark">✗</span>
+      <span>Entering on <strong style="color:#fff">APEX signal</strong> — APEX = "breakout imminent" preparation warning ONLY. It is NOT an entry signal.</span>
+    </div>
+    <div class="discipline-rule">
+      <span class="x-mark">✗</span>
+      <span>Entering before <strong style="color:#fff">9:45 AM ORB</strong> confirmation. No exceptions regardless of how strong pre-market looks.</span>
+    </div>
+    <div class="discipline-rule">
+      <span class="x-mark">✗</span>
+      <span>More than <strong style="color:#fff">2 trades per day.</strong> Preference = 1. Quality over quantity always.</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  MAVERICK // MARKET CHAMELEON SPY CHEAT CODE // BUILT WITH GOOSE // APRIL 2026
+</div>
+
+</body>
+</html>
