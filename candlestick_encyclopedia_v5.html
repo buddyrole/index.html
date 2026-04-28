@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rod Codex v5 — Candlestick Encyclopedia</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+:root{
+  --bg:#07090f;--bg2:#0c1018;--bg3:#101520;
+  --panel:#121824;--panel2:#161e2e;
+  --border:#1a2d4a;--border2:#253d66;
+  --gold:#f5a623;--gold2:#ffcc44;
+  --red:#ff3d3d;--red2:#ff7070;
+  --green:#00e676;--green2:#69f0ae;
+  --blue:#00b4ff;--blue2:#64dfff;
+  --cyan:#00e5ff;--purple:#b388ff;
+  --white:#dde6f0;--muted:#6b7a99;
+  --bull:#26a69a;--bear:#ef5350;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--white);font-family:'Rajdhani',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,180,255,0.012) 3px,rgba(0,180,255,0.012) 6px);pointer-events:none;z-index:999}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#060910 0%,#0c1525 50%,#060910 100%);border-bottom:2px solid var(--gold);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.hdr-left{display:flex;flex-direction:column;gap:2px}
+.hdr-badge{font-family:'Share Tech Mono';font-size:9px;color:var(--gold);letter-spacing:4px;text-transform:uppercase}
+.hdr-title{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:var(--white);letter-spacing:2px}
+.hdr-title span{color:var(--gold)}
+.hdr-sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-family:'Share Tech Mono'}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.ver-badge{font-family:'Orbitron';font-size:11px;background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.35);color:var(--gold);padding:4px 12px;border-radius:3px}
+
+/* SEARCH + FILTER BAR */
+.toolbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.search-box{background:var(--panel);border:1px solid var(--border2);color:var(--white);font-family:'Rajdhani';font-size:14px;padding:7px 14px;border-radius:4px;outline:none;width:260px;transition:border-color 0.2s}
+.search-box::placeholder{color:var(--muted)}
+.search-box:focus{border-color:var(--gold)}
+.filter-btns{display:flex;gap:6px;flex-wrap:wrap}
+.fbtn{background:var(--panel);border:1px solid var(--border);color:var(--muted);font-family:'Rajdhani';font-size:12px;font-weight:600;letter-spacing:1px;padding:5px 12px;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;white-space:nowrap}
+.fbtn:hover{color:var(--white);border-color:var(--border2)}
+.fbtn.active{background:rgba(245,166,35,0.1);border-color:var(--gold);color:var(--gold)}
+.count-badge{font-family:'Share Tech Mono';font-size:11px;color:var(--muted);margin-left:auto}
+
+/* MAIN LAYOUT */
+.main{display:flex;min-height:calc(100vh - 130px)}
+.sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;max-height:calc(100vh - 130px);position:sticky;top:0}
+.content-area{flex:1;padding:20px;overflow-y:auto}
+
+/* SIDEBAR */
+.sidebar-section{padding:10px 0;border-bottom:1px solid var(--border)}
+.sidebar-section-title{font-family:'Orbitron';font-size:9px;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;padding:6px 14px 4px}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.15s;border-left:2px solid transparent}
+.sidebar-item:hover{color:var(--white);background:rgba(255,255,255,0.02)}
+.sidebar-item.active{color:var(--gold);background:rgba(245,166,35,0.06);border-left-color:var(--gold)}
+.sidebar-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-bull{background:var(--bull)}
+.dot-bear{background:var(--bear)}
+.dot-neutral{background:var(--gold)}
+.dot-cont{background:var(--blue)}
+.dot-wick{background:var(--purple)}
+.new-tag{font-family:'Share Tech Mono';font-size:9px;background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.4);color:var(--gold);padding:1px 5px;border-radius:2px;margin-left:auto}
+
+/* CARDS GRID */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+
+/* PATTERN CARD */
+.pcard{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:transform 0.2s,border-color 0.2s,box-shadow 0.2s;cursor:pointer;display:flex;flex-direction:column}
+.pcard:hover{transform:translateY(-3px);border-color:var(--border2);box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.pcard.active-card{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+
+.pcard-header{padding:14px 16px 10px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--border)}
+.pcard-svg{width:60px;height:70px;flex-shrink:0;background:rgba(0,0,0,0.2);border-radius:4px;display:flex;align-items:center;justify-content:center}
+.pcard-meta{flex:1}
+.pcard-name{font-family:'Orbitron';font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:0.5px}
+.pcard-tags{display:flex;gap:5px;flex-wrap:wrap}
+.ptag{font-family:'Share Tech Mono';font-size:10px;padding:2px 7px;border-radius:2px;font-weight:400}
+.tag-bull{background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.3);color:var(--green)}
+.tag-bear{background:rgba(255,61,61,0.1);border:1px solid rgba(255,61,61,0.3);color:var(--red)}
+.tag-neutral{background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);color:var(--gold)}
+.tag-cont{background:rgba(0,180,255,0.1);border:1px solid rgba(0,180,255,0.3);color:var(--blue)}
+.tag-rev{background:rgba(179,136,255,0.1);border:1px solid rgba(179,136,255,0.3);color:var(--purple)}
+.tag-new{background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.4);color:#ffd700}
+
+/* RELIABILITY BAR */
+.reliability-row{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.1)}
+.rel-label{font-family:'Share Tech Mono';font-size:10px;color:var(--muted);width:70px;flex-shrink:0}
+.rel-track{flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+.rel-fill{height:100%;border-radius:3px;transition:width 0.6s ease}
+.rel-score{font-family:'Share Tech Mono';font-size:10px;color:var(--white);width:30px;text-align:right;flex-shrink:0}
+
+/* CARD BODY */
+.pcard-body{padding:12px 16px;flex:1}
+.section-lbl{font-family:'Orbitron';font-size:9px;font-weight:700;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;margin-top:10px}
+.section-lbl:first-child{margin-top:0}
+.story-text{font-size:13px;color:var(--white);line-height:1.6}
+.failure-text{font-size:12px;color:var(--red2);line-height:1.5}
+.spy-text{font-size:12px;color:var(--blue2);line-height:1.5}
+.entry-text{font-size:12px;color:var(--green2);line-height:1.5}
+
+/* WICK MODULE */
+.wick-module{background:linear-gradient(135deg,var(--panel2),var(--panel));border:1px solid rgba(179,136,255,0.3);border-radius:8px;overflow:hidden;margin-bottom:20px}
+.wick-module-header{background:linear-gradient(90deg,rgba(179,136,255,0.12),transparent);padding:14px 18px;border-bottom:1px solid rgba(179,136,255,0.2);display:flex;align-items:center;gap:10px}
+.wick-module-title{font-family:'Orbitron';font-size:14px;font-weight:700;color:var(--purple);letter-spacing:2px}
+.wick-module-sub{font-size:12px;color:var(--muted);margin-left:auto;font-family:'Share Tech Mono'}
+.wick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;padding:16px}
+.wick-card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px}
+.wick-card-title{font-family:'Orbitron';font-size:11px;font-weight:700;color:var(--purple);letter-spacing:2px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.wick-rule-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid rgba(26,45,74,0.5);font-size:13px;color:var(--white)}
+.wick-rule-item:last-child{border-bottom:none}
+.wick-rule-item::before{content:'▸';color:var(--purple);flex-shrink:0;margin-top:1px}
+
+/* SECTION DIVIDER */
+.sect-div{margin:24px 0 16px;display:flex;align-items:center;gap:12px}
+.sect-div-title{font-family:'Orbitron';font-size:12px;font-weight:700;color:var(--gold);letter-spacing:3px;white-space:nowrap;text-transform:uppercase}
+.sect-div-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+
+/* MOBILE */
+@media(max-width:700px){.sidebar{display:none}.hdr-title{font-size:15px}.cards-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-badge">⚡ MAVERICK // INTEL DATABASE</div>
+    <div class="hdr-title">ROD <span>CODEX</span></div>
+    <div class="hdr-sub">Candlestick Encyclopedia — SPY / LTPROv7 Edition</div>
+  </div>
+  <div class="hdr-right">
+    <div class="ver-badge">v5.0</div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <input class="search-box" type="text" placeholder="🔍 Search patterns..." oninput="filterCards(this.value)" id="searchInput">
+  <div class="filter-btns">
+    <button class="fbtn active" onclick="filterByType('all',this)">ALL</button>
+    <button class="fbtn" onclick="filterByType('bullish',this)">🟢 BULLISH</button>
+    <button class="fbtn" onclick="filterByType('bearish',this)">🔴 BEARISH</button>
+    <button class="fbtn" onclick="filterByType('neutral',this)">🟡 NEUTRAL</button>
+    <button class="fbtn" onclick="filterByType('continuation',this)">🔵 CONTINUATION</button>
+    <button class="fbtn" onclick="filterByType('new',this)">⭐ NEW v5</button>
+    <button class="fbtn" onclick="filterByType('wick',this)">📍 WICK RULES</button>
+  </div>
+  <div class="count-badge" id="countBadge">Loading patterns...</div>
+</div>
+
+<div class="main">
+  <div class="sidebar" id="sidebarEl">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Bullish Reversals</div>
+      <div class="sidebar-item" onclick="scrollTo('hammer')"><span class="sidebar-dot dot-bull"></span>Hammer</div>
+      <div class="sidebar-item" onclick="scrollTo('inverted-hammer')"><span class="sidebar-dot dot-bull"></span>Inverted Hammer</div>
+      <div class="sidebar-item" onclick="scrollTo('bullish-engulfing')"><span class="sidebar-dot dot-bull"></span>Bullish Engulfing <span class="new-tag">NEW</span></div>
+      <div class="sidebar-item" onclick="scrollTo('morning-star')"><span class="sidebar-dot dot-bull"></span>Morning Star <span class="new-tag">NEW</span></div>
+      <div class="sidebar-item" onclick="scrollTo('tweezer-bottoms')"><span class="sidebar-dot dot-bull"></span>Tweezer Bottoms <span class="new-tag">NEW</span></div>
+      <div class="sidebar-item" onclick="scrollTo('pin-bar-bull')"><span class="sidebar-dot dot-bull"></span>Pin Bar (Bull) <span class="new-tag">NEW</span></div>
+      <div class="sidebar-item" onclick="scrollTo('morning-doji-star')"><span class="sidebar-dot dot-bull"></span>Morning Doji Star</div>
+      <div class="sidebar-item" onclick="scrollTo('piercing-line')"><span class="sidebar-dot dot-bull"></span>Piercing Line</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Bearish Reversals</div>
+      <div class="sidebar-item" onclick="scrollTo('shooting-star')"><span class="sidebar-dot dot-bear"></span>Shooting Star</div>
+      <div class="sidebar-item" onclick="scrollTo('bearish-engulfing')"><span class="sidebar-dot dot-bear"></span>Bearish Engulfing <span class="new-tag">NEW</span></div>
+      <div class="sidebar-item" onclick="scrollTo('evening-star')"><span class="sidebar-dot dot-bear"></span>Evening Star <span class="new-tag">NEW</span></div>
+      <div class="sidebar-item" onclick="scrollTo('tweezer-tops')"><span class="sidebar-dot dot-bear"></span>Tweezer Tops <span class="new-tag">NEW</span></div>
+      <div class="sidebar-item" onclick="scrollTo('pin-bar-bear')"><span class="sidebar-dot dot-bear"></span>Pin Bar (Bear) <span class="new-tag">NEW</span></div>
+      <div class="sidebar-item" onclick="scrollTo('hanging-man')"><span class="sidebar-dot dot-bear"></span>Hanging Man</div>
+      <div class="sidebar-item" onclick="scrollTo('dark-cloud')"><span class="sidebar-dot dot-bear"></span>Dark Cloud Cover</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Neutral / Indecision</div>
+      <div class="sidebar-item" onclick="scrollTo('doji')"><span class="sidebar-dot dot-neutral"></span>Doji</div>
+      <div class="sidebar-item" onclick="scrollTo('long-legged-doji')"><span class="sidebar-dot dot-neutral"></span>Long-Legged Doji <span class="new-tag">NEW</span></div>
+      <div class="sidebar-item" onclick="scrollTo('spinning-top')"><span class="sidebar-dot dot-neutral"></span>Spinning Top</div>
+      <div class="sidebar-item" onclick="scrollTo('marubozu')"><span class="sidebar-dot dot-neutral"></span>Marubozu <span class="new-tag">NEW</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Continuation</div>
+      <div class="sidebar-item" onclick="scrollTo('inside-bar')"><span class="sidebar-dot dot-cont"></span>Inside Bar</div>
+      <div class="sidebar-item" onclick="scrollTo('three-white-soldiers')"><span class="sidebar-dot dot-cont"></span>Three White Soldiers</div>
+      <div class="sidebar-item" onclick="scrollTo('three-black-crows')"><span class="sidebar-dot dot-cont"></span>Three Black Crows</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">📍 Wick Rules Module</div>
+      <div class="sidebar-item" onclick="scrollTo('wick-rules')"><span class="sidebar-dot dot-wick"></span>2:1 / 3:1 Rejection Ratio</div>
+      <div class="sidebar-item" onclick="scrollTo('wick-rules')"><span class="sidebar-dot dot-wick"></span>Stop Loss Shield</div>
+      <div class="sidebar-item" onclick="scrollTo('wick-rules')"><span class="sidebar-dot dot-wick"></span>L/S/Equal Playbook</div>
+    </div>
+  </div>
+
+  <div class="content-area" id="contentArea">
+    <!-- ======================== WICK RULES MODULE ======================== -->
+    <div id="wick-rules" class="wick-module" data-type="wick">
+      <div class="wick-module-header">
+        <div style="font-size:22px">📍</div>
+        <div>
+          <div class="wick-module-title">WICK RULES MODULE</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Rejection Ratios · Stop Loss Shield · Long/Short/Equal Playbook</div>
+        </div>
+        <div class="wick-module-sub">v5.0 NEW</div>
+      </div>
+      <div class="wick-grid">
+
+        <div class="wick-card">
+          <div class="wick-card-title">⚖️ 2:1 REJECTION RATIO</div>
+          <div class="wick-rule-item">Wick is 2× the candle body length</div>
+          <div class="wick-rule-item">MINIMUM threshold for a "rejection" signal</div>
+          <div class="wick-rule-item">On its own: LOW conviction — need confluence</div>
+          <div class="wick-rule-item">Requires: VWAP alignment + LTPROv7 SIGNAL confirmation</div>
+          <div class="wick-rule-item">Action: Reduce position size 50% at 2:1</div>
+          <div style="margin-top:8px;padding:7px 10px;background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.25);border-radius:3px;font-size:12px;color:var(--gold)">
+            ⚠️ Borderline signal — always pair with another confirmation
+          </div>
+        </div>
+
+        <div class="wick-card">
+          <div class="wick-card-title">🔥 3:1 REJECTION RATIO</div>
+          <div class="wick-rule-item">Wick is 3× the candle body length = Pin Bar</div>
+          <div class="wick-rule-item">HIGH conviction rejection signal</div>
+          <div class="wick-rule-item">Respected by institutional order flow</div>
+          <div class="wick-rule-item">Especially powerful at: VWAP, supply/demand zones, prior day high/low</div>
+          <div class="wick-rule-item">Action: Full size entry when LTPROv7 SIGNAL confirms</div>
+          <div style="margin-top:8px;padding:7px 10px;background:rgba(0,230,118,0.07);border:1px solid rgba(0,230,118,0.25);border-radius:3px;font-size:12px;color:var(--green)">
+            ✅ High-probability. This is a Sniper entry candidate.
+          </div>
+        </div>
+
+        <div class="wick-card">
+          <div class="wick-card-title">🛡️ STOP LOSS SHIELD RULE</div>
+          <div class="wick-rule-item">Never place stop at the candle body edge</div>
+          <div class="wick-rule-item">Place stop BEYOND the wick tip</div>
+          <div class="wick-rule-item">Add 1 ATR buffer past the wick extreme</div>
+          <div class="wick-rule-item">Long trade: stop below lowest wick + ATR</div>
+          <div class="wick-rule-item">Short trade: stop above highest wick + ATR</div>
+          <div style="margin-top:8px;padding:7px 10px;background:rgba(0,180,255,0.07);border:1px solid rgba(0,180,255,0.2);border-radius:3px;font-size:12px;color:var(--blue)">
+            Market makers sweep wick tips to hunt retail stops before reversing
+          </div>
+        </div>
+
+        <div class="wick-card">
+          <div class="wick-card-title">🟢 LONG LOWER WICK PLAYBOOK</div>
+          <div class="wick-rule-item">Story: Bears pushed price down, bulls REJECTED hard</div>
+          <div class="wick-rule-item">Close near top of range = bullish acceptance</div>
+          <div class="wick-rule-item">Best at: support, demand zone, VWAP bounce</div>
+          <div class="wick-rule-item">LTPROv7: SIGNAL=BUY must confirm</div>
+          <div class="wick-rule-item">Play: BUY CALLS, Delta ≥ 0.60</div>
+          <div class="wick-rule-item">SPY context: After sweep of prior low = LSR setup</div>
+        </div>
+
+        <div class="wick-card">
+          <div class="wick-card-title">🔴 LONG UPPER WICK PLAYBOOK</div>
+          <div class="wick-rule-item">Story: Bulls pushed price up, bears REJECTED hard</div>
+          <div class="wick-rule-item">Close near bottom of range = bearish acceptance</div>
+          <div class="wick-rule-item">Best at: resistance, supply zone, VWAP rejection</div>
+          <div class="wick-rule-item">LTPROv7: SIGNAL=SELL must confirm</div>
+          <div class="wick-rule-item">Play: BUY PUTS, Delta ≥ 0.60</div>
+          <div class="wick-rule-item">SPY context: After sweep of prior high = bearish LSR setup</div>
+        </div>
+
+        <div class="wick-card">
+          <div class="wick-card-title">🟡 EQUAL WICKS PLAYBOOK</div>
+          <div class="wick-rule-item">Story: Neither bulls nor bears won — indecision</div>
+          <div class="wick-rule-item">Equal long wicks both ways = pure confusion</div>
+          <div class="wick-rule-item">Especially dangerous during news events (FOMC)</div>
+          <div class="wick-rule-item">Action: STAND DOWN — no entry on equal wicks</div>
+          <div class="wick-rule-item">Wait for: next candle to close decisively in one direction</div>
+          <div style="margin-top:8px;padding:7px 10px;background:rgba(255,61,61,0.07);border:1px solid rgba(255,61,61,0.2);border-radius:3px;font-size:12px;color:var(--red)">
+            ⛔ No edge here. Patience = profit.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================== NEW PATTERNS SECTION ======================== -->
+    <div class="sect-div">
+      <div class="sect-div-title">⭐ New v5 Patterns</div>
+      <div class="sect-div-line"></div>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid">
+
+      <!-- PIN BAR BULLISH -->
+      <div class="pcard" id="pin-bar-bull" data-type="bullish new" data-name="Pin Bar Bullish Bull Pin">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="30" y1="4" x2="30" y2="18" stroke="#69f0ae" stroke-width="2"/>
+              <rect x="22" y="18" width="16" height="10" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="30" y1="28" x2="30" y2="66" stroke="#69f0ae" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Pin Bar — Bullish</div>
+            <div class="pcard-tags">
+              <span class="ptag tag-bull">BULLISH</span>
+              <span class="ptag tag-rev">REVERSAL</span>
+              <span class="ptag tag-new">NEW v5</span>
+            </div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:78%;background:linear-gradient(90deg,var(--green),var(--green2))"></div></div>
+          <div class="rel-score">78%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Price sweeps below a key support level (liquidity grab). Bears think they're winning — but institutional buyers step in aggressively, absorbing all sell orders. Price rockets back up. The long lower wick IS the rejection story. Small body near the top = bulls closed in control.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">If price closes BELOW the pin bar low on the next candle → pattern failed. Bears overwhelmed. Exit immediately. This is the most common false pin on SPY near FOMC days.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Most powerful at VWAP support, prior day lows, or after a liquidity sweep. APEX fires → sweep happens → Pin Bar forms → SIGNAL=BUY → THIS IS THE ENTRY. Wick must be 3:1 or greater to qualify as high-conviction.</div>
+          <div class="section-lbl">Entry Trigger</div>
+          <div class="entry-text">Buy calls above pin bar high. Stop: below lowest wick + 1 ATR. Delta ≥ 0.60.</div>
+        </div>
+      </div>
+
+      <!-- PIN BAR BEARISH -->
+      <div class="pcard" id="pin-bar-bear" data-type="bearish new" data-name="Pin Bar Bearish Bear Pin">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="30" y1="4" x2="30" y2="42" stroke="#ff7070" stroke-width="2.5"/>
+              <rect x="22" y="42" width="16" height="10" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="30" y1="52" x2="30" y2="66" stroke="#ff7070" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Pin Bar — Bearish</div>
+            <div class="pcard-tags">
+              <span class="ptag tag-bear">BEARISH</span>
+              <span class="ptag tag-rev">REVERSAL</span>
+              <span class="ptag tag-new">NEW v5</span>
+            </div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:75%;background:linear-gradient(90deg,var(--red),var(--red2))"></div></div>
+          <div class="rel-score">75%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Price spikes above a resistance level (liquidity grab at highs). Bulls get trapped in FOMO. Institutional sellers hammer the ask, absorbing all buy orders. Price collapses back. The long upper wick IS the rejection. Body closes near the lows = bears won decisively.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">If price closes ABOVE the pin bar high on next candle → trapped bears, pattern failed. Likely a breakout. Close and flip bias to bullish if LTPROv7 confirms.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Most powerful at VWAP resistance, prior day highs, or after a liquidity sweep of highs. APEX fires → sweep of highs → Pin Bar (Bearish) → SIGNAL=SELL → BUY PUTS. Wick must be 3:1+.</div>
+          <div class="section-lbl">Entry Trigger</div>
+          <div class="entry-text">Buy puts below pin bar low. Stop: above highest wick + 1 ATR. Delta ≥ 0.60.</div>
+        </div>
+      </div>
+
+      <!-- BULLISH ENGULFING -->
+      <div class="pcard" id="bullish-engulfing" data-type="bullish new" data-name="Bullish Engulfing Bull Engulf">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="22" y1="8" x2="22" y2="16" stroke="#ff7070" stroke-width="1.5"/>
+              <rect x="16" y="16" width="12" height="18" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="22" y1="34" x2="22" y2="40" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="38" y1="6" x2="38" y2="14" stroke="#69f0ae" stroke-width="1.5"/>
+              <rect x="30" y="14" width="16" height="44" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="38" y1="58" x2="38" y2="64" stroke="#69f0ae" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Bullish Engulfing</div>
+            <div class="pcard-tags">
+              <span class="ptag tag-bull">BULLISH</span>
+              <span class="ptag tag-rev">REVERSAL</span>
+              <span class="ptag tag-new">NEW v5</span>
+            </div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:63%;background:linear-gradient(90deg,var(--green),var(--green2))"></div></div>
+          <div class="rel-score">63%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Day 1: bears in control, red candle. Day 2: bulls open BELOW Day 1 low (trap), then buy aggressively, driving price above Day 1 open. The green candle CONSUMES the entire prior red candle. Bears capitulated. Smart money buying at discount, retail panic selling = fuel for the move.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">If the next candle gaps down below the engulfing candle open → buyers failed to follow through. Often happens if news hits overnight. Watch for continuation red candle as failure signal.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Most powerful after a multi-candle decline, at demand zones or VWAP. BIAS must flip bullish. Engulfing + VWAP bounce + SIGNAL=BUY = highest-probability long entry of the day.</div>
+          <div class="section-lbl">Entry Trigger</div>
+          <div class="entry-text">Buy calls at close of engulfing candle. Stop: below engulfing candle low. Delta ≥ 0.60.</div>
+        </div>
+      </div>
+
+      <!-- BEARISH ENGULFING -->
+      <div class="pcard" id="bearish-engulfing" data-type="bearish new" data-name="Bearish Engulfing Bear Engulf">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="22" y1="8" x2="22" y2="16" stroke="#69f0ae" stroke-width="1.5"/>
+              <rect x="16" y="16" width="12" height="18" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="22" y1="34" x2="22" y2="42" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="38" y1="6" x2="38" y2="14" stroke="#ff7070" stroke-width="1.5"/>
+              <rect x="30" y="14" width="16" height="44" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="38" y1="58" x2="38" y2="64" stroke="#ff7070" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Bearish Engulfing</div>
+            <div class="pcard-tags">
+              <span class="ptag tag-bear">BEARISH</span>
+              <span class="ptag tag-rev">REVERSAL</span>
+              <span class="ptag tag-new">NEW v5</span>
+            </div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:79%;background:linear-gradient(90deg,var(--red),var(--red2))"></div></div>
+          <div class="rel-score">79%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Day 1: bulls in control, green candle. Day 2: bears open ABOVE Day 1 high (false breakout trap), then sell aggressively, driving price below Day 1 open. Red candle ENGULFS the entire green candle. Bulls trapped at highs. This is institutional distribution disguised as a breakout.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">Price gaps up above the bearish engulfing high on next session → bears failed. Treat as a re-breakout. Flip to calls if SIGNAL=BUY confirms on LTPROv7.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Most powerful after a multi-day rally, at supply zones or VWAP rejection. BIAS flip bearish + Bearish Engulfing + SIGNAL=SELL = highest-probability put entry.</div>
+          <div class="section-lbl">Entry Trigger</div>
+          <div class="entry-text">Buy puts at close of engulfing candle. Stop: above engulfing candle high. Delta ≥ 0.60.</div>
+        </div>
+      </div>
+
+      <!-- TWEEZER TOPS -->
+      <div class="pcard" id="tweezer-tops" data-type="bearish new" data-name="Tweezer Tops Tweezer Bear">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <!-- Candle 1 green -->
+              <line x1="18" y1="8" x2="18" y2="16" stroke="#69f0ae" stroke-width="1.5"/>
+              <rect x="12" y="16" width="12" height="22" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="18" y1="38" x2="18" y2="44" stroke="#69f0ae" stroke-width="1.5"/>
+              <!-- Candle 2 red - same high -->
+              <line x1="42" y1="8" x2="42" y2="16" stroke="#ff7070" stroke-width="1.5"/>
+              <rect x="36" y="16" width="12" height="22" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="42" y1="38" x2="42" y2="44" stroke="#ff7070" stroke-width="1.5"/>
+              <!-- Level line -->
+              <line x1="6" y1="16" x2="54" y2="16" stroke="#ffcc44" stroke-width="1" stroke-dasharray="3,3"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Tweezer Tops</div>
+            <div class="pcard-tags">
+              <span class="ptag tag-bear">BEARISH</span>
+              <span class="ptag tag-rev">REVERSAL</span>
+              <span class="ptag tag-new">NEW v5</span>
+            </div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:60%;background:linear-gradient(90deg,var(--red),var(--red2))"></div></div>
+          <div class="rel-score">60%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Two consecutive candles with matching HIGHS. Day 1 pushes to a level — bulls think it's breaking out. Day 2 reaches the SAME high but then reverses. Institutional sellers are sitting at that exact level both times, absorbing every buy order. Double rejection = supply zone confirmed.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">If a third candle closes ABOVE both highs → sellers absorbed, breakout is real. Do not be short. Exit immediately and consider flipping to calls.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Watch for Tweezer Tops at prior day highs, round numbers, and VWAP rejection zones. Two equal highs = double-tested supply. SIGNAL=SELL + tweezer at resistance = precision put entry.</div>
+          <div class="section-lbl">Entry Trigger</div>
+          <div class="entry-text">Buy puts below the low of the second candle. Stop: above both highs + 1 ATR. Delta ≥ 0.60.</div>
+        </div>
+      </div>
+
+      <!-- TWEEZER BOTTOMS -->
+      <div class="pcard" id="tweezer-bottoms" data-type="bullish new" data-name="Tweezer Bottoms Tweezer Bull">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <!-- Candle 1 red -->
+              <line x1="18" y1="10" x2="18" y2="18" stroke="#ff7070" stroke-width="1.5"/>
+              <rect x="12" y="18" width="12" height="22" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="18" y1="40" x2="18" y2="52" stroke="#ff7070" stroke-width="1.5"/>
+              <!-- Candle 2 green - same low -->
+              <line x1="42" y1="10" x2="42" y2="18" stroke="#69f0ae" stroke-width="1.5"/>
+              <rect x="36" y="18" width="12" height="22" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="42" y1="40" x2="42" y2="52" stroke="#69f0ae" stroke-width="1.5"/>
+              <!-- Level line -->
+              <line x1="6" y1="52" x2="54" y2="52" stroke="#ffcc44" stroke-width="1" stroke-dasharray="3,3"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Tweezer Bottoms</div>
+            <div class="pcard-tags">
+              <span class="ptag tag-bull">BULLISH</span>
+              <span class="ptag tag-rev">REVERSAL</span>
+              <span class="ptag tag-new">NEW v5</span>
+            </div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:62%;background:linear-gradient(90deg,var(--green),var(--green2))"></div></div>
+          <div class="rel-score">62%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Two consecutive candles with matching LOWS. Bears push to a level twice — both times bulls absorb every sell order at the exact same price. Day 2 reverses up from the same low. Institutional buyers are defending that level hard. Double test = demand zone confirmed.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">Third candle closes BELOW both lows → buyers overwhelmed. Do not be long. Exit and consider puts if SIGNAL=SELL confirms.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Watch for Tweezer Bottoms at prior day lows, VWAP support, demand zones. Two equal lows = double-tested demand. SIGNAL=BUY + tweezer at support = precision call entry.</div>
+          <div class="section-lbl">Entry Trigger</div>
+          <div class="entry-text">Buy calls above the high of the second candle. Stop: below both lows - 1 ATR. Delta ≥ 0.60.</div>
+        </div>
+      </div>
+
+      <!-- MORNING STAR -->
+      <div class="pcard" id="morning-star" data-type="bullish new" data-name="Morning Star Bull Three Candle">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+              <!-- Candle 1 big red -->
+              <line x1="15" y1="6" x2="15" y2="12" stroke="#ff7070" stroke-width="1.5"/>
+              <rect x="9" y="12" width="12" height="30" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="15" y1="42" x2="15" y2="48" stroke="#ff7070" stroke-width="1.5"/>
+              <!-- Candle 2 small doji/neutral -->
+              <line x1="35" y1="44" x2="35" y2="48" stroke="#f5a623" stroke-width="1.5"/>
+              <rect x="29" y="48" width="12" height="8" fill="#f5a623" stroke="#ffcc44" stroke-width="1.5"/>
+              <line x1="35" y1="56" x2="35" y2="62" stroke="#f5a623" stroke-width="1.5"/>
+              <!-- Candle 3 big green -->
+              <line x1="57" y1="8" x2="57" y2="14" stroke="#69f0ae" stroke-width="1.5"/>
+              <rect x="51" y="14" width="12" height="30" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="57" y1="44" x2="57" y2="50" stroke="#69f0ae" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Morning Star</div>
+            <div class="pcard-tags">
+              <span class="ptag tag-bull">BULLISH</span>
+              <span class="ptag tag-rev">REVERSAL</span>
+              <span class="ptag tag-new">NEW v5</span>
+            </div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:72%;background:linear-gradient(90deg,var(--green),var(--green2))"></div></div>
+          <div class="rel-score">72%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Three-candle reversal. Candle 1: bears dominate, big red. Candle 2: market gaps down at open, then INDECISION — neither side wins (small body). Candle 3: bulls take over completely, big green candle recovering INTO Candle 1. The star is the turning point — institutional accumulation in the doji/small candle.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">If Candle 3 is weak (doesn't recover at least 50% of Candle 1) → bulls didn't show up. Pattern fails. Look for continuation lower on next candle.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Powerful after a 2-3 day SPY decline. Watch for it at key support. The doji candle during FOMC = classic Morning Star setup if followed by a rip. SIGNAL=BUY must confirm on Candle 3 close.</div>
+          <div class="section-lbl">Entry Trigger</div>
+          <div class="entry-text">Buy calls at open of Candle 3 or after Candle 3 closes green. Stop: below Candle 2 low. Delta ≥ 0.60.</div>
+        </div>
+      </div>
+
+      <!-- EVENING STAR -->
+      <div class="pcard" id="evening-star" data-type="bearish new" data-name="Evening Star Bear Three Candle">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+              <!-- Candle 1 big green -->
+              <line x1="15" y1="12" x2="15" y2="18" stroke="#69f0ae" stroke-width="1.5"/>
+              <rect x="9" y="18" width="12" height="30" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="15" y1="48" x2="15" y2="54" stroke="#69f0ae" stroke-width="1.5"/>
+              <!-- Candle 2 small doji -->
+              <line x1="35" y1="8" x2="35" y2="14" stroke="#f5a623" stroke-width="1.5"/>
+              <rect x="29" y="14" width="12" height="8" fill="#f5a623" stroke="#ffcc44" stroke-width="1.5"/>
+              <line x1="35" y1="22" x2="35" y2="28" stroke="#f5a623" stroke-width="1.5"/>
+              <!-- Candle 3 big red -->
+              <line x1="57" y1="18" x2="57" y2="24" stroke="#ff7070" stroke-width="1.5"/>
+              <rect x="51" y="24" width="12" height="30" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="57" y1="54" x2="57" y2="62" stroke="#ff7070" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Evening Star</div>
+            <div class="pcard-tags">
+              <span class="ptag tag-bear">BEARISH</span>
+              <span class="ptag tag-rev">REVERSAL</span>
+              <span class="ptag tag-new">NEW v5</span>
+            </div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:68%;background:linear-gradient(90deg,var(--red),var(--red2))"></div></div>
+          <div class="rel-score">68%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Mirror of Morning Star. Candle 1: bulls dominant, big green. Candle 2: market gaps up but STALLS — small body indecision. Institutional sellers are distributing into the euphoria. Candle 3: bears take over, big red candle recovering BACK INTO Candle 1. Bulls were trapped at the top.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">If Candle 3 is weak (doesn't recover at least 50% of Candle 1) → sellers not committed. Pattern fails. Price likely continues higher. Exit short immediately.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Powerful after a 2-3 day SPY rally. Watch at supply zones, prior highs. The star candle on a FOMC presser = Evening Star setup if Powell turns hawkish. SIGNAL=SELL must confirm on Candle 3 close.</div>
+          <div class="section-lbl">Entry Trigger</div>
+          <div class="entry-text">Buy puts at open of Candle 3 or after Candle 3 closes red. Stop: above Candle 2 high. Delta ≥ 0.60.</div>
+        </div>
+      </div>
+
+      <!-- LONG-LEGGED DOJI -->
+      <div class="pcard" id="long-legged-doji" data-type="neutral new" data-name="Long Legged Doji Indecision FOMC">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="30" y1="4" x2="30" y2="33" stroke="#f5a623" stroke-width="2"/>
+              <rect x="18" y="33" width="24" height="4" fill="#f5a623" stroke="#ffcc44" stroke-width="1.5"/>
+              <line x1="30" y1="37" x2="30" y2="66" stroke="#f5a623" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Long-Legged Doji</div>
+            <div class="pcard-tags">
+              <span class="ptag tag-neutral">NEUTRAL</span>
+              <span class="ptag tag-rev">INDECISION</span>
+              <span class="ptag tag-new">NEW v5</span>
+            </div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:45%;background:linear-gradient(90deg,var(--gold),var(--gold2))"></div></div>
+          <div class="rel-score">45%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Price traveled far in BOTH directions and returned to the open. Bulls pushed hard, bears pushed hard — nobody won. This is the market screaming "we don't know." Open = Close despite massive range. High uncertainty. Both sides got trapped and stopped out.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">EVERYTHING about this candle is a "failure" in terms of direction. The next candle determines the winner. Treat it as a reset, not a signal. Entering on the doji itself = gambling, not trading.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">THE classic FOMC 2:00 PM candle. This IS the announcement candle 90% of the time. DO NOT TRADE. Wait for the next full 5-min candle to close. Long-Legged Doji + next candle closes strong = follow the close direction. SIGNAL=WAIT during doji = absolute gate.</div>
+          <div class="section-lbl">Entry Trigger</div>
+          <div class="entry-text">NONE on the doji itself. Wait for confirmed directional candle to close. Then enter with SIGNAL confirmation.</div>
+        </div>
+      </div>
+
+      <!-- MARUBOZU -->
+      <div class="pcard" id="marubozu" data-type="neutral new" data-name="Marubozu Bull Bear Strong Momentum">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <!-- Green Marubozu left -->
+              <rect x="8" y="10" width="16" height="50" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <!-- Red Marubozu right -->
+              <rect x="36" y="10" width="16" height="50" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Marubozu</div>
+            <div class="pcard-tags">
+              <span class="ptag tag-cont">CONTINUATION</span>
+              <span class="ptag tag-new">NEW v5</span>
+            </div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:71%;background:linear-gradient(90deg,var(--blue),var(--blue2))"></div></div>
+          <div class="rel-score">71%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">No wicks. Price opened and never looked back. Full ACCEPTANCE of the move — no rejection at either extreme. Green Marubozu: bulls opened and bought all the way to close without hesitation. Red Marubozu: bears opened and sold all the way to close. This is one-sided institutional order flow with zero ambiguity.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">⚠️ CRITICAL: A large-bodied RED candle with a small lower wick is NOT a Hammer. A Hammer requires the lower wick to be 2-3x the body AND the body to be small. Marubozu = full body, minimal/no wicks = REJECTION vs ACCEPTANCE framework: this candle means ACCEPTANCE, not rejection.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Green Marubozu after FOMC dovish surprise = maximum bullish confirmation. Red Marubozu after hawkish surprise = maximum bearish confirmation. Do NOT fade a Marubozu. Ride it. SIGNAL=BUY on green, SIGNAL=SELL on red. This is the "no doubt" candle.</div>
+          <div class="section-lbl">Entry Trigger</div>
+          <div class="entry-text">Trade in the direction of the Marubozu. Enter on first pullback or next candle open. Never chase mid-Marubozu — premium explodes. Delta ≥ 0.60.</div>
+        </div>
+      </div>
+
+    </div><!-- end cards-grid -->
+
+    <!-- ======================== CORE PATTERNS ======================== -->
+    <div class="sect-div">
+      <div class="sect-div-title">Core Pattern Library</div>
+      <div class="sect-div-line"></div>
+    </div>
+
+    <div class="cards-grid" id="coreGrid">
+
+      <!-- HAMMER -->
+      <div class="pcard" id="hammer" data-type="bullish" data-name="Hammer Bull Reversal Support">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="30" y1="8" x2="30" y2="14" stroke="#69f0ae" stroke-width="1.5"/>
+              <rect x="22" y="14" width="16" height="12" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="30" y1="26" x2="30" y2="62" stroke="#69f0ae" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Hammer</div>
+            <div class="pcard-tags"><span class="ptag tag-bull">BULLISH</span><span class="ptag tag-rev">REVERSAL</span></div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:60%;background:linear-gradient(90deg,var(--green),var(--green2))"></div></div>
+          <div class="rel-score">60%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Bears drove price sharply lower during the session. But bulls stepped in at key support and pushed price back near the open. Small body = indecision who wins, but long lower wick = bulls clearly REJECTED the lows.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">⚠️ KEY RULE: A large-bodied red candle with a lower wick is NOT a Hammer. The body must be SMALL. Large body = Marubozu = ACCEPTANCE, not rejection. Don't confuse the two.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Hammer at VWAP or prior day low after a decline. BIAS flip bullish + SIGNAL=BUY = call entry. Wick must be 2:1+ to qualify. 3:1 = Pin Bar (higher conviction).</div>
+        </div>
+      </div>
+
+      <!-- SHOOTING STAR -->
+      <div class="pcard" id="shooting-star" data-type="bearish" data-name="Shooting Star Bear Reversal Resistance">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="30" y1="8" x2="30" y2="44" stroke="#ff7070" stroke-width="2.5"/>
+              <rect x="22" y="44" width="16" height="12" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="30" y1="56" x2="30" y2="62" stroke="#ff7070" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Shooting Star</div>
+            <div class="pcard-tags"><span class="ptag tag-bear">BEARISH</span><span class="ptag tag-rev">REVERSAL</span></div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:59%;background:linear-gradient(90deg,var(--red),var(--red2))"></div></div>
+          <div class="rel-score">59%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Bulls drove price sharply higher intraday — then bears crushed it back near the open. The long upper wick is a rejection of highs. Institutional sellers used the rally to distribute at a higher price. Retail longs are now trapped.</div>
+          <div class="section-lbl">Failure Version</div>
+          <div class="failure-text">If price gaps above the Shooting Star high next candle → sellers overwhelmed. Real breakout. Cover shorts and flip to calls if SIGNAL=BUY confirms.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Classic at VWAP rejection or prior day high. After a Liquidity Sweep of highs on SPY, Shooting Star = sniper put setup. SIGNAL=SELL required.</div>
+        </div>
+      </div>
+
+      <!-- DOJI -->
+      <div class="pcard" id="doji" data-type="neutral" data-name="Doji Indecision Neutral">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="30" y1="8" x2="30" y2="34" stroke="#f5a623" stroke-width="1.5"/>
+              <rect x="18" y="34" width="24" height="3" fill="#f5a623" stroke="#ffcc44" stroke-width="1.5"/>
+              <line x1="30" y1="37" x2="30" y2="62" stroke="#f5a623" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Doji</div>
+            <div class="pcard-tags"><span class="ptag tag-neutral">NEUTRAL</span><span class="ptag tag-rev">INDECISION</span></div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:50%;background:linear-gradient(90deg,var(--gold),var(--gold2))"></div></div>
+          <div class="rel-score">50%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Open = Close. Buyers and sellers perfectly balanced for the session. The market is waiting — for news, for a catalyst, for the next session. Neither side has the conviction to push price decisively.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Doji before FOMC = market holding breath. Doji after big move = potential exhaustion. SIGNAL=WAIT is typical. Next candle close determines direction. Do not trade the Doji itself.</div>
+        </div>
+      </div>
+
+      <!-- INSIDE BAR -->
+      <div class="pcard" id="inside-bar" data-type="neutral continuation" data-name="Inside Bar Consolidation NR7">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="18" y1="6" x2="18" y2="12" stroke="#00b4ff" stroke-width="1.5"/>
+              <rect x="12" y="12" width="12" height="46" fill="#00b4ff" stroke="#64dfff" stroke-width="1.5" opacity="0.5"/>
+              <line x1="18" y1="58" x2="18" y2="64" stroke="#00b4ff" stroke-width="1.5"/>
+              <line x1="42" y1="22" x2="42" y2="28" stroke="#f5a623" stroke-width="1.5"/>
+              <rect x="36" y="28" width="12" height="26" fill="#f5a623" stroke="#ffcc44" stroke-width="1.5"/>
+              <line x1="42" y1="54" x2="42" y2="58" stroke="#f5a623" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Inside Bar</div>
+            <div class="pcard-tags"><span class="ptag tag-neutral">NEUTRAL</span><span class="ptag tag-cont">CONTINUATION</span></div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:55%;background:linear-gradient(90deg,var(--blue),var(--blue2))"></div></div>
+          <div class="rel-score">55%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">The mother bar contains the inside bar completely. Price is coiling — volume contracting, range compressing. The market is loading energy. When the inside bar breaks, it typically continues the prior trend. This is the "coil before the spring."</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">Classic pre-FOMC setup: series of inside bars as SPY compresses, then explosive breakout at 2:00 PM. LTPROv7 ATR compression signals this. Watch for NR7 (narrowest range in 7 candles) as the highest-probability coil.</div>
+        </div>
+      </div>
+
+      <!-- THREE WHITE SOLDIERS -->
+      <div class="pcard" id="three-white-soldiers" data-type="bullish continuation" data-name="Three White Soldiers Bull Continuation Strong">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="15" y1="46" x2="15" y2="52" stroke="#69f0ae" stroke-width="1.5"/>
+              <rect x="9" y="32" width="12" height="14" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="15" y1="24" x2="15" y2="32" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="35" y1="38" x2="35" y2="44" stroke="#69f0ae" stroke-width="1.5"/>
+              <rect x="29" y="20" width="12" height="18" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="35" y1="14" x2="35" y2="20" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="55" y1="30" x2="55" y2="36" stroke="#69f0ae" stroke-width="1.5"/>
+              <rect x="49" y="10" width="12" height="20" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+              <line x1="55" y1="6" x2="55" y2="10" stroke="#69f0ae" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Three White Soldiers</div>
+            <div class="pcard-tags"><span class="ptag tag-bull">BULLISH</span><span class="ptag tag-cont">CONTINUATION</span></div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:82%;background:linear-gradient(90deg,var(--green),var(--green2))"></div></div>
+          <div class="rel-score">82%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Three consecutive green candles, each closing near its high, each opening within the prior body. Sustained institutional buying across three sessions. No panic, no reversal — pure accumulation. Sellers have been fully absorbed.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">After a dovish FOMC, look for Three White Soldiers forming on 5-min chart. Ride the trend — don't fade it. SIGNAL=BUY on all three is confirmation. Take partials at VWAP extensions.</div>
+        </div>
+      </div>
+
+      <!-- THREE BLACK CROWS -->
+      <div class="pcard" id="three-black-crows" data-type="bearish continuation" data-name="Three Black Crows Bear Continuation Strong">
+        <div class="pcard-header">
+          <div class="pcard-svg">
+            <svg viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+              <line x1="15" y1="8" x2="15" y2="14" stroke="#ff7070" stroke-width="1.5"/>
+              <rect x="9" y="14" width="12" height="20" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="15" y1="34" x2="15" y2="40" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="35" y1="18" x2="35" y2="24" stroke="#ff7070" stroke-width="1.5"/>
+              <rect x="29" y="24" width="12" height="20" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="35" y1="44" x2="35" y2="50" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="55" y1="28" x2="55" y2="34" stroke="#ff7070" stroke-width="1.5"/>
+              <rect x="49" y="34" width="12" height="20" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+              <line x1="55" y1="54" x2="55" y2="62" stroke="#ff7070" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="pcard-meta">
+            <div class="pcard-name">Three Black Crows</div>
+            <div class="pcard-tags"><span class="ptag tag-bear">BEARISH</span><span class="ptag tag-cont">CONTINUATION</span></div>
+          </div>
+        </div>
+        <div class="reliability-row">
+          <div class="rel-label">Bulkowski</div>
+          <div class="rel-track"><div class="rel-fill" style="width:78%;background:linear-gradient(90deg,var(--red),var(--red2))"></div></div>
+          <div class="rel-score">78%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="section-lbl">Order Flow Story</div>
+          <div class="story-text">Three consecutive red candles, each closing near its low, each opening within the prior body. Sustained institutional selling. Bulls made no meaningful attempt to reverse. Distribution is complete — this is not a dip to buy.</div>
+          <div class="section-lbl">SPY / LTPROv7 Context</div>
+          <div class="spy-text">After hawkish FOMC, Three Black Crows on 5-min = confirmed downtrend. Ride it. Don't buy the dips during this pattern. SIGNAL=SELL on all three. Take partials at support levels.</div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- end content-area -->
+</div><!-- end main -->
+
+<script>
+let activeType = 'all';
+
+function filterByType(type, btn) {
+  activeType = type;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function filterCards(query) {
+  applyFilters(query);
+}
+
+function applyFilters(query) {
+  query = (query || document.getElementById('searchInput').value).toLowerCase();
+  const allCards = document.querySelectorAll('.pcard');
+  const wickModule = document.getElementById('wick-rules');
+  let visible = 0;
+
+  // Handle wick module visibility
+  if (activeType === 'all' || activeType === 'wick') {
+    wickModule.style.display = query ? 'none' : 'block';
+    if (!query) visible++;
+  } else {
+    wickModule.style.display = 'none';
+  }
+
+  allCards.forEach(card => {
+    const cardType = card.dataset.type || '';
+    const cardName = card.dataset.name || '';
+    const typeMatch = activeType === 'all' || cardType.includes(activeType);
+    const searchMatch = !query || cardName.toLowerCase().includes(query) || card.textContent.toLowerCase().includes(query);
+    if (typeMatch && searchMatch) {
+      card.style.display = '';
+      visible++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  document.getElementById('countBadge').textContent = visible + ' pattern' + (visible !== 1 ? 's' : '') + ' shown';
+
+  // Show/hide section dividers based on visible cards
+  document.querySelectorAll('.cards-grid').forEach(grid => {
+    const hasVisible = [...grid.querySelectorAll('.pcard')].some(c => c.style.display !== 'none');
+    const prev = grid.previousElementSibling;
+    if (prev && prev.classList.contains('sect-div')) {
+      prev.style.display = hasVisible ? '' : 'none';
+    }
+  });
+}
+
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('active-card');
+    setTimeout(() => el.classList.remove('active-card'), 2000);
+    // Update sidebar active
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    event.target.closest('.sidebar-item')?.classList.add('active');
+  }
+}
+
+// Init count
+window.addEventListener('DOMContentLoaded', () => applyFilters(''));
+</script>
+</body>
+</html>
