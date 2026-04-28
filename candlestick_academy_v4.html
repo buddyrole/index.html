@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candlestick Academy v4 — Maverick</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+:root{
+  --bg:#07090f;--bg2:#0b0f1a;--bg3:#101520;
+  --panel:#111826;--panel2:#151e30;
+  --border:#1b2e48;--border2:#243d5e;
+  --gold:#f5a623;--gold2:#ffcc44;
+  --red:#ff3d3d;--red2:#ff7070;
+  --green:#00e676;--green2:#69f0ae;
+  --blue:#00b4ff;--blue2:#64dfff;
+  --cyan:#00e5ff;--purple:#b388ff;
+  --white:#dde6f0;--muted:#68788f;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--white);font-family:'Rajdhani',sans-serif;display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,180,255,0.01) 3px,rgba(0,180,255,0.01) 6px);pointer-events:none;z-index:999}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#060910,#0c1525,#060910);border-bottom:2px solid var(--gold);padding:12px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.hdr-left{display:flex;flex-direction:column}
+.hdr-badge{font-family:'Share Tech Mono';font-size:9px;color:var(--gold);letter-spacing:4px;text-transform:uppercase}
+.hdr-title{font-family:'Orbitron';font-size:18px;font-weight:900;color:var(--white);letter-spacing:2px}
+.hdr-title span{color:var(--gold)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.xp-box{background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);border-radius:4px;padding:4px 12px;font-family:'Orbitron';font-size:11px;color:var(--gold)}
+
+/* MODE BAR */
+.mode-bar{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;flex-shrink:0;gap:4px}
+.mode-btn{background:none;border:none;color:var(--muted);font-family:'Rajdhani';font-size:13px;font-weight:600;letter-spacing:1px;padding:10px 16px;cursor:pointer;text-transform:uppercase;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap}
+.mode-btn:hover{color:var(--white)}
+.mode-btn.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(245,166,35,0.04)}
+.progress-wrap{margin-left:auto;display:flex;align-items:center;gap:10px}
+.prog-track{width:120px;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:3px;transition:width 0.4s ease}
+.prog-text{font-family:'Share Tech Mono';font-size:11px;color:var(--muted)}
+
+/* SCREEN CONTAINERS */
+.screen{display:none;flex:1;overflow:hidden;flex-direction:column}
+.screen.active{display:flex}
+
+/* ========== FLASHCARD SCREEN ========== */
+.fc-controls{padding:12px 20px;display:flex;align-items:center;gap:10px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.fc-select{background:var(--panel);border:1px solid var(--border2);color:var(--white);font-family:'Rajdhani';font-size:13px;padding:6px 12px;border-radius:4px;cursor:pointer;outline:none}
+.fc-select option{background:var(--bg3)}
+.fc-btn{background:var(--panel);border:1px solid var(--border2);color:var(--muted);font-family:'Rajdhani';font-size:12px;font-weight:600;letter-spacing:1px;padding:6px 14px;border-radius:4px;cursor:pointer;text-transform:uppercase;transition:all 0.2s}
+.fc-btn:hover{border-color:var(--gold);color:var(--gold)}
+.fc-btn.primary{background:rgba(245,166,35,0.1);border-color:var(--gold);color:var(--gold)}
+.fc-counter{font-family:'Share Tech Mono';font-size:12px;color:var(--muted);margin-left:auto}
+
+.fc-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.card-wrap{perspective:1000px;width:100%;max-width:540px}
+.card-inner{position:relative;transform-style:preserve-3d;transition:transform 0.5s ease;cursor:pointer;min-height:380px}
+.card-inner.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;padding:22px;display:flex;flex-direction:column;min-height:380px}
+.card-front{background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--border2)}
+.card-back{background:linear-gradient(145deg,#0f1d30,#0c1624);border:1px solid var(--border2);transform:rotateY(180deg)}
+
+.card-tag-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.ctag{font-family:'Share Tech Mono';font-size:10px;padding:2px 8px;border-radius:2px}
+.ctag-bull{background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.3);color:var(--green)}
+.ctag-bear{background:rgba(255,61,61,0.1);border:1px solid rgba(255,61,61,0.3);color:var(--red)}
+.ctag-neutral{background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);color:var(--gold)}
+.ctag-cont{background:rgba(0,180,255,0.1);border:1px solid rgba(0,180,255,0.3);color:var(--blue)}
+.ctag-new{background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.35);color:#ffd700}
+
+.card-name{font-family:'Orbitron';font-size:20px;font-weight:700;color:var(--white);margin-bottom:6px;letter-spacing:0.5px}
+.card-hint{font-size:13px;color:var(--muted);margin-bottom:16px;font-style:italic}
+.card-svg-area{flex:1;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.2);border-radius:6px;padding:14px}
+.flip-hint{text-align:center;margin-top:12px;font-size:11px;color:var(--muted);font-family:'Share Tech Mono';letter-spacing:1px}
+
+.back-section-lbl{font-family:'Orbitron';font-size:9px;font-weight:700;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;margin-top:10px}
+.back-section-lbl:first-child{margin-top:0}
+.back-text{font-size:13px;color:var(--white);line-height:1.6}
+.back-text-muted{font-size:12px;color:var(--muted);line-height:1.5}
+.back-spy{font-size:12px;color:var(--blue2);line-height:1.5}
+
+/* RELIABILITY BAR (card) */
+.mini-rel{display:flex;align-items:center;gap:6px;margin:8px 0}
+.mini-rel-track{flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden}
+.mini-rel-fill{height:100%;border-radius:3px}
+.mini-rel-label{font-family:'Share Tech Mono';font-size:10px;color:var(--muted);width:24px;text-align:right}
+
+/* FC NAV */
+.fc-nav{padding:14px 20px;display:flex;align-items:center;justify-content:center;gap:12px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0}
+.nav-btn{background:var(--panel);border:1px solid var(--border2);color:var(--white);font-family:'Rajdhani';font-size:14px;font-weight:600;padding:10px 24px;border-radius:5px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all 0.2s}
+.nav-btn:hover{border-color:var(--gold);color:var(--gold)}
+.nav-btn.mark-know{background:rgba(0,230,118,0.08);border-color:rgba(0,230,118,0.35);color:var(--green)}
+.nav-btn.mark-review{background:rgba(255,61,61,0.08);border-color:rgba(255,61,61,0.35);color:var(--red)}
+
+/* ========== QUIZ SCREEN ========== */
+.quiz-wrap{flex:1;overflow-y:auto;padding:24px 20px;max-width:680px;margin:0 auto;width:100%}
+.quiz-header{text-align:center;margin-bottom:24px}
+.quiz-title{font-family:'Orbitron';font-size:16px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:6px}
+.quiz-sub{font-size:13px;color:var(--muted)}
+.q-block{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;transition:border-color 0.2s}
+.q-block.answered{pointer-events:none}
+.q-num{font-family:'Share Tech Mono';font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:8px}
+.q-text{font-size:15px;color:var(--white);font-weight:600;line-height:1.5;margin-bottom:14px}
+.q-options{display:flex;flex-direction:column;gap:7px}
+.q-opt{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:10px 14px;cursor:pointer;font-size:13px;color:var(--white);transition:all 0.2s;text-align:left;font-family:'Rajdhani';font-weight:500;letter-spacing:0.3px}
+.q-opt:hover{border-color:var(--border2);background:var(--panel2)}
+.q-opt.correct{background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.5);color:var(--green)}
+.q-opt.wrong{background:rgba(255,61,61,0.08);border-color:rgba(255,61,61,0.4);color:var(--red)}
+.q-explanation{margin-top:12px;padding:10px 14px;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.15);border-left:3px solid var(--cyan);border-radius:4px;font-size:13px;color:var(--white);line-height:1.5;display:none;animation:fadeIn 0.3s ease}
+.q-explanation.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.quiz-score-box{background:var(--panel2);border:1px solid var(--border2);border-radius:8px;padding:22px;text-align:center;margin-top:16px;display:none}
+.quiz-score-box.show{display:block}
+.score-num{font-family:'Orbitron';font-size:40px;font-weight:900;color:var(--gold)}
+.score-label{font-family:'Share Tech Mono';font-size:12px;color:var(--muted);letter-spacing:2px;margin-top:4px;margin-bottom:14px}
+.score-grade{font-family:'Orbitron';font-size:18px;font-weight:700;margin-bottom:14px}
+.restart-btn{background:rgba(245,166,35,0.1);border:1px solid var(--gold);color:var(--gold);font-family:'Orbitron';font-size:12px;font-weight:700;padding:10px 24px;border-radius:4px;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:all 0.2s}
+.restart-btn:hover{background:rgba(245,166,35,0.2)}
+
+/* ========== REVIEW SCREEN ========== */
+.review-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:20px;overflow-y:auto;flex:1}
+.review-chip{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px;cursor:pointer;text-align:center;transition:all 0.2s}
+.review-chip:hover{border-color:var(--border2);transform:translateY(-2px)}
+.review-chip.needs-review{border-color:rgba(255,61,61,0.4);background:rgba(255,61,61,0.04)}
+.review-chip.knows{border-color:rgba(0,230,118,0.3);background:rgba(0,230,118,0.03)}
+.review-chip-name{font-family:'Orbitron';font-size:11px;font-weight:600;color:var(--white);margin-bottom:4px}
+.review-chip-status{font-family:'Share Tech Mono';font-size:10px}
+
+/* MISC */
+@media(max-width:600px){.card-name{font-size:15px}.quiz-wrap{padding:14px}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-badge">⚡ MAVERICK // TRAINING MODULE</div>
+    <div class="hdr-title">CANDLESTICK <span>ACADEMY</span></div>
+  </div>
+  <div class="hdr-right">
+    <div class="xp-box">XP: <span id="xpCount">0</span></div>
+  </div>
+</div>
+
+<div class="mode-bar">
+  <button class="mode-btn active" onclick="switchMode('flashcard')">📇 Flashcards</button>
+  <button class="mode-btn" onclick="switchMode('quiz')">🎯 Quiz Mode</button>
+  <button class="mode-btn" onclick="switchMode('review')">📋 Review Deck</button>
+  <div class="progress-wrap">
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="prog-text" id="progText">0 / 0</div>
+  </div>
+</div>
+
+<!-- ======== FLASHCARD SCREEN ======== -->
+<div class="screen active" id="screen-flashcard">
+  <div class="fc-controls">
+    <select class="fc-select" id="filterSelect" onchange="rebuildDeck()">
+      <option value="all">All Patterns</option>
+      <option value="bullish">🟢 Bullish</option>
+      <option value="bearish">🔴 Bearish</option>
+      <option value="neutral">🟡 Neutral</option>
+      <option value="continuation">🔵 Continuation</option>
+      <option value="new">⭐ New v4</option>
+    </select>
+    <button class="fc-btn" onclick="shuffleDeck()">🔀 Shuffle</button>
+    <button class="fc-btn" onclick="reviewOnlyMode()">📌 Review Only</button>
+    <button class="fc-btn primary" onclick="resetMarks()">↺ Reset</button>
+    <div class="fc-counter" id="fcCounter">Card 1 of 14</div>
+  </div>
+
+  <div class="fc-stage">
+    <div class="card-wrap">
+      <div class="card-inner" id="cardInner" onclick="flipCard()">
+        <div class="card-face card-front" id="cardFront"></div>
+        <div class="card-face card-back" id="cardBack"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fc-nav">
+    <button class="nav-btn mark-review" onclick="markCard(false)">✗ REVIEW</button>
+    <button class="nav-btn" onclick="prevCard()">◀ PREV</button>
+    <button class="nav-btn" onclick="nextCard()">NEXT ▶</button>
+    <button class="nav-btn mark-know" onclick="markCard(true)">✓ KNOW IT</button>
+  </div>
+</div>
+
+<!-- ======== QUIZ SCREEN ======== -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-wrap" id="quizWrap"></div>
+</div>
+
+<!-- ======== REVIEW SCREEN ======== -->
+<div class="screen" id="screen-review">
+  <div class="review-grid" id="reviewGrid"></div>
+</div>
+
+<script>
+// ======================== PATTERN DATA ========================
+const patterns = [
+  {
+    id:'hammer', name:'Hammer', type:'bullish', new:false,
+    hint:'Small body, long lower wick, appears after a downtrend',
+    reliability:60, relColor:'var(--green)',
+    story:'Bears drove price down hard intraday. Bulls stepped in at support and pushed price back near the open. Small body + long lower wick = rejection of lows. Bulls are absorbing sell orders.',
+    failure:'⚠️ A large-bodied red candle with a lower wick is NOT a Hammer. Body must be small. Large body = Marubozu = acceptance, not rejection.',
+    spy:'Hammer at VWAP or prior day low. BIAS bullish + SIGNAL=BUY + 2:1+ wick = call entry. 3:1 wick = Pin Bar (higher conviction).',
+    svgMarkup: buildSVG_hammer(),
+    tags:['BULLISH','REVERSAL']
+  },
+  {
+    id:'shooting-star', name:'Shooting Star', type:'bearish', new:false,
+    hint:'Long upper wick, small body near lows, at resistance',
+    reliability:59, relColor:'var(--red)',
+    story:'Bulls pushed price up sharply intraday — bears crushed it back near open. Upper wick = institutional sellers distributing at higher prices. Retail longs are trapped.',
+    failure:'If price gaps ABOVE the high next candle → sellers overwhelmed. Real breakout. Flip to calls if SIGNAL=BUY confirms.',
+    spy:'At VWAP rejection or prior day high. After SPY Liquidity Sweep of highs → Shooting Star → SIGNAL=SELL = put entry.',
+    svgMarkup: buildSVG_shootingStar(),
+    tags:['BEARISH','REVERSAL']
+  },
+  {
+    id:'doji', name:'Doji', type:'neutral', new:false,
+    hint:'Open = Close. No body. Equal wicks.',
+    reliability:50, relColor:'var(--gold)',
+    story:'Open = Close. Bulls and bears fought all day and neither side won. The market is waiting for a catalyst. Pure indecision — no order flow winner.',
+    failure:'Everything about this candle is uncertain. Context is everything. Doji at support = potential reversal. Doji mid-trend = pause.',
+    spy:'Classic pre-FOMC candle. SIGNAL=WAIT typical. Wait for next candle to close directionally. Do NOT trade the Doji itself.',
+    svgMarkup: buildSVG_doji(),
+    tags:['NEUTRAL','INDECISION']
+  },
+  {
+    id:'inside-bar', name:'Inside Bar', type:'neutral continuation', new:false,
+    hint:'Second candle is contained within the first (mother bar)',
+    reliability:55, relColor:'var(--blue)',
+    story:'The mother bar contains the inside bar completely. Price coiling — volume contracting, range compressing. The market is loading energy for the next explosive move.',
+    failure:'If price breaks the mother bar but immediately reverses back inside → failed breakout. Don\'t chase.',
+    spy:'Pre-FOMC coil setup. LTPROv7 ATR compression confirms. NR7 = narrowest range in 7 candles = highest-probability breakout setup.',
+    svgMarkup: buildSVG_insideBar(),
+    tags:['NEUTRAL','CONTINUATION','COIL']
+  },
+  // ===== NEW v4 PATTERNS =====
+  {
+    id:'pin-bar-bull', name:'Pin Bar — Bullish', type:'bullish', new:true,
+    hint:'Tiny body near top, massively long lower wick (3:1+)',
+    reliability:78, relColor:'var(--green)',
+    story:'Price sweeps BELOW key support (liquidity grab). Bears think they\'re winning. Institutional buyers step in aggressively, absorbing all sell orders. Price rockets back up. The long lower wick IS the story. Small body near top = bulls closed in control.',
+    failure:'If next candle closes BELOW the pin bar low → pattern failed. Exit immediately. Most common false pin = FOMC days.',
+    spy:'Most powerful at VWAP, prior day lows. APEX fires → sweep of lows → Pin Bar → SIGNAL=BUY → THIS is the Liquidity Sweep Reversal entry. Wick must be 3:1+.',
+    svgMarkup: buildSVG_pinBull(),
+    tags:['BULLISH','REVERSAL','NEW v4']
+  },
+  {
+    id:'pin-bar-bear', name:'Pin Bar — Bearish', type:'bearish', new:true,
+    hint:'Tiny body near bottom, massively long upper wick (3:1+)',
+    reliability:75, relColor:'var(--red)',
+    story:'Price spikes ABOVE resistance (liquidity grab at highs). Bulls get trapped in FOMO. Institutional sellers hammer the ask, absorbing all buys. Price collapses. The long upper wick = rejection story. Body near lows = bears closed in control.',
+    failure:'Next candle closes ABOVE pin bar high → real breakout. Bears failed. Exit and consider flipping to calls if SIGNAL=BUY confirms.',
+    spy:'At VWAP resistance or prior day highs. APEX → sweep of highs → Bearish Pin Bar → SIGNAL=SELL → BUY PUTS. Must be 3:1+ wick.',
+    svgMarkup: buildSVG_pinBear(),
+    tags:['BEARISH','REVERSAL','NEW v4']
+  },
+  {
+    id:'bullish-engulfing', name:'Bullish Engulfing', type:'bullish', new:true,
+    hint:'Large green candle consumes the entire prior red candle',
+    reliability:63, relColor:'var(--green)',
+    story:'Day 1: bears in control (red). Day 2: opens BELOW Day 1 low (trap), bulls buy aggressively, close ABOVE Day 1 open. Green candle CONSUMES the red. Bears capitulated. Smart money buying at discount while retail panic sells.',
+    failure:'Next candle gaps DOWN below engulfing candle open → follow-through failed. Pattern fails. Watch for continuation red as exit signal.',
+    spy:'After multi-candle decline at demand zones or VWAP. BIAS flip bullish + Engulfing + SIGNAL=BUY = highest-probability long entry of the session.',
+    svgMarkup: buildSVG_bullEngulf(),
+    tags:['BULLISH','REVERSAL','NEW v4']
+  },
+  {
+    id:'bearish-engulfing', name:'Bearish Engulfing', type:'bearish', new:true,
+    hint:'Large red candle consumes the entire prior green candle',
+    reliability:79, relColor:'var(--red)',
+    story:'Day 1: bulls in control (green). Day 2: opens ABOVE Day 1 high (false breakout trap), bears sell aggressively, close BELOW Day 1 open. Red candle ENGULFS the green. Bulls trapped at highs. Institutional distribution disguised as a breakout.',
+    failure:'Next candle gaps UP above engulfing high → bears failed. Flip to calls if SIGNAL=BUY confirms on LTPROv7.',
+    spy:'After multi-day SPY rally at supply zones or VWAP rejection. BIAS flip bearish + Engulfing + SIGNAL=SELL = highest-probability put entry.',
+    svgMarkup: buildSVG_bearEngulf(),
+    tags:['BEARISH','REVERSAL','NEW v4']
+  },
+  {
+    id:'tweezer-tops', name:'Tweezer Tops', type:'bearish', new:true,
+    hint:'Two candles with matching highs — double rejection at the same level',
+    reliability:60, relColor:'var(--red)',
+    story:'Two consecutive candles with matching HIGHS. Day 1 tests a level. Day 2 reaches the SAME high and reverses. Institutional sellers sitting at that exact level both times, absorbing every buy. Double rejection = supply zone confirmed.',
+    failure:'Third candle closes ABOVE both highs → sellers absorbed. Real breakout. Do not be short. Flip to calls if SIGNAL=BUY.',
+    spy:'Watch at prior day highs, round numbers, VWAP rejection zones. Two equal highs = double-tested supply. SIGNAL=SELL + tweezer at resistance = precision put entry.',
+    svgMarkup: buildSVG_tweezerTops(),
+    tags:['BEARISH','REVERSAL','NEW v4']
+  },
+  {
+    id:'tweezer-bottoms', name:'Tweezer Bottoms', type:'bullish', new:true,
+    hint:'Two candles with matching lows — double rejection at the same level',
+    reliability:62, relColor:'var(--green)',
+    story:'Two consecutive candles with matching LOWS. Bears push twice — bulls absorb every sell order at the same price both times. Double test = demand zone confirmed. Institutional buyers defending hard.',
+    failure:'Third candle closes BELOW both lows → buyers overwhelmed. Pattern fails. Consider puts if SIGNAL=SELL confirms.',
+    spy:'At prior day lows, VWAP support, demand zones. Two equal lows = double-tested demand. SIGNAL=BUY + tweezer at support = precision call entry.',
+    svgMarkup: buildSVG_tweezerBottoms(),
+    tags:['BULLISH','REVERSAL','NEW v4']
+  },
+  {
+    id:'morning-star', name:'Morning Star', type:'bullish', new:true,
+    hint:'3 candles: big red → small/doji → big green. Classic reversal.',
+    reliability:72, relColor:'var(--green)',
+    story:'Candle 1: bears dominate, big red. Candle 2: gaps down, indecision — neither side wins (institutional accumulation in the quiet). Candle 3: bulls take over completely, big green recovering INTO Candle 1. The star is the turning point.',
+    failure:'If Candle 3 is weak (doesn\'t recover at least 50% of Candle 1) → bulls didn\'t show up. Pattern fails. Look for continuation lower.',
+    spy:'Powerful after 2-3 day SPY decline at key support. The FOMC doji followed by a rip = classic Morning Star. SIGNAL=BUY must confirm on Candle 3 close.',
+    svgMarkup: buildSVG_morningStar(),
+    tags:['BULLISH','REVERSAL','3-CANDLE','NEW v4']
+  },
+  {
+    id:'evening-star', name:'Evening Star', type:'bearish', new:true,
+    hint:'3 candles: big green → small/doji → big red. Mirror of Morning Star.',
+    reliability:68, relColor:'var(--red)',
+    story:'Candle 1: bulls dominant, big green. Candle 2: gaps up but stalls — small body. Institutional sellers distributing into the euphoria. Candle 3: bears take over, big red recovering back INTO Candle 1. Bulls trapped at the top.',
+    failure:'If Candle 3 is weak (doesn\'t recover 50%+ of Candle 1) → sellers not committed. Fails. Price likely continues higher. Exit short.',
+    spy:'After 2-3 day SPY rally at supply zones. Star candle on Powell presser = Evening Star if he turns hawkish. SIGNAL=SELL on Candle 3 close.',
+    svgMarkup: buildSVG_eveningStar(),
+    tags:['BEARISH','REVERSAL','3-CANDLE','NEW v4']
+  },
+  {
+    id:'long-legged-doji', name:'Long-Legged Doji', type:'neutral', new:true,
+    hint:'Open = Close, but with massive wicks in both directions',
+    reliability:45, relColor:'var(--gold)',
+    story:'Price traveled far up AND far down, returning to the open. Bulls and bears both tried hard — both got stopped out. Neither won. This candle screams "we don\'t know." Maximum uncertainty, minimum edge.',
+    failure:'EVERYTHING about this candle is a "failure" for directional traders. The NEXT candle is what matters. Do not trade the doji itself.',
+    spy:'THE classic FOMC 2:00 PM candle. DO NOT TRADE. Wait for next full 5-min candle to close. SIGNAL=WAIT during doji = absolute gate. The doji is the trap, not the signal.',
+    svgMarkup: buildSVG_llDoji(),
+    tags:['NEUTRAL','INDECISION','FOMC','NEW v4']
+  },
+  {
+    id:'marubozu', name:'Marubozu', type:'continuation', new:true,
+    hint:'No wicks at all. Full-body candle. Open-to-close dominance.',
+    reliability:71, relColor:'var(--blue)',
+    story:'No wicks = no rejection at either end = full ACCEPTANCE of the move. Opened and never looked back. Green: bulls opened and bought all the way to close. Red: bears opened and sold all the way. One-sided institutional order flow with zero ambiguity.',
+    failure:'⚠️ KEY: A large red candle with a small lower wick is NOT a Hammer. Hammer = small body + 2-3x lower wick. Marubozu = big body + no wicks = ACCEPTANCE not rejection. Critical distinction.',
+    spy:'Green Marubozu after dovish FOMC = maximum bullish confirmation. Red after hawkish = maximum bearish. DO NOT fade. Ride it. This is the "no doubt" candle. Trade in direction on first pullback.',
+    svgMarkup: buildSVG_marubozu(),
+    tags:['CONTINUATION','ACCEPTANCE','NEW v4']
+  }
+];
+
+// ======================== SVG BUILDERS ========================
+function makeSVG(content, w=80, h=90) {
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${content}</svg>`;
+}
+function buildSVG_hammer() {
+  return makeSVG(`<line x1="40" y1="10" x2="40" y2="20" stroke="#69f0ae" stroke-width="2"/>
+  <rect x="29" y="20" width="22" height="14" fill="#00e676" stroke="#69f0ae" stroke-width="2"/>
+  <line x1="40" y1="34" x2="40" y2="76" stroke="#69f0ae" stroke-width="3"/>`);
+}
+function buildSVG_shootingStar() {
+  return makeSVG(`<line x1="40" y1="10" x2="40" y2="54" stroke="#ff7070" stroke-width="3"/>
+  <rect x="29" y="54" width="22" height="14" fill="#ef5350" stroke="#ff7070" stroke-width="2"/>
+  <line x1="40" y1="68" x2="40" y2="78" stroke="#ff7070" stroke-width="2"/>`);
+}
+function buildSVG_doji() {
+  return makeSVG(`<line x1="40" y1="10" x2="40" y2="44" stroke="#f5a623" stroke-width="2"/>
+  <rect x="24" y="44" width="32" height="4" fill="#f5a623" stroke="#ffcc44" stroke-width="2"/>
+  <line x1="40" y1="48" x2="40" y2="80" stroke="#f5a623" stroke-width="2"/>`);
+}
+function buildSVG_insideBar() {
+  return makeSVG(`<line x1="22" y1="8" x2="22" y2="16" stroke="#00b4ff" stroke-width="2"/>
+  <rect x="14" y="16" width="16" height="58" fill="#00b4ff" stroke="#64dfff" stroke-width="1.5" opacity="0.45"/>
+  <line x1="22" y1="74" x2="22" y2="82" stroke="#00b4ff" stroke-width="2"/>
+  <line x1="56" y1="28" x2="56" y2="35" stroke="#f5a623" stroke-width="2"/>
+  <rect x="48" y="35" width="16" height="34" fill="#f5a623" stroke="#ffcc44" stroke-width="1.5"/>
+  <line x1="56" y1="69" x2="56" y2="74" stroke="#f5a623" stroke-width="2"/>`, 80, 90);
+}
+function buildSVG_pinBull() {
+  return makeSVG(`<line x1="40" y1="10" x2="40" y2="24" stroke="#69f0ae" stroke-width="2"/>
+  <rect x="29" y="24" width="22" height="13" fill="#00e676" stroke="#69f0ae" stroke-width="2"/>
+  <line x1="40" y1="37" x2="40" y2="80" stroke="#69f0ae" stroke-width="3"/>`);
+}
+function buildSVG_pinBear() {
+  return makeSVG(`<line x1="40" y1="10" x2="40" y2="54" stroke="#ff7070" stroke-width="3"/>
+  <rect x="29" y="54" width="22" height="13" fill="#ef5350" stroke="#ff7070" stroke-width="2"/>
+  <line x1="40" y1="67" x2="40" y2="78" stroke="#ff7070" stroke-width="2"/>`);
+}
+function buildSVG_bullEngulf() {
+  return makeSVG(`<line x1="24" y1="12" x2="24" y2="22" stroke="#ff7070" stroke-width="1.5"/>
+  <rect x="16" y="22" width="16" height="24" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+  <line x1="24" y1="46" x2="24" y2="54" stroke="#ff7070" stroke-width="1.5"/>
+  <line x1="56" y1="8" x2="56" y2="18" stroke="#69f0ae" stroke-width="1.5"/>
+  <rect x="46" y="18" width="20" height="58" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+  <line x1="56" y1="76" x2="56" y2="83" stroke="#69f0ae" stroke-width="1.5"/>`, 80, 90);
+}
+function buildSVG_bearEngulf() {
+  return makeSVG(`<line x1="24" y1="12" x2="24" y2="20" stroke="#69f0ae" stroke-width="1.5"/>
+  <rect x="16" y="20" width="16" height="24" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+  <line x1="24" y1="44" x2="24" y2="52" stroke="#69f0ae" stroke-width="1.5"/>
+  <line x1="56" y1="8" x2="56" y2="18" stroke="#ff7070" stroke-width="1.5"/>
+  <rect x="46" y="18" width="20" height="58" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+  <line x1="56" y1="76" x2="56" y2="83" stroke="#ff7070" stroke-width="1.5"/>`, 80, 90);
+}
+function buildSVG_tweezerTops() {
+  return makeSVG(`<line x1="24" y1="14" x2="24" y2="22" stroke="#69f0ae" stroke-width="1.5"/>
+  <rect x="16" y="22" width="16" height="26" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+  <line x1="24" y1="48" x2="24" y2="56" stroke="#69f0ae" stroke-width="1.5"/>
+  <line x1="56" y1="14" x2="56" y2="22" stroke="#ff7070" stroke-width="1.5"/>
+  <rect x="48" y="22" width="16" height="26" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+  <line x1="56" y1="48" x2="56" y2="56" stroke="#ff7070" stroke-width="1.5"/>
+  <line x1="8" y1="22" x2="72" y2="22" stroke="#ffcc44" stroke-width="1" stroke-dasharray="3,3"/>`, 80, 75);
+}
+function buildSVG_tweezerBottoms() {
+  return makeSVG(`<line x1="24" y1="14" x2="24" y2="22" stroke="#ff7070" stroke-width="1.5"/>
+  <rect x="16" y="22" width="16" height="26" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+  <line x1="24" y1="48" x2="24" y2="60" stroke="#ff7070" stroke-width="1.5"/>
+  <line x1="56" y1="14" x2="56" y2="22" stroke="#69f0ae" stroke-width="1.5"/>
+  <rect x="48" y="22" width="16" height="26" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+  <line x1="56" y1="48" x2="56" y2="60" stroke="#69f0ae" stroke-width="1.5"/>
+  <line x1="8" y1="60" x2="72" y2="60" stroke="#ffcc44" stroke-width="1" stroke-dasharray="3,3"/>`, 80, 75);
+}
+function buildSVG_morningStar() {
+  return makeSVG(`<line x1="16" y1="8" x2="16" y2="16" stroke="#ff7070" stroke-width="1.5"/>
+  <rect x="9" y="16" width="14" height="28" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+  <line x1="16" y1="44" x2="16" y2="50" stroke="#ff7070" stroke-width="1.5"/>
+  <line x1="40" y1="52" x2="40" y2="57" stroke="#f5a623" stroke-width="1.5"/>
+  <rect x="33" y="57" width="14" height="10" fill="#f5a623" stroke="#ffcc44" stroke-width="1.5"/>
+  <line x1="40" y1="67" x2="40" y2="73" stroke="#f5a623" stroke-width="1.5"/>
+  <line x1="64" y1="10" x2="64" y2="18" stroke="#69f0ae" stroke-width="1.5"/>
+  <rect x="57" y="18" width="14" height="30" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+  <line x1="64" y1="48" x2="64" y2="54" stroke="#69f0ae" stroke-width="1.5"/>`, 80, 82);
+}
+function buildSVG_eveningStar() {
+  return makeSVG(`<line x1="16" y1="30" x2="16" y2="38" stroke="#69f0ae" stroke-width="1.5"/>
+  <rect x="9" y="38" width="14" height="28" fill="#00e676" stroke="#69f0ae" stroke-width="1.5"/>
+  <line x1="16" y1="66" x2="16" y2="74" stroke="#69f0ae" stroke-width="1.5"/>
+  <line x1="40" y1="12" x2="40" y2="18" stroke="#f5a623" stroke-width="1.5"/>
+  <rect x="33" y="18" width="14" height="10" fill="#f5a623" stroke="#ffcc44" stroke-width="1.5"/>
+  <line x1="40" y1="28" x2="40" y2="34" stroke="#f5a623" stroke-width="1.5"/>
+  <line x1="64" y1="22" x2="64" y2="30" stroke="#ff7070" stroke-width="1.5"/>
+  <rect x="57" y="30" width="14" height="30" fill="#ef5350" stroke="#ff7070" stroke-width="1.5"/>
+  <line x1="64" y1="60" x2="64" y2="70" stroke="#ff7070" stroke-width="1.5"/>`, 80, 82);
+}
+function buildSVG_llDoji() {
+  return makeSVG(`<line x1="40" y1="6" x2="40" y2="43" stroke="#f5a623" stroke-width="2.5"/>
+  <rect x="25" y="43" width="30" height="5" fill="#f5a623" stroke="#ffcc44" stroke-width="2"/>
+  <line x1="40" y1="48" x2="40" y2="84" stroke="#f5a623" stroke-width="2.5"/>`);
+}
+function buildSVG_marubozu() {
+  return makeSVG(`<rect x="12" y="12" width="22" height="68" fill="#00e676" stroke="#69f0ae" stroke-width="2"/>
+  <rect x="46" y="12" width="22" height="68" fill="#ef5350" stroke="#ff7070" stroke-width="2"/>`);
+}
+
+// ======================== STATE ========================
+let deck = [];
+let currentIdx = 0;
+let marks = {};
+let xp = 0;
+let quizAnswered = [];
+
+function getTagClass(t) {
+  if(t.includes('BULL') || t.includes('NEW')) return 'ctag-bull';
+  if(t.includes('BEAR')) return 'ctag-bear';
+  if(t.includes('NEUTRAL') || t.includes('INDECISION')) return 'ctag-neutral';
+  return 'ctag-cont';
+}
+function getSpecialClass(t) {
+  if(t.includes('NEW')) return 'ctag-new';
+  return getTagClass(t);
+}
+
+function buildFront(p) {
+  const tags = p.tags.map(t => `<span class="ctag ${t.includes('NEW') ? 'ctag-new' : getTagClass(t)}">${t}</span>`).join('');
+  return `<div class="card-tag-row">${tags}</div>
+  <div class="card-name">${p.name}</div>
+  <div class="card-hint">${p.hint}</div>
+  <div class="card-svg-area">${p.svgMarkup}</div>
+  <div class="flip-hint">TAP TO REVEAL ▸</div>`;
+}
+
+function buildBack(p) {
+  const relPct = p.reliability;
+  const relColor = p.relColor;
+  return `<div class="back-section-lbl">Order Flow Story</div>
+  <div class="back-text">${p.story}</div>
+  <div class="back-section-lbl">Bulkowski Reliability</div>
+  <div class="mini-rel">
+    <div style="font-family:'Share Tech Mono';font-size:10px;color:var(--muted);width:50px">Reliability</div>
+    <div class="mini-rel-track"><div class="mini-rel-fill" style="width:${relPct}%;background:${relColor}"></div></div>
+    <div class="mini-rel-label">${relPct}%</div>
+  </div>
+  <div class="back-section-lbl">Failure Version</div>
+  <div class="back-text-muted">${p.failure}</div>
+  <div class="back-section-lbl">SPY / LTPROv7 Context</div>
+  <div class="back-spy">${p.spy}</div>`;
+}
+
+function rebuildDeck() {
+  const filter = document.getElementById('filterSelect').value;
+  deck = patterns.filter(p => {
+    if(filter === 'all') return true;
+    if(filter === 'new') return p.new;
+    return p.type.includes(filter);
+  });
+  currentIdx = 0;
+  renderCard();
+}
+
+function renderCard() {
+  if(!deck.length) return;
+  const p = deck[currentIdx];
+  document.getElementById('cardFront').innerHTML = buildFront(p);
+  document.getElementById('cardBack').innerHTML = buildBack(p);
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('fcCounter').textContent = `Card ${currentIdx + 1} of ${deck.length}`;
+  const pct = ((currentIdx) / Math.max(deck.length - 1, 1)) * 100;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progText').textContent = `${currentIdx + 1} / ${deck.length}`;
+}
+
+function flipCard() {
+  document.getElementById('cardInner').classList.toggle('flipped');
+}
+
+function nextCard() {
+  currentIdx = (currentIdx + 1) % deck.length;
+  renderCard();
+}
+function prevCard() {
+  currentIdx = (currentIdx - 1 + deck.length) % deck.length;
+  renderCard();
+}
+
+function markCard(knows) {
+  if(!deck.length) return;
+  const id = deck[currentIdx].id;
+  marks[id] = knows;
+  xp += knows ? 10 : 2;
+  document.getElementById('xpCount').textContent = xp;
+  nextCard();
+}
+
+function shuffleDeck() {
+  deck = [...deck].sort(() => Math.random() - 0.5);
+  currentIdx = 0;
+  renderCard();
+}
+
+function reviewOnlyMode() {
+  deck = patterns.filter(p => marks[p.id] === false);
+  if(!deck.length) {
+    alert('No patterns marked for review yet! Great job, Maverick! 🎯');
+    return;
+  }
+  currentIdx = 0;
+  renderCard();
+}
+
+function resetMarks() {
+  marks = {};
+  rebuildDeck();
+}
+
+// ======================== QUIZ ========================
+const quizQuestions = [
+  {q:"A candle with a tiny body and a wick 3x longer than the body at a key support level is called a:", opts:["Doji","Long-Legged Doji","Pin Bar","Marubozu"], ans:2, exp:"A Pin Bar has a tiny body with a wick at least 3:1 the body length. This is the highest-conviction rejection pattern. 3:1 ratio = Sniper entry candidate."},
+  {q:"During FOMC, the 2:00 PM announcement candle is almost always a:", opts:["Marubozu","Long-Legged Doji or Spinning Top","Morning Star","Bullish Engulfing"], ans:1, exp:"The 2:00 PM FOMC candle almost always forms a Long-Legged Doji — massive wicks both ways as market makers run stops in both directions. DO NOT TRADE the first candle."},
+  {q:"What is the CORRECT sequence when APEX signal fires on LTPROv7?", opts:["APEX fires → Enter immediately","APEX fires → Wait for liquidity sweep → SIGNAL=BUY → Enter","APEX fires → Buy puts","APEX fires → Ignore and wait for BIAS flip"], ans:1, exp:"APEX is a PREPARATION WARNING, not a buy signal. The correct sequence: APEX fires → watch for liquidity sweep reversal → wait for SIGNAL=BUY → THEN enter."},
+  {q:"A Bearish Engulfing pattern means:", opts:["Bulls are taking over","A small red candle inside a green candle","A large red candle that completely consumes the prior green candle","Price closed above the prior day high"], ans:2, exp:"Bearish Engulfing: Day 2's red candle opens ABOVE Day 1 high (false breakout trap) and closes BELOW Day 1 open, consuming the entire prior green candle. Institutional distribution."},
+  {q:"Tweezer Tops signal:", opts:["Double-tested demand zone","Strong continuation higher","Double-tested supply zone — bears rejected price at the same level twice","Bullish reversal at support"], ans:2, exp:"Tweezer Tops have two candles with matching highs. Institutional sellers defended the same exact level twice, absorbing all buy orders. Double rejection = supply zone confirmed. → BUY PUTS below the lows."},
+  {q:"A Marubozu candle with NO wicks tells you:", opts:["The market is indecisive","Full ACCEPTANCE of the move — one-sided institutional order flow","Strong rejection at the high","It's the same as a Hammer"], ans:1, exp:"Marubozu = no wicks = no rejection at either end = full ACCEPTANCE. This is one-sided institutional order flow. Green Marubozu after dovish FOMC = maximum bullish. DO NOT fade it."},
+  {q:"What is the minimum wick-to-body ratio to qualify as a 'weak' rejection signal?", opts:["1:1","2:1","3:1","4:1"], ans:1, exp:"2:1 is the minimum 'rejection' threshold, but it's LOW conviction. Always needs confluence (VWAP + LTPROv7 SIGNAL). 3:1 = high conviction Pin Bar. Below 2:1 = not a rejection signal."},
+  {q:"In a Morning Star pattern, when should you enter?", opts:["After Candle 1 closes","On the open of Candle 2","After Candle 3 closes green with SIGNAL=BUY","During Candle 2 indecision"], ans:2, exp:"Morning Star entry = after Candle 3 closes green (confirming bulls won) AND LTPROv7 SIGNAL=BUY confirms. Candle 3 must recover at least 50% of Candle 1 to validate the pattern."},
+  {q:"When DXY rises sharply after a hawkish Fed decision, SPY should:", opts:["Also rise","Stay flat","Fall — inverse seesaw relationship","Rise then reverse"], ans:2, exp:"DXY and SPY have an INVERSE relationship. DXY ↑ (hawkish/dollar strength) → SPY ↓ → BUY PUTS. This is the core DXY seesaw rule for FOMC days."},
+  {q:"During FOMC, your entry rule after the announcement is:", opts:["Enter on the first spike in the correct direction","Wait for the 5-minute candle to fully CLOSE before entering","Enter as soon as DXY moves","Enter at exactly 2:00 PM"], ans:1, exp:"Wait for the FULL 5-min candle to CLOSE. The first spike is almost always a trap (Long-Legged Doji territory). The candle CLOSE tells you who won — wicks are noise, body is truth."},
+  {q:"The Evening Star pattern fails when:", opts:["Candle 2 is a Doji","Candle 3 closes weak (doesn't recover 50%+ of Candle 1)","Candle 1 is very large","There are wicks on Candle 2"], ans:1, exp:"Evening Star fails if Candle 3 doesn't recover at least 50% of Candle 1 — meaning sellers didn't follow through. This is the failure version — price likely continues higher. Exit short immediately."},
+  {q:"Where should your stop be placed relative to a Pin Bar?", opts:["At the candle body edge","At the 50% of the wick","Beyond the wick tip + 1 ATR buffer (Stop Loss Shield)","At VWAP"], ans:2, exp:"Stop Loss Shield Rule: place stop BEYOND the wick tip + 1 ATR buffer. Market makers WILL sweep wick tips to hunt retail stops before reversing. Give the trade room to breathe."},
+  {q:"A large red candle with a small lower wick during a downtrend is:", opts:["A Hammer — bullish reversal signal","A Marubozu — bearish ACCEPTANCE, not a Hammer","A Pin Bar","An Inside Bar"], ans:1, exp:"CRITICAL: A large-bodied red candle is a Marubozu (bearish acceptance) NOT a Hammer. A Hammer requires a SMALL body with the wick 2-3x larger. This is the most common misidentification in order flow reading."},
+  {q:"Tweezer Bottoms are confirmed to have FAILED when:", opts:["Both lows are exactly equal","A third candle closes BELOW both lows","The pattern appears at VWAP","Both candles have long lower wicks"], ans:1, exp:"Tweezer Bottoms fail when a third candle closes BELOW both lows — institutional buyers were overwhelmed. Consider puts if SIGNAL=SELL confirms on LTPROv7."}
+];
+
+let quizState = {};
+
+function buildQuiz() {
+  quizState = {};
+  const wrap = document.getElementById('quizWrap');
+  wrap.innerHTML = `<div class="quiz-header">
+    <div class="quiz-title">⚡ PATTERN RECOGNITION DRILL</div>
+    <div class="quiz-sub">${quizQuestions.length} questions — SPY/FOMC context emphasis — Score yourself</div>
+  </div>`;
+
+  quizQuestions.forEach((q, qi) => {
+    const block = document.createElement('div');
+    block.className = 'q-block';
+    block.id = `qblock-${qi}`;
+    block.innerHTML = `<div class="q-num">Q${qi+1} of ${quizQuestions.length}</div>
+    <div class="q-text">${q.q}</div>
+    <div class="q-options">${q.opts.map((o,oi) => `<button class="q-opt" onclick="answerQ(${qi},${oi})">${o}</button>`).join('')}</div>
+    <div class="q-explanation" id="qexp-${qi}">${q.exp}</div>`;
+    wrap.appendChild(block);
+  });
+
+  const scoreBox = document.createElement('div');
+  scoreBox.id = 'quizScoreBox';
+  scoreBox.className = 'quiz-score-box';
+  wrap.appendChild(scoreBox);
+}
+
+function answerQ(qi, chosen) {
+  if(quizState[qi] !== undefined) return;
+  quizState[qi] = chosen;
+  const q = quizQuestions[qi];
+  const block = document.getElementById(`qblock-${qi}`);
+  block.classList.add('answered');
+  const opts = block.querySelectorAll('.q-opt');
+  opts[q.ans].classList.add('correct');
+  if(chosen !== q.ans) opts[chosen].classList.add('wrong');
+  else { xp += 15; document.getElementById('xpCount').textContent = xp; }
+  document.getElementById(`qexp-${qi}`).classList.add('show');
+
+  // Check if all answered
+  if(Object.keys(quizState).length === quizQuestions.length) showScore();
+}
+
+function showScore() {
+  const correct = quizQuestions.filter((q,i) => quizState[i] === q.ans).length;
+  const total = quizQuestions.length;
+  const pct = Math.round(correct / total * 100);
+  let grade, color;
+  if(pct >= 90){grade='🎖️ MAVERICK CERTIFIED';color='var(--green)'}
+  else if(pct >= 75){grade='✅ COMBAT READY';color='var(--blue)'}
+  else if(pct >= 60){grade='⚠️ NEEDS REVIEW';color='var(--gold)'}
+  else{grade='⛔ BACK TO ACADEMY';color='var(--red)'}
+
+  const box = document.getElementById('quizScoreBox');
+  box.className = 'quiz-score-box show';
+  box.innerHTML = `<div class="score-num">${correct}/${total}</div>
+  <div class="score-label">QUESTIONS CORRECT</div>
+  <div class="score-grade" style="color:${color}">${grade}</div>
+  <div style="font-family:'Share Tech Mono';font-size:12px;color:var(--muted);margin-bottom:16px">${pct}% accuracy — XP earned: ${correct * 15}</div>
+  <button class="restart-btn" onclick="buildQuiz();document.getElementById('quizWrap').scrollTop=0">↺ RESTART DRILL</button>`;
+}
+
+// ======================== REVIEW GRID ========================
+function buildReview() {
+  const grid = document.getElementById('reviewGrid');
+  grid.innerHTML = '';
+  patterns.forEach(p => {
+    const status = marks[p.id];
+    const chip = document.createElement('div');
+    chip.className = 'review-chip' + (status === true ? ' knows' : status === false ? ' needs-review' : '');
+    chip.innerHTML = `<div class="review-chip-name">${p.name}</div>
+    <div class="review-chip-status" style="color:${status === true ? 'var(--green)' : status === false ? 'var(--red)' : 'var(--muted)'}">${status === true ? '✓ KNOW IT' : status === false ? '✗ REVIEW' : '—'}</div>`;
+    chip.onclick = () => {
+      switchMode('flashcard');
+      const idx = deck.findIndex(d => d.id === p.id);
+      if(idx >= 0){ currentIdx = idx; renderCard(); }
+    };
+    grid.appendChild(chip);
+  });
+}
+
+// ======================== MODE SWITCH ========================
+function switchMode(mode) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${mode}`).classList.add('active');
+  event.target.classList.add('active');
+  if(mode === 'quiz') buildQuiz();
+  if(mode === 'review') buildReview();
+}
+
+// ======================== INIT ========================
+rebuildDeck();
+</script>
+</body>
+</html>
