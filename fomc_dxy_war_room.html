@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOMC/DXY War Room — Maverick</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #060810;
+    --bg2: #0b0f1a;
+    --bg3: #0f1525;
+    --panel: #111827;
+    --panel2: #162035;
+    --border: #1e3a5f;
+    --border2: #2a4a7a;
+    --gold: #f5a623;
+    --gold2: #ffcc44;
+    --red: #ff3b3b;
+    --red2: #ff6b6b;
+    --green: #00e676;
+    --green2: #69f0ae;
+    --blue: #00b4ff;
+    --blue2: #64dfff;
+    --cyan: #00e5ff;
+    --purple: #b388ff;
+    --white: #e8eaf6;
+    --muted: #7986a8;
+    --hawk: #ff4444;
+    --dove: #00c853;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCANLINE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,180,255,0.015) 2px, rgba(0,180,255,0.015) 4px);
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* HEADER */
+  .war-header {
+    background: linear-gradient(135deg, #0a0e1a 0%, #0d1829 50%, #0a0e1a 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .war-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(245,166,35,0.06), transparent);
+    animation: headerSweep 4s ease-in-out infinite;
+  }
+  @keyframes headerSweep { 0%,100%{left:-100%} 50%{left:100%} }
+
+  .header-left { display: flex; flex-direction: column; gap: 2px; }
+  .callsign {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  .war-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--white);
+    letter-spacing: 2px;
+  }
+  .war-title span { color: var(--gold); }
+  .war-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .live-badge {
+    background: var(--red);
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 2px;
+    letter-spacing: 2px;
+    animation: livePulse 1.2s ease-in-out infinite;
+  }
+  @keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .fed-date {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+  }
+
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 12px 20px;
+    cursor: pointer;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .tab-btn:hover { color: var(--blue); }
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    background: rgba(245,166,35,0.05);
+  }
+  .tab-icon { margin-right: 6px; }
+
+  /* CONTENT */
+  .tab-content { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    background: linear-gradient(135deg, rgba(255,60,60,0.15), rgba(255,60,60,0.05));
+    border: 1px solid rgba(255,60,60,0.4);
+    border-left: 4px solid var(--red);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .alert-icon { font-size: 18px; }
+  .alert-text { font-size: 14px; color: var(--red2); font-weight: 600; letter-spacing: 0.5px; }
+  .alert-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .section-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
+
+  /* SEESAW VISUAL */
+  .seesaw-container {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .seesaw-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    color: var(--cyan);
+    text-align: center;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+  .seesaw-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 10px 0 20px;
+    position: relative;
+  }
+  .seesaw-side {
+    flex: 1;
+    text-align: center;
+    padding: 16px 12px;
+    border-radius: 6px;
+    position: relative;
+  }
+  .seesaw-side.dxy {
+    background: linear-gradient(135deg, rgba(255,60,60,0.12), rgba(255,60,60,0.03));
+    border: 1px solid rgba(255,60,60,0.3);
+  }
+  .seesaw-side.spy {
+    background: linear-gradient(135deg, rgba(0,230,118,0.12), rgba(0,230,118,0.03));
+    border: 1px solid rgba(0,230,118,0.3);
+  }
+  .seesaw-mid {
+    width: 60px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .seesaw-arrow { font-size: 28px; }
+  .seesaw-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+  .seesaw-side.dxy .seesaw-label { color: var(--red); }
+  .seesaw-side.spy .seesaw-label { color: var(--green); }
+  .seesaw-direction {
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+  .seesaw-desc { font-size: 12px; color: var(--muted); }
+
+  .seesaw-rule {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin: 6px 0;
+    position: relative;
+    padding-left: 20px;
+  }
+  .seesaw-rule::before { content: '▸'; position: absolute; left: 6px; color: var(--cyan); }
+
+  .invert-badge {
+    display: inline-block;
+    background: rgba(179,136,255,0.15);
+    border: 1px solid rgba(179,136,255,0.4);
+    color: var(--purple);
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 3px;
+    margin-top: 8px;
+  }
+
+  /* GRID LAYOUT */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+
+  @media(max-width:700px) {
+    .two-col, .three-col { grid-template-columns: 1fr; }
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .card-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* CHEAT CODE CARD */
+  .cheat-code-card {
+    background: linear-gradient(135deg, var(--panel2), var(--panel));
+    border: 1px solid var(--border2);
+    border-left: 4px solid var(--gold);
+    border-radius: 6px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .cheat-code-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+  .rule-big {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    color: var(--cyan);
+    text-align: center;
+    padding: 14px;
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+  .rule-big .highlight { color: var(--gold); font-weight: 700; }
+
+  .step-list { list-style: none; }
+  .step-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(30,58,95,0.5);
+    font-size: 14px;
+    color: var(--white);
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-num {
+    background: var(--gold);
+    color: var(--bg);
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-text { flex: 1; }
+  .step-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* SCENARIO PLAYBOOK */
+  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media(max-width:700px) { .scenario-grid { grid-template-columns: 1fr; } }
+
+  .scenario-card {
+    border-radius: 6px;
+    padding: 18px;
+    border: 1px solid;
+    position: relative;
+    overflow: hidden;
+  }
+  .scenario-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .scenario-card.hawk {
+    background: linear-gradient(135deg, rgba(255,68,68,0.1), rgba(255,68,68,0.03));
+    border-color: rgba(255,68,68,0.3);
+  }
+  .scenario-card.hawk::before { background: var(--hawk); }
+  .scenario-card.dove {
+    background: linear-gradient(135deg, rgba(0,200,83,0.1), rgba(0,200,83,0.03));
+    border-color: rgba(0,200,83,0.3);
+  }
+  .scenario-card.dove::before { background: var(--dove); }
+
+  .scenario-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .scenario-card.hawk .scenario-label { color: var(--hawk); }
+  .scenario-card.dove .scenario-label { color: var(--dove); }
+
+  .scenario-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 900;
+    margin-bottom: 10px;
+  }
+  .scenario-card.hawk .scenario-name { color: var(--red2); }
+  .scenario-card.dove .scenario-name { color: var(--green2); }
+
+  .scenario-trigger {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .signal-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(30,58,95,0.4);
+    font-size: 13px;
+  }
+  .signal-row:last-child { border-bottom: none; }
+  .signal-icon { font-size: 14px; width: 20px; text-align: center; }
+  .signal-asset { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--blue); width: 40px; }
+  .signal-direction { font-weight: 700; font-size: 13px; }
+  .up { color: var(--green); }
+  .dn { color: var(--red); }
+  .signal-note { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+  .action-box {
+    margin-top: 12px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    padding: 10px 12px;
+  }
+  .action-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .action-text { font-size: 13px; color: var(--white); line-height: 1.5; }
+
+  /* WICK RULES */
+  .wick-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  @media(max-width:700px) { .wick-grid { grid-template-columns: 1fr; } }
+
+  .wick-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .wick-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+
+  .wick-svg-wrap {
+    margin: 0 auto 12px;
+    width: 60px;
+    height: 80px;
+  }
+
+  .wick-ratio {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .wick-name { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 6px; }
+  .wick-rule-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .wick-verdict {
+    margin-top: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .verdict-reject {
+    background: rgba(0,230,118,0.1);
+    border: 1px solid rgba(0,230,118,0.3);
+    color: var(--green);
+  }
+  .verdict-ignore {
+    background: rgba(255,59,59,0.1);
+    border: 1px solid rgba(255,59,59,0.3);
+    color: var(--red);
+  }
+  .verdict-neutral {
+    background: rgba(245,166,35,0.1);
+    border: 1px solid rgba(245,166,35,0.3);
+    color: var(--gold);
+  }
+
+  /* NEWS SPIKE SECTION */
+  .spike-timeline {
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 16px;
+  }
+  .spike-timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--gold), var(--border));
+  }
+  .spike-item {
+    position: relative;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .spike-item::before {
+    content: '';
+    position: absolute;
+    left: -21px; top: 16px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: var(--bg);
+  }
+  .spike-time {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .spike-title-text { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+  .spike-body { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .spike-tag {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin-right: 4px;
+    margin-top: 6px;
+  }
+  .tag-danger { background: rgba(255,60,60,0.15); border: 1px solid rgba(255,60,60,0.35); color: var(--red); }
+  .tag-wait { background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.35); color: var(--gold); }
+  .tag-go { background: rgba(0,230,118,0.12); border: 1px solid rgba(0,230,118,0.35); color: var(--green); }
+  .tag-info { background: rgba(0,180,255,0.12); border: 1px solid rgba(0,180,255,0.3); color: var(--blue); }
+
+  /* RULES CHECKLIST */
+  .rules-list { list-style: none; }
+  .rules-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .rules-list li:hover { border-color: var(--blue2); }
+  .rule-check {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border2);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .rule-check.checked {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--bg);
+    font-size: 12px;
+  }
+  .rule-content { flex: 1; }
+  .rule-text { color: var(--white); line-height: 1.4; }
+  .rule-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .rule-priority {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .p-critical { background: rgba(255,60,60,0.12); border: 1px solid rgba(255,60,60,0.3); color: var(--red); }
+  .p-high { background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3); color: var(--gold); }
+  .p-med { background: rgba(0,180,255,0.1); border: 1px solid rgba(0,180,255,0.25); color: var(--blue); }
+
+  /* CANDLE LEGEND */
+  .candle-display {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+  .candle-item { text-align: center; }
+  .candle-label-top { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-family: 'Share Tech Mono'; }
+  .candle-label-bot { font-size: 11px; color: var(--muted); margin-top: 6px; font-family: 'Share Tech Mono'; }
+  .candle-name { font-size: 12px; color: var(--white); font-weight: 600; margin-top: 8px; }
+  .candle-note { font-size: 11px; color: var(--gold); }
+
+  /* CLOSE RULE BOX */
+  .close-rule-box {
+    background: linear-gradient(135deg, rgba(245,166,35,0.12), rgba(245,166,35,0.03));
+    border: 2px solid var(--gold);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .close-rule-main {
+    font-family: 'Orbitron', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .close-rule-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* BIAS METER */
+  .bias-meter-wrap { margin-bottom: 16px; }
+  .bias-track {
+    height: 12px;
+    background: linear-gradient(90deg, var(--hawk) 0%, #555 45%, #555 55%, var(--dove) 100%);
+    border-radius: 6px;
+    position: relative;
+    margin: 10px 0;
+    overflow: visible;
+  }
+  .bias-needle {
+    position: absolute;
+    top: -4px;
+    width: 4px;
+    height: 20px;
+    background: var(--gold);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: left 0.5s ease;
+    box-shadow: 0 0 8px var(--gold);
+  }
+  .bias-labels { display: flex; justify-content: space-between; font-size: 11px; font-family: 'Share Tech Mono'; }
+  .bias-labels span:first-child { color: var(--hawk); }
+  .bias-labels span:last-child { color: var(--dove); }
+  .bias-controls { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .bias-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    min-width: 100px;
+  }
+  .bias-btn.hawk-btn {
+    background: rgba(255,68,68,0.1);
+    border-color: rgba(255,68,68,0.4);
+    color: var(--red);
+  }
+  .bias-btn.hawk-btn:hover { background: rgba(255,68,68,0.2); }
+  .bias-btn.dove-btn {
+    background: rgba(0,200,83,0.1);
+    border-color: rgba(0,200,83,0.4);
+    color: var(--green);
+  }
+  .bias-btn.dove-btn:hover { background: rgba(0,200,83,0.2); }
+  .bias-btn.neutral-btn {
+    background: rgba(245,166,35,0.08);
+    border-color: rgba(245,166,35,0.3);
+    color: var(--gold);
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  .status-item { display: flex; align-items: center; gap: 6px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-green { background: var(--green); box-shadow: 0 0 4px var(--green); }
+  .dot-yellow { background: var(--gold); }
+  .dot-red { background: var(--red); }
+
+  /* INTERACTIVE SCENARIO */
+  .outcome-display {
+    display: none;
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 5px;
+    animation: fadeIn 0.3s ease;
+  }
+  .outcome-display.show { display: block; }
+  .outcome-display.hawk-out {
+    background: rgba(255,68,68,0.08);
+    border: 1px solid rgba(255,68,68,0.3);
+  }
+  .outcome-display.dove-out {
+    background: rgba(0,200,83,0.08);
+    border: 1px solid rgba(0,200,83,0.3);
+  }
+  .outcome-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .hawk-out .outcome-title { color: var(--red); }
+  .dove-out .outcome-title { color: var(--green); }
+  .outcome-steps { font-size: 13px; color: var(--white); line-height: 1.8; }
+
+  /* MISC */
+  .note-box {
+    background: rgba(0,229,255,0.05);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-left: 3px solid var(--cyan);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 13px;
+    color: var(--white);
+    line-height: 1.5;
+  }
+  .note-box .note-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .warn-box {
+    background: rgba(255,59,59,0.06);
+    border: 1px solid rgba(255,59,59,0.25);
+    border-left: 3px solid var(--red);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 13px;
+    color: var(--white);
+    line-height: 1.5;
+  }
+  .warn-box .note-label { color: var(--red); font-family: 'Orbitron'; font-size: 9px; letter-spacing: 3px; margin-bottom: 4px; display: block; }
+
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 16px 0; }
+
+  h4 { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="war-header">
+  <div class="header-left">
+    <div class="callsign">⚡ MAVERICK // GOOSE ACTUAL</div>
+    <div class="war-title">FOMC / <span>DXY</span> WAR ROOM</div>
+    <div class="war-subtitle">Fed Day Intelligence System — SPY Options Tactical</div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge">FED DAY</div>
+    <div class="fed-date" id="fedDate"></div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('seesaw')"><span class="tab-icon">⚖️</span>DXY SEESAW</button>
+  <button class="tab-btn" onclick="switchTab('cheatcode')"><span class="tab-icon">🕯️</span>CANDLE CHEAT CODE</button>
+  <button class="tab-btn" onclick="switchTab('playbook')"><span class="tab-icon">🦅</span>SCENARIO PLAYBOOK</button>
+  <button class="tab-btn" onclick="switchTab('wicks')"><span class="tab-icon">📍</span>WICK ID</button>
+  <button class="tab-btn" onclick="switchTab('rules')"><span class="tab-icon">✅</span>FED DAY RULES</button>
+</div>
+
+<!-- TAB: DXY SEESAW -->
+<div class="tab-content active" id="tab-seesaw">
+  <div class="alert-banner">
+    <div class="alert-icon">⚠️</div>
+    <div>
+      <div class="alert-text">FOMC DECISION DAY — HIGH VOLATILITY PROTOCOL ACTIVE</div>
+      <div class="alert-sub">DXY correlation governs SPY direction. Monitor 2:00 PM ET release + Powell presser ~2:30 PM.</div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">DXY vs SPY Inverse Seesaw</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="seesaw-container">
+    <div class="seesaw-title">THE FUNDAMENTAL RELATIONSHIP</div>
+    <div class="seesaw-visual">
+      <div class="seesaw-side dxy">
+        <div class="seesaw-direction">📈</div>
+        <div class="seesaw-label">DXY ↑</div>
+        <div class="seesaw-desc">Dollar strengthens<br>Risk-off signal</div>
+      </div>
+      <div class="seesaw-mid">
+        <div style="font-size:30px;">⚖️</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'Share Tech Mono';margin-top:4px;">INVERSE</div>
+      </div>
+      <div class="seesaw-side spy">
+        <div class="seesaw-direction">📉</div>
+        <div class="seesaw-label">SPY ↓</div>
+        <div class="seesaw-desc">Equities sell off<br>Bears in control</div>
+      </div>
+    </div>
+
+    <div class="seesaw-rule">DXY ↑ (hawkish Fed / rate hike / hold with hawkish tone) → SPY ↓ → BUY PUTS</div>
+    <div class="seesaw-rule">DXY ↓ (dovish Fed / rate cut / cut with dovish tone) → SPY ↑ → BUY CALLS</div>
+    <div class="seesaw-rule">DXY FLAT / CHOPPY → SPY choppy → STAND DOWN, wait for direction</div>
+
+    <div style="text-align:center;margin-top:12px;">
+      <div class="invert-badge">⚡ THIS RELATIONSHIP CAN BREAK DURING EXTREME PANIC EVENTS</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title" style="color:var(--blue);">📡 What Moves DXY on Fed Day</div>
+      <div class="seesaw-rule" style="background:rgba(0,180,255,0.04);border-color:rgba(0,180,255,0.15);">Rate HIKE or HOLD w/ hawkish language → DXY surges</div>
+      <div class="seesaw-rule" style="background:rgba(0,180,255,0.04);border-color:rgba(0,180,255,0.15);">Rate CUT or HOLD w/ dovish language → DXY drops</div>
+      <div class="seesaw-rule" style="background:rgba(0,180,255,0.04);border-color:rgba(0,180,255,0.15);">Powell tone shift mid-presser → DXY whipsaws</div>
+      <div class="seesaw-rule" style="background:rgba(0,180,255,0.04);border-color:rgba(0,180,255,0.15);">Market "priced in" + surprise = violent reversal</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--gold);">🔑 KEY LEVELS TO WATCH</div>
+      <div style="font-size:13px;line-height:1.9;color:var(--muted);">
+        <div><span style="color:var(--white);font-family:'Share Tech Mono'">DXY 104+</span> → Strong dollar zone, bearish SPY</div>
+        <div><span style="color:var(--white);font-family:'Share Tech Mono'">DXY 100-104</span> → Neutral zone, wait for break</div>
+        <div><span style="color:var(--white);font-family:'Share Tech Mono'">DXY &lt;100</span> → Dollar weakness, bullish SPY</div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+          <span style="color:var(--cyan);">Pro tip:</span> Watch 5-min DXY chart while FOMC reads. First 5-min candle CLOSE = bias confirmation.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header" style="margin-top:8px;">
+    <div class="section-title">Correlated Assets Matrix</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="three-col">
+    <div class="card" style="border-color:rgba(255,60,60,0.3);">
+      <div class="card-title" style="color:var(--red);">HAWKISH → DXY ↑</div>
+      <div class="signal-row"><span class="signal-asset">SPY</span><span class="signal-direction dn">↓ BEARISH</span></div>
+      <div class="signal-row"><span class="signal-asset">QQQ</span><span class="signal-direction dn">↓ SELLS HARD</span></div>
+      <div class="signal-row"><span class="signal-asset">GOLD</span><span class="signal-direction dn">↓ DOWN</span></div>
+      <div class="signal-row"><span class="signal-asset">OIL</span><span class="signal-direction dn">↓ PRESSURE</span></div>
+      <div class="signal-row"><span class="signal-asset">VIX</span><span class="signal-direction up">↑ SPIKES</span></div>
+    </div>
+    <div class="card" style="border-color:rgba(0,230,118,0.3);">
+      <div class="card-title" style="color:var(--green);">DOVISH → DXY ↓</div>
+      <div class="signal-row"><span class="signal-asset">SPY</span><span class="signal-direction up">↑ BULLISH</span></div>
+      <div class="signal-row"><span class="signal-asset">QQQ</span><span class="signal-direction up">↑ LEADS</span></div>
+      <div class="signal-row"><span class="signal-asset">GOLD</span><span class="signal-direction up">↑ RISES</span></div>
+      <div class="signal-row"><span class="signal-asset">OIL</span><span class="signal-direction up">↑ BOUNCES</span></div>
+      <div class="signal-row"><span class="signal-asset">VIX</span><span class="signal-direction dn">↓ DROPS</span></div>
+    </div>
+    <div class="card" style="border-color:rgba(245,166,35,0.3);">
+      <div class="card-title" style="color:var(--gold);">UNCERTAIN / WHIPSAW</div>
+      <div class="signal-row"><span class="signal-asset">SPY</span><span class="signal-direction" style="color:var(--gold);">↕ VOLATILE</span></div>
+      <div class="signal-row"><span class="signal-asset">VIX</span><span class="signal-direction up">↑ ELEVATED</span></div>
+      <div class="signal-row"><span class="signal-asset">DXY</span><span class="signal-direction" style="color:var(--gold);">↕ CHOPPY</span></div>
+      <div style="margin-top:10px;padding:8px;background:rgba(245,166,35,0.06);border-radius:3px;font-size:12px;color:var(--gold);">
+        ⛔ STAND DOWN. Wait for 5-min candle confirmation.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: CANDLE CHEAT CODE -->
+<div class="tab-content" id="tab-cheatcode">
+  <div class="section-header">
+    <div class="section-title">FOMC Candle Cheat Code</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="close-rule-box">
+    <div class="close-rule-main">⚡ THE #1 FOMC RULE: WAIT FOR THE CANDLE CLOSE ⚡</div>
+    <div class="close-rule-sub">Never enter on the initial spike. The first move is the trap.<br>The CLOSE of the 5-minute candle after the announcement = your actual signal.</div>
+  </div>
+
+  <div class="cheat-code-card">
+    <div class="cheat-code-title">📋 THE FOMC ENTRY SEQUENCE</div>
+    <ul class="step-list">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <div>2:00 PM ET — FOMC Decision Drops</div>
+          <div class="step-sub">🚫 DO NOT TRADE. Market spikes violently both ways. Wicks are massive. This is the trap.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <div>Watch DXY on 5-min chart simultaneously</div>
+          <div class="step-sub">DXY direction + SPY direction must CONFIRM the seesaw relationship</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <div>Wait for FULL 5-min candle to CLOSE after announcement</div>
+          <div class="step-sub">The close tells you who won — bulls or bears. Wicks = noise. Body = truth.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-text">
+          <div>Check LTPROv7: SIGNAL=BUY or SIGNAL=SELL must confirm</div>
+          <div class="step-sub">SIGNAL=WAIT → NO ENTRY regardless of FOMC news. The signal is the gate.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-text">
+          <div>2:30 PM ET — Powell Presser Begins</div>
+          <div class="step-sub">Repeat the same process. Powell can completely reverse the 2:00 PM move. Stay alert, don't get married to your position.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">6</div>
+        <div class="step-text">
+          <div>Enter: Delta 0.60+ SPY 0DTE option in direction of confirmed bias</div>
+          <div class="step-sub">Max 2 trades today. Prefer 1. Size appropriately — volatility = wider spreads.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="section-header">
+        <div class="section-title">Candle Types to Watch</div>
+        <div class="section-line"></div>
+      </div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-title" style="color:var(--green);">✅ BULLISH CONFIRMATION CANDLES</div>
+        <div class="signal-row" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 0;">
+          <div style="font-weight:600;color:var(--green2);">Bullish Engulfing</div>
+          <div style="font-size:12px;color:var(--muted);">Large green body consumes prior red. Bears capitulated.</div>
+        </div>
+        <div class="signal-row" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 0;">
+          <div style="font-weight:600;color:var(--green2);">Hammer / Pin Bar (lower wick)</div>
+          <div style="font-size:12px;color:var(--muted);">Long lower wick rejected hard. Bulls pushed back.</div>
+        </div>
+        <div class="signal-row" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 0;">
+          <div style="font-weight:600;color:var(--green2);">Strong Marubozu Green</div>
+          <div style="font-size:12px;color:var(--muted);">No wicks, full acceptance. Bulls in total control.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--red);">🔴 BEARISH CONFIRMATION CANDLES</div>
+        <div class="signal-row" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 0;">
+          <div style="font-weight:600;color:var(--red2);">Bearish Engulfing</div>
+          <div style="font-size:12px;color:var(--muted);">Large red body swallows prior green. Bulls failed.</div>
+        </div>
+        <div class="signal-row" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 0;">
+          <div style="font-weight:600;color:var(--red2);">Shooting Star / Pin Bar (upper wick)</div>
+          <div style="font-size:12px;color:var(--muted);">Long upper wick rejected hard. Bears pushed price back.</div>
+        </div>
+        <div class="signal-row" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 0;">
+          <div style="font-weight:600;color:var(--red2);">Strong Marubozu Red</div>
+          <div style="font-size:12px;color:var(--muted);">No wicks, full acceptance. Bears in total control.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-header">
+        <div class="section-title">Danger Candles = DO NOT TRADE</div>
+        <div class="section-line"></div>
+      </div>
+      <div class="card" style="border-color:rgba(245,166,35,0.3);margin-bottom:12px;">
+        <div class="card-title" style="color:var(--gold);">⚠️ INDECISION / WAIT CANDLES</div>
+        <div class="signal-row" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 0;">
+          <div style="font-weight:600;color:var(--gold);">Doji (any type)</div>
+          <div style="font-size:12px;color:var(--muted);">Open ≈ Close. Market has no conviction. Stand down.</div>
+        </div>
+        <div class="signal-row" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 0;">
+          <div style="font-weight:600;color:var(--gold);">Long-Legged Doji</div>
+          <div style="font-size:12px;color:var(--muted);">Massive wicks both ways. Pure FOMC whipsaw. Don't touch.</div>
+        </div>
+        <div class="signal-row" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 0;">
+          <div style="font-weight:600;color:var(--gold);">Spinning Top</div>
+          <div style="font-size:12px;color:var(--muted);">Small body, long wicks. Neither side won. Wait for next candle.</div>
+        </div>
+      </div>
+      <div class="note-box">
+        <div class="note-label">GOOSE REMINDER</div>
+        The first candle after FOMC is almost always a Long-Legged Doji or Spinning Top. This is DESIGNED to shake you out. Your edge is patience. The second or third candle is where the real move begins.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: SCENARIO PLAYBOOK -->
+<div class="tab-content" id="tab-playbook">
+  <div class="section-header">
+    <div class="section-title">Hawkish vs Dovish Scenario Playbook</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="section-header" style="margin-bottom:8px;">
+    <div class="section-title" style="color:var(--muted);font-size:11px;">LIVE BIAS SELECTOR</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="bias-meter-wrap card" style="margin-bottom:20px;">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">Set today's Fed tone as it develops:</div>
+    <div class="bias-track">
+      <div class="bias-needle" id="biasNeedle" style="left:50%"></div>
+    </div>
+    <div class="bias-labels">
+      <span>🦅 HAWKISH</span>
+      <span style="color:var(--muted);">NEUTRAL</span>
+      <span>🕊️ DOVISH</span>
+    </div>
+    <div class="bias-controls">
+      <button class="bias-btn hawk-btn" onclick="setBias('hawk')">🦅 HAWKISH — Rate Hold / Hike</button>
+      <button class="bias-btn neutral-btn" onclick="setBias('neutral')">⚖️ NEUTRAL — Unclear</button>
+      <button class="bias-btn dove-btn" onclick="setBias('dove')">🕊️ DOVISH — Rate Cut / Soft</button>
+    </div>
+    <div id="biasOutcome" class="outcome-display"></div>
+  </div>
+
+  <div class="scenario-grid">
+    <!-- HAWKISH -->
+    <div class="scenario-card hawk">
+      <div class="scenario-label">Scenario A</div>
+      <div class="scenario-name">🦅 HAWKISH</div>
+      <div class="scenario-trigger">Trigger: Hold/Hike + "still concerned about inflation" + DXY surges</div>
+      <div class="signal-row"><span class="signal-asset">DXY</span><span class="signal-direction up">↑ SURGES</span></div>
+      <div class="signal-row"><span class="signal-asset">SPY</span><span class="signal-direction dn">↓ DROPS</span></div>
+      <div class="signal-row"><span class="signal-asset">VIX</span><span class="signal-direction up">↑ SPIKES</span></div>
+      <div class="signal-row"><span class="signal-asset">PLAY</span><span class="signal-direction dn" style="font-size:13px;">BUY PUTS</span><span class="signal-note">δ0.60+</span></div>
+      <div class="action-box">
+        <div class="action-label">Entry Sequence</div>
+        <div class="action-text">
+          1. Confirm 5-min candle CLOSES RED<br>
+          2. DXY 5-min CLOSES above prior high<br>
+          3. LTPROv7 SIGNAL = SELL confirms<br>
+          4. Buy SPY puts, Delta ≥ 0.60, 0DTE<br>
+          5. Stop: candle close back above breakdown
+        </div>
+      </div>
+    </div>
+
+    <!-- DOVISH -->
+    <div class="scenario-card dove">
+      <div class="scenario-label">Scenario B</div>
+      <div class="scenario-name">🕊️ DOVISH</div>
+      <div class="scenario-trigger">Trigger: Cut + "progress on inflation" + DXY drops / VIX falls</div>
+      <div class="signal-row"><span class="signal-asset">DXY</span><span class="signal-direction dn">↓ FALLS</span></div>
+      <div class="signal-row"><span class="signal-asset">SPY</span><span class="signal-direction up">↑ RIPS</span></div>
+      <div class="signal-row"><span class="signal-asset">VIX</span><span class="signal-direction dn">↓ COLLAPSES</span></div>
+      <div class="signal-row"><span class="signal-asset">PLAY</span><span class="signal-direction up" style="font-size:13px;">BUY CALLS</span><span class="signal-note">δ0.60+</span></div>
+      <div class="action-box">
+        <div class="action-label">Entry Sequence</div>
+        <div class="action-text">
+          1. Confirm 5-min candle CLOSES GREEN<br>
+          2. DXY 5-min CLOSES below prior low<br>
+          3. LTPROv7 SIGNAL = BUY confirms<br>
+          4. Buy SPY calls, Delta ≥ 0.60, 0DTE<br>
+          5. Stop: candle close back below breakout
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header" style="margin-top:4px;">
+    <div class="section-title">Scenario C — The Fake-Out / Reversal</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="card" style="border-color:rgba(179,136,255,0.3);margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <div style="font-size:24px;">🎭</div>
+      <div>
+        <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--purple);">THE FOMC FAKE-OUT (Most Common)</div>
+        <div style="font-size:12px;color:var(--muted);">Initial spike one direction, then complete reversal</div>
+      </div>
+    </div>
+    <div class="note-box" style="border-color:rgba(179,136,255,0.3);">
+      <div class="note-label" style="color:var(--purple);">PATTERN</div>
+      Statement drops → SPY spikes UP 1% → Long-Legged Doji / spinning top forms → Market re-reads language → SPY reverses DOWN 2%. OR vice versa. This is the MOST COMMON FOMC pattern.
+    </div>
+    <div class="warn-box">
+      <span class="note-label">GOOSE WARNING</span>
+      If you chased the initial spike, you are now underwater on a reversal. This is why WAIT FOR CANDLE CLOSE is non-negotiable. The first move is a liquidity sweep. Sound familiar?
+    </div>
+    <div style="font-size:13px;color:var(--white);line-height:1.7;margin-top:8px;">
+      <strong style="color:var(--purple);">How to handle it:</strong> Do not enter until 2nd or 3rd 5-min candle confirms direction. If you see a massive wick both ways → declare it a no-trade. Come back after Powell presser begins.
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Powell Presser Rules (2:30 PM ET)</div>
+    <div class="section-line"></div>
+  </div>
+  <div class="card">
+    <div class="seesaw-rule">Powell says "data dependent" → neutral/wait. No directional bias yet.</div>
+    <div class="seesaw-rule">Powell says "prepared to hold higher" → DXY bid, SPY sells → bearish</div>
+    <div class="seesaw-rule">Powell says "confident inflation moving toward target" → dovish → bullish</div>
+    <div class="seesaw-rule">Q&A: any surprise question about employment = possible volatility spike</div>
+    <div class="seesaw-rule">If market has already moved big by 2:30 → consider sitting presser out. Let theta decay work if holding.</div>
+  </div>
+</div>
+
+<!-- TAB: WICK IDENTIFICATION -->
+<div class="tab-content" id="tab-wicks">
+  <div class="section-header">
+    <div class="section-title">Wick Identification During News Spikes</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="warn-box" style="margin-bottom:20px;">
+    <span class="note-label">FOMC WICK CONTEXT</span>
+    During FOMC, wicks on 1-min and even 5-min candles are NOISE. They represent market makers running stops in both directions. Do not trade the wick — trade the candle BODY and CLOSE.
+  </div>
+
+  <div class="wick-grid">
+    <!-- Long Upper Wick -->
+    <div class="wick-card">
+      <div class="wick-svg-wrap">
+        <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+          <!-- Upper wick long -->
+          <line x1="30" y1="2" x2="30" y2="40" stroke="#ff6b6b" stroke-width="2"/>
+          <!-- Candle body (red) -->
+          <rect x="18" y="40" width="24" height="20" fill="#ff3b3b" stroke="#ff6b6b" stroke-width="1"/>
+          <!-- Lower wick short -->
+          <line x1="30" y1="60" x2="30" y2="68" stroke="#ff6b6b" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="wick-ratio">3:1</div>
+      <div class="wick-name">Long Upper Wick</div>
+      <div class="wick-rule-text">Wick is 3x the body. Strong rejection of highs. Bears pushed price back down hard.</div>
+      <div class="wick-verdict verdict-reject">BEARISH REJECTION</div>
+    </div>
+
+    <!-- Long Lower Wick -->
+    <div class="wick-card">
+      <div class="wick-svg-wrap">
+        <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+          <!-- Upper wick short -->
+          <line x1="30" y1="10" x2="30" y2="18" stroke="#69f0ae" stroke-width="2"/>
+          <!-- Candle body (green) -->
+          <rect x="18" y="18" width="24" height="20" fill="#00e676" stroke="#69f0ae" stroke-width="1"/>
+          <!-- Lower wick long -->
+          <line x1="30" y1="38" x2="30" y2="76" stroke="#69f0ae" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="wick-ratio">3:1</div>
+      <div class="wick-name">Long Lower Wick</div>
+      <div class="wick-rule-text">Wick is 3x the body. Strong rejection of lows. Bulls absorbed all the selling.</div>
+      <div class="wick-verdict verdict-reject" style="background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.3);color:var(--green);">BULLISH REJECTION</div>
+    </div>
+
+    <!-- Equal Wicks Doji -->
+    <div class="wick-card">
+      <div class="wick-svg-wrap">
+        <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+          <!-- Upper wick -->
+          <line x1="30" y1="5" x2="30" y2="36" stroke="#f5a623" stroke-width="2"/>
+          <!-- Doji body (tiny) -->
+          <rect x="16" y="36" width="28" height="5" fill="#f5a623" stroke="#ffcc44" stroke-width="1"/>
+          <!-- Lower wick -->
+          <line x1="30" y1="41" x2="30" y2="74" stroke="#f5a623" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="wick-ratio">1:1</div>
+      <div class="wick-name">Equal Wicks Doji</div>
+      <div class="wick-rule-text">Equal wicks both ways. Perfect indecision. No winner. Market waiting for more info.</div>
+      <div class="wick-verdict verdict-neutral">INDECISION — WAIT</div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">2:1 vs 3:1 Rejection Ratio Rules</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card" style="border-color:rgba(245,166,35,0.3);">
+      <div class="card-title" style="color:var(--gold);">2:1 RATIO — Weak Rejection</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px;">
+        Wick is 2x the body length. Rejection exists but lacks conviction. On its own during FOMC: <strong style="color:var(--gold);">borderline — need confluence.</strong>
+      </div>
+      <div class="seesaw-rule">Needs VWAP alignment to confirm</div>
+      <div class="seesaw-rule">Needs LTPROv7 SIGNAL to confirm</div>
+      <div class="seesaw-rule">Low-conviction entry — reduce size 50%</div>
+    </div>
+    <div class="card" style="border-color:rgba(0,230,118,0.3);">
+      <div class="card-title" style="color:var(--green);">3:1 RATIO — Strong Rejection</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px;">
+        Wick is 3x the body length. This is a Pin Bar / decisive rejection. High-probability signal, especially at key levels.
+      </div>
+      <div class="seesaw-rule">Respected by institutional players</div>
+      <div class="seesaw-rule">Confirm with FOMC scenario alignment</div>
+      <div class="seesaw-rule">High-conviction entry — full size</div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Stop Loss Shield Rule</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="cheat-code-card" style="border-left-color:var(--blue);">
+    <div class="cheat-code-title" style="color:var(--blue);">🛡️ THE STOP SHIELD</div>
+    <div class="note-box">
+      <div class="note-label">RULE</div>
+      Place your stop BEYOND the wick tip, not the candle body. During FOMC, market makers WILL sweep wick tips to trigger retail stops before continuing in the intended direction. Give the trade room to breathe by at least 1 ATR beyond the extreme wick.
+    </div>
+    <div style="margin-top:12px;">
+      <div class="signal-row"><span class="signal-icon">🟢</span><div><strong>Long trade stop:</strong> Below the LOWEST wick of the entry candle + 1 ATR buffer</div></div>
+      <div class="signal-row"><span class="signal-icon">🔴</span><div><strong>Short trade stop:</strong> Above the HIGHEST wick of the entry candle + 1 ATR buffer</div></div>
+      <div class="signal-row"><span class="signal-icon">⚠️</span><div><strong>FOMC day:</strong> Expect stops to be hunted. Widen stops OR reduce size to compensate.</div></div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Wick Playbook — Long / Short / Equal</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="three-col">
+    <div class="card" style="border-color:rgba(0,230,118,0.25);">
+      <div class="card-title" style="color:var(--green);">LONG LOWER WICK</div>
+      <div style="font-size:13px;line-height:1.7;color:var(--muted);">
+        Bears tried to push lower. Bulls rejected hard. Close is near top.<br><br>
+        <span style="color:var(--green);">Play: Look for CALL entry</span><br>
+        <span style="color:var(--white);">Condition: Appears at support, DXY turning down, SIGNAL=BUY</span>
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(255,60,60,0.25);">
+      <div class="card-title" style="color:var(--red);">LONG UPPER WICK</div>
+      <div style="font-size:13px;line-height:1.7;color:var(--muted);">
+        Bulls tried to push higher. Bears rejected hard. Close is near bottom.<br><br>
+        <span style="color:var(--red);">Play: Look for PUT entry</span><br>
+        <span style="color:var(--white);">Condition: Appears at resistance, DXY surging, SIGNAL=SELL</span>
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(245,166,35,0.25);">
+      <div class="card-title" style="color:var(--gold);">EQUAL WICKS</div>
+      <div style="font-size:13px;line-height:1.7;color:var(--muted);">
+        Both sides equal. Pure indecision. No edge here.<br><br>
+        <span style="color:var(--gold);">Play: STAND DOWN</span><br>
+        <span style="color:var(--white);">Action: Wait for next candle to break one direction cleanly</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: FED DAY RULES -->
+<div class="tab-content" id="tab-rules">
+  <div class="section-header">
+    <div class="section-title">Maverick's Fed Day Rules of Engagement</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="alert-banner" style="border-left-color:var(--gold);background:linear-gradient(135deg,rgba(245,166,35,0.12),rgba(245,166,35,0.03));">
+    <div class="alert-icon">🎯</div>
+    <div>
+      <div class="alert-text" style="color:var(--gold);">Check off each rule before pulling the trigger</div>
+      <div class="alert-sub">Click checkboxes as you confirm each condition. All critical rules must be satisfied before entry.</div>
+    </div>
+  </div>
+
+  <ul class="rules-list" id="rulesList">
+    <li>
+      <div class="rule-check" onclick="toggleCheck(this)"></div>
+      <div class="rule-content">
+        <div class="rule-text">SIGNAL=BUY or SIGNAL=SELL confirmed on LTPROv7</div>
+        <div class="rule-detail">SIGNAL=WAIT → absolute gate. No exceptions. Not even on FOMC day.</div>
+      </div>
+      <div class="rule-priority p-critical">CRITICAL</div>
+    </li>
+    <li>
+      <div class="rule-check" onclick="toggleCheck(this)"></div>
+      <div class="rule-content">
+        <div class="rule-text">Waited for 5-min candle CLOSE after 2:00 PM announcement</div>
+        <div class="rule-detail">Did NOT enter on initial spike or first wick. Candle body and close confirmed direction.</div>
+      </div>
+      <div class="rule-priority p-critical">CRITICAL</div>
+    </li>
+    <li>
+      <div class="rule-check" onclick="toggleCheck(this)"></div>
+      <div class="rule-content">
+        <div class="rule-text">DXY confirms the seesaw (direction aligns with SPY play)</div>
+        <div class="rule-detail">DXY down + SPY up = calls. DXY up + SPY down = puts. If seesaw broken = WAIT.</div>
+      </div>
+      <div class="rule-priority p-critical">CRITICAL</div>
+    </li>
+    <li>
+      <div class="rule-check" onclick="toggleCheck(this)"></div>
+      <div class="rule-content">
+        <div class="rule-text">Time is past 9:45 AM / Not trading raw open</div>
+        <div class="rule-detail">ORB rules still apply. Even on FOMC, no entries before 9:45 AM ET.</div>
+      </div>
+      <div class="rule-priority p-high">HIGH</div>
+    </li>
+    <li>
+      <div class="rule-check" onclick="toggleCheck(this)"></div>
+      <div class="rule-content">
+        <div class="rule-text">Option Delta is 0.60 or above</div>
+        <div class="rule-detail">FOMC = wide bid/ask spreads. High delta reduces slippage risk and gets faster premium response.</div>
+      </div>
+      <div class="rule-priority p-high">HIGH</div>
+    </li>
+    <li>
+      <div class="rule-check" onclick="toggleCheck(this)"></div>
+      <div class="rule-content">
+        <div class="rule-text">This is trade #1 (or confirmed #2 is acceptable today)</div>
+        <div class="rule-detail">Max 2 trades. Strong preference for 1. FOMC volatility can fake even experienced traders.</div>
+      </div>
+      <div class="rule-priority p-high">HIGH</div>
+    </li>
+    <li>
+      <div class="rule-check" onclick="toggleCheck(this)"></div>
+      <div class="rule-content">
+        <div class="rule-text">Stop placed BEYOND the wick tip (+1 ATR buffer)</div>
+        <div class="rule-detail">Stop Loss Shield rule active. Market makers WILL sweep retail stops on FOMC.</div>
+      </div>
+      <div class="rule-priority p-high">HIGH</div>
+    </li>
+    <li>
+      <div class="rule-check" onclick="toggleCheck(this)"></div>
+      <div class="rule-content">
+        <div class="rule-text">VIX checked — not above 35 (extreme fear = no 0DTE)</div>
+        <div class="rule-detail">VIX 25-35 = elevated, trade with caution. VIX 35+ = skip 0DTE, spreads too wide.</div>
+      </div>
+      <div class="rule-priority p-med">MEDIUM</div>
+    </li>
+    <li>
+      <div class="rule-check" onclick="toggleCheck(this)"></div>
+      <div class="rule-content">
+        <div class="rule-text">Powell presser status known before 3:30 PM entry</div>
+        <div class="rule-detail">Don't hold through Powell if you don't know what he said. Presser can reverse everything.</div>
+      </div>
+      <div class="rule-priority p-med">MEDIUM</div>
+    </li>
+    <li>
+      <div class="rule-check" onclick="toggleCheck(this)"></div>
+      <div class="rule-content">
+        <div class="rule-text">APEX signal status checked (is this a preparation warning moment?)</div>
+        <div class="rule-detail">APEX = preparation, NOT buy. If APEX fired → watch for liquidity sweep reversal → wait for SIGNAL=BUY to confirm.</div>
+      </div>
+      <div class="rule-priority p-med">MEDIUM</div>
+    </li>
+  </ul>
+
+  <div id="ruleScore" style="margin-top:16px;padding:14px 18px;background:var(--panel);border:1px solid var(--border);border-radius:6px;font-family:'Orbitron',monospace;font-size:13px;text-align:center;color:var(--muted);">
+    Check off rules above to see entry readiness
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="status-item"><div class="status-dot dot-green"></div>FOMC WAR ROOM ACTIVE</div>
+  <div class="status-item"><div class="status-dot dot-yellow"></div>FED DAY PROTOCOL</div>
+  <div class="status-item"><div class="status-dot dot-red"></div>MAX CAUTION: 2:00–3:00 PM ET</div>
+  <div style="margin-left:auto;color:var(--gold);">MAVERICK // DELTA ≥ 0.60 // MAX 2 TRADES</div>
+</div>
+
+<script>
+  // Set date
+  const now = new Date();
+  document.getElementById('fedDate').textContent = now.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+
+  // Tab switching
+  function switchTab(id) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.target.closest('.tab-btn').classList.add('active');
+  }
+
+  // Bias selector
+  function setBias(bias) {
+    const needle = document.getElementById('biasNeedle');
+    const out = document.getElementById('biasOutcome');
+
+    if (bias === 'hawk') {
+      needle.style.left = '12%';
+      out.className = 'outcome-display show hawk-out';
+      out.innerHTML = `
+        <div class="outcome-title">🦅 HAWKISH BIAS LOCKED — BEAR MODE</div>
+        <div class="outcome-steps">
+          ✅ DXY should be RISING<br>
+          ✅ SPY bias: BEARISH → look for PUTS (δ0.60+)<br>
+          ✅ Wait for 5-min candle close RED after announcement<br>
+          ✅ LTPROv7 must show SIGNAL = SELL<br>
+          ⛔ Do not chase initial bounce — it's a trap
+        </div>`;
+    } else if (bias === 'dove') {
+      needle.style.left = '88%';
+      out.className = 'outcome-display show dove-out';
+      out.innerHTML = `
+        <div class="outcome-title">🕊️ DOVISH BIAS LOCKED — BULL MODE</div>
+        <div class="outcome-steps">
+          ✅ DXY should be FALLING<br>
+          ✅ SPY bias: BULLISH → look for CALLS (δ0.60+)<br>
+          ✅ Wait for 5-min candle close GREEN after announcement<br>
+          ✅ LTPROv7 must show SIGNAL = BUY<br>
+          ⛔ Do not chase initial dip — it's a trap
+        </div>`;
+    } else {
+      needle.style.left = '50%';
+      out.className = 'outcome-display show';
+      out.style.background = 'rgba(245,166,35,0.06)';
+      out.style.border = '1px solid rgba(245,166,35,0.3)';
+      out.innerHTML = `
+        <div class="outcome-title" style="color:var(--gold);">⚖️ NEUTRAL — STAND DOWN</div>
+        <div class="outcome-steps" style="color:var(--muted);">
+          Market has not made up its mind yet.<br>
+          Wait for DXY to break a direction clearly.<br>
+          Wait for 2+ 5-min candles to close in same direction.<br>
+          LTPROv7 SIGNAL must confirm before any entry.
+        </div>`;
+    }
+  }
+
+  // Checkboxes
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    el.textContent = el.classList.contains('checked') ? '✓' : '';
+    updateScore();
+  }
+
+  function updateScore() {
+    const checks = document.querySelectorAll('.rule-check');
+    const criticals = document.querySelectorAll('.p-critical');
+    const checkedCritical = [...checks].filter((c,i) => {
+      const priority = c.closest('li').querySelector('.rule-priority');
+      return c.classList.contains('checked') && priority && priority.classList.contains('p-critical');
+    }).length;
+    const totalChecked = [...checks].filter(c => c.classList.contains('checked')).length;
+    const totalCritical = criticals.length;
+
+    const score = document.getElementById('ruleScore');
+    if (checkedCritical < totalCritical) {
+      score.style.borderColor = 'rgba(255,60,60,0.4)';
+      score.style.color = 'var(--red)';
+      score.textContent = `⛔ CRITICAL RULES NOT CLEARED (${checkedCritical}/${totalCritical}) — DO NOT ENTER`;
+    } else if (totalChecked >= 7) {
+      score.style.borderColor = 'rgba(0,230,118,0.4)';
+      score.style.color = 'var(--green)';
+      score.textContent = `✅ ${totalChecked}/10 RULES CLEARED — ENTRY AUTHORIZED. EXECUTE WITH DISCIPLINE.`;
+    } else {
+      score.style.borderColor = 'rgba(245,166,35,0.4)';
+      score.style.color = 'var(--gold)';
+      score.textContent = `⚠️ ${totalChecked}/10 CHECKED — Continue verifying before entry`;
+    }
+  }
+</script>
+</body>
+</html>
