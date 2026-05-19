@@ -1,0 +1,510 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); color: var(--color-text-primary); }
+.tabs { display: flex; gap: 4px; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.5rem; padding: 1rem 0 0; }
+.tab { padding: 8px 20px; font-size: 14px; font-weight: 500; border: 0.5px solid transparent; border-bottom: none; border-radius: var(--border-radius-md) var(--border-radius-md) 0 0; cursor: pointer; color: var(--color-text-secondary); background: transparent; }
+.tab.active { border-color: var(--color-border-tertiary); border-bottom-color: var(--color-background-primary); background: var(--color-background-primary); color: var(--color-text-primary); }
+.page { display: none; }
+.page.active { display: block; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+.metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem; }
+.metric-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
+.metric-val { font-size: 24px; font-weight: 500; }
+.metric-val.green { color: #3B6D11; }
+.metric-val.red { color: #A32D2D; }
+.metric-val.blue { color: #185FA5; }
+.metric-val.amber { color: #854F0B; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+@media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; font-size: 14px; }
+.form-group textarea { min-height: 60px; resize: vertical; }
+.btn { padding: 8px 20px; font-size: 14px; font-weight: 500; border-radius: var(--border-radius-md); cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); }
+.btn-primary { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
+.btn-danger { background: var(--color-background-danger); color: var(--color-text-danger); border-color: var(--color-border-danger); }
+.btn-success { background: var(--color-background-success); color: var(--color-text-success); border-color: var(--color-border-success); }
+.section-head { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 0.5px solid var(--color-border-tertiary); letter-spacing: 0.5px; text-transform: uppercase; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+.session-row { display: grid; grid-template-columns: 90px 70px 70px 70px 80px 1fr 80px; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+.session-row:last-child { border-bottom: none; }
+.session-head { font-size: 11px; color: var(--color-text-secondary); font-weight: 500; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: var(--border-radius-md); font-size: 11px; font-weight: 500; }
+.badge-win { background: var(--color-background-success); color: var(--color-text-success); }
+.badge-loss { background: var(--color-background-danger); color: var(--color-text-danger); }
+.badge-scratch { background: var(--color-background-warning); color: var(--color-text-warning); }
+.badge-bull { background: var(--color-background-success); color: var(--color-text-success); }
+.badge-bear { background: var(--color-background-danger); color: var(--color-text-danger); }
+.badge-none { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.badge-A { background: #EAF3DE; color: #3B6D11; }
+.badge-B { background: var(--color-background-warning); color: var(--color-text-warning); }
+.badge-C { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--color-text-secondary); font-size: 14px; }
+.row-btns { display: flex; gap: 6px; }
+.chart-wrap { position: relative; width: 100%; height: 200px; margin-bottom: 1rem; }
+.insight-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+.insight-row:last-child { border-bottom: none; }
+.insight-label { color: var(--color-text-secondary); }
+.insight-val { font-weight: 500; }
+.bar-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; }
+.bar-outer { flex: 1; height: 6px; background: var(--color-background-secondary); border-radius: 3px; overflow: hidden; }
+.bar-inner { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+.export-row { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; }
+.alert { padding: 12px 16px; border-radius: var(--border-radius-md); font-size: 13px; margin-bottom: 1rem; }
+.alert-success { background: var(--color-background-success); color: var(--color-text-success); border: 0.5px solid var(--color-border-success); }
+.alert-danger { background: var(--color-background-danger); color: var(--color-text-danger); border: 0.5px solid var(--color-border-danger); }
+</style>
+
+<h2 class="sr-only">Maverick session journal — log and analyze your trading sessions</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('stats')">Stats dashboard</button>
+  <button class="tab" onclick="showTab('journal')">Add session</button>
+  <button class="tab" onclick="showTab('log')">Session log</button>
+  <button class="tab" onclick="showTab('perf')">My performance</button>
+</div>
+
+<div id="alert-area"></div>
+
+<!-- TAB 1: Stats Dashboard -->
+<div id="tab-stats" class="page active" style="padding: 0 0 1rem;">
+  <div class="section-head">Historical tendencies (research-based)</div>
+  <div class="grid-4">
+    <div class="metric"><div class="metric-label">London sweeps Asia low</div><div class="metric-val blue">41%</div></div>
+    <div class="metric"><div class="metric-label">NY continues after low sweep</div><div class="metric-val green">66%</div></div>
+    <div class="metric"><div class="metric-label">London sweeps Asia high</div><div class="metric-val blue">37%</div></div>
+    <div class="metric"><div class="metric-label">NY continues after high sweep</div><div class="metric-val red">62%</div></div>
+  </div>
+  <div class="grid-4">
+    <div class="metric"><div class="metric-label">Trend days</div><div class="metric-val blue">36%</div></div>
+    <div class="metric"><div class="metric-label">Mean reversion days</div><div class="metric-val amber">43%</div></div>
+    <div class="metric"><div class="metric-label">9:35 win rate</div><div class="metric-val green">65%</div></div>
+    <div class="metric"><div class="metric-label">No sweep → fade</div><div class="metric-val amber">48%</div></div>
+  </div>
+
+  <div class="section-head" style="margin-top:1rem;">This week — danger zones</div>
+  <div class="card">
+    <div class="insight-row"><span class="insight-label">Mon May 18</span><span class="insight-val" style="color:#3B6D11">Cleanest day — best opportunity</span></div>
+    <div class="insight-row"><span class="insight-label">Tue May 19</span><span class="insight-val" style="color:#854F0B">HD earnings before open — caution</span></div>
+    <div class="insight-row"><span class="insight-label">Wed May 20</span><span class="insight-val" style="color:#A32D2D">FOMC 2PM + NVDA after close — avoid after 1:30PM</span></div>
+    <div class="insight-row"><span class="insight-label">Thu May 21</span><span class="insight-val" style="color:#854F0B">WMT earnings — wait after 10AM</span></div>
+    <div class="insight-row"><span class="insight-label">Fri May 22</span><span class="insight-val" style="color:var(--color-text-secondary)">Light volume — selective</span></div>
+  </div>
+
+  <div class="section-head" style="margin-top:1rem;">Pre-market checklist</div>
+  <div class="card">
+    <div class="insight-row"><span class="insight-label">1. Mark Asia H/L on ES1! 1H</span><span class="insight-val">Pre-market</span></div>
+    <div class="insight-row"><span class="insight-label">2. Note London sweep direction</span><span class="insight-val">2AM–7AM ET</span></div>
+    <div class="insight-row"><span class="insight-label">3. Switch to SPY → run cockpit</span><span class="insight-val">Pre-market</span></div>
+    <div class="insight-row"><span class="insight-label">4. Check REGIME score + DXY/TNX</span><span class="insight-val">9:00–9:30 AM</span></div>
+    <div class="insight-row"><span class="insight-label">5. Wait for 9:35 candle close</span><span class="insight-val">9:35 AM</span></div>
+    <div class="insight-row"><span class="insight-label">6. Execute with conviction</span><span class="insight-val">Delta 0.60+</span></div>
+  </div>
+</div>
+
+<!-- TAB 2: Add Session -->
+<div id="tab-journal" class="page" style="padding: 0 0 1rem;">
+  <div class="section-head">Log a session</div>
+  <div class="card">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="form-group">
+        <label>Ticker</label>
+        <select id="f-ticker">
+          <option>SPY</option>
+          <option>QQQ</option>
+          <option>ES1!</option>
+          <option>NVDA</option>
+          <option>AAPL</option>
+          <option>MSFT</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>London sweep</label>
+        <select id="f-sweep">
+          <option value="low">Swept Asia low (bullish)</option>
+          <option value="high">Swept Asia high (bearish)</option>
+          <option value="none">No sweep</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Day type</label>
+        <select id="f-daytype">
+          <option value="trend">Trend day</option>
+          <option value="mrev">Mean reversion</option>
+          <option value="chop">Choppy</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Setup grade</label>
+        <select id="f-grade">
+          <option>A+</option>
+          <option>A-</option>
+          <option>B</option>
+          <option>C</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Direction taken</label>
+        <select id="f-dir">
+          <option value="call">Call (bullish)</option>
+          <option value="put">Put (bearish)</option>
+          <option value="none">No trade</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Entry time</label>
+        <select id="f-entry">
+          <option value="935">9:35–10:00 AM</option>
+          <option value="1000">10:00–10:30 AM</option>
+          <option value="1030">10:30–11:00 AM</option>
+          <option value="late">After 11:00 AM</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Result</label>
+        <select id="f-result">
+          <option value="win">Win</option>
+          <option value="loss">Loss</option>
+          <option value="scratch">Scratch</option>
+          <option value="none">No trade taken</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>P&L ($)</label>
+        <input type="number" id="f-pnl" placeholder="e.g. 250 or -120" step="1">
+      </div>
+      <div class="form-group">
+        <label>REGIME score</label>
+        <input type="number" id="f-regime" placeholder="-8 to +8" min="-8" max="8">
+      </div>
+      <div class="form-group">
+        <label>DXY/TNX</label>
+        <select id="f-macro">
+          <option value="on">Risk ON (both down)</option>
+          <option value="off">Risk OFF (both up)</option>
+          <option value="mixed">Mixed</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>5M sniper at entry</label>
+        <select id="f-5m">
+          <option value="2u">2U (bullish)</option>
+          <option value="2d">2D (bearish)</option>
+          <option value="1">1 Inside</option>
+          <option value="3">3 Outside</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:1rem;">
+      <label>Notes / what I learned</label>
+      <textarea id="f-notes" placeholder="London swept Asia low, SPY opened above VWAP, 1H confirmed 2U at 9:35..."></textarea>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-primary" onclick="saveSession()">Save session</button>
+      <button class="btn" onclick="clearForm()">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: Session Log -->
+<div id="tab-log" class="page" style="padding: 0 0 1rem;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+    <div class="section-head" style="margin:0;">All sessions (<span id="session-count">0</span>)</div>
+    <div class="export-row" style="margin:0;">
+      <button class="btn btn-success" onclick="exportData()">Export JSON</button>
+      <button class="btn" onclick="document.getElementById('import-file').click()">Import JSON</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-danger" onclick="clearAll()">Clear all</button>
+    </div>
+  </div>
+  <div id="log-container">
+    <div class="empty-state">No sessions logged yet. Add your first session in the "Add session" tab.</div>
+  </div>
+</div>
+
+<!-- TAB 4: My Performance -->
+<div id="tab-perf" class="page" style="padding: 0 0 1rem;">
+  <div id="perf-container">
+    <div class="empty-state">Log at least 5 sessions to see your personal performance stats.</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+let sessions = JSON.parse(localStorage.getItem('maverick_sessions') || '[]');
+let pnlChart = null;
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['stats','journal','log','perf'][i] === name));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'log') renderLog();
+  if (name === 'perf') renderPerf();
+}
+
+function showAlert(msg, type) {
+  const a = document.getElementById('alert-area');
+  a.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(() => a.innerHTML = '', 3000);
+}
+
+function saveSession() {
+  const date = document.getElementById('f-date').value;
+  if (!date) { showAlert('Please select a date.', 'danger'); return; }
+  const session = {
+    id: Date.now(),
+    date,
+    ticker: document.getElementById('f-ticker').value,
+    sweep: document.getElementById('f-sweep').value,
+    daytype: document.getElementById('f-daytype').value,
+    grade: document.getElementById('f-grade').value,
+    dir: document.getElementById('f-dir').value,
+    entry: document.getElementById('f-entry').value,
+    result: document.getElementById('f-result').value,
+    pnl: parseFloat(document.getElementById('f-pnl').value) || 0,
+    regime: parseInt(document.getElementById('f-regime').value) || 0,
+    macro: document.getElementById('f-macro').value,
+    five_m: document.getElementById('f-5m').value,
+    notes: document.getElementById('f-notes').value
+  };
+  sessions.unshift(session);
+  localStorage.setItem('maverick_sessions', JSON.stringify(sessions));
+  showAlert('Session saved successfully!', 'success');
+  clearForm();
+  document.getElementById('session-count').textContent = sessions.length;
+}
+
+function clearForm() {
+  ['f-date','f-pnl','f-regime','f-notes'].forEach(id => document.getElementById(id).value = '');
+}
+
+function deleteSession(id) {
+  sessions = sessions.filter(s => s.id !== id);
+  localStorage.setItem('maverick_sessions', JSON.stringify(sessions));
+  renderLog();
+  renderPerf();
+}
+
+function clearAll() {
+  if (!confirm('Delete all sessions? This cannot be undone.')) return;
+  sessions = [];
+  localStorage.setItem('maverick_sessions', JSON.stringify(sessions));
+  renderLog();
+  renderPerf();
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(sessions, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'maverick_sessions_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      sessions = imported;
+      localStorage.setItem('maverick_sessions', JSON.stringify(sessions));
+      showAlert('Imported ' + sessions.length + ' sessions.', 'success');
+      renderLog();
+      renderPerf();
+    } catch { showAlert('Invalid JSON file.', 'danger'); }
+  };
+  reader.readAsText(file);
+}
+
+function badgeResult(r) {
+  if (r === 'win') return '<span class="badge badge-win">Win</span>';
+  if (r === 'loss') return '<span class="badge badge-loss">Loss</span>';
+  if (r === 'scratch') return '<span class="badge badge-scratch">Scratch</span>';
+  return '<span class="badge badge-none">No trade</span>';
+}
+
+function badgeSweep(s) {
+  if (s === 'low') return '<span class="badge badge-bull">Low swept</span>';
+  if (s === 'high') return '<span class="badge badge-bear">High swept</span>';
+  return '<span class="badge badge-none">No sweep</span>';
+}
+
+function badgeGrade(g) {
+  if (g.startsWith('A')) return `<span class="badge badge-A">${g}</span>`;
+  if (g === 'B') return `<span class="badge badge-B">${g}</span>`;
+  return `<span class="badge badge-C">${g}</span>`;
+}
+
+function renderLog() {
+  const c = document.getElementById('log-container');
+  document.getElementById('session-count').textContent = sessions.length;
+  if (!sessions.length) {
+    c.innerHTML = '<div class="empty-state">No sessions logged yet.</div>';
+    return;
+  }
+  c.innerHTML = `
+    <div class="card" style="overflow-x:auto;">
+      <div class="session-row session-head">
+        <span>Date</span><span>Ticker</span><span>Sweep</span><span>Grade</span><span>Result</span><span>Notes</span><span>Actions</span>
+      </div>
+      ${sessions.map(s => `
+        <div class="session-row">
+          <span>${s.date}</span>
+          <span>${s.ticker}</span>
+          <span>${badgeSweep(s.sweep)}</span>
+          <span>${badgeGrade(s.grade)}</span>
+          <span>${badgeResult(s.result)} ${s.pnl !== 0 ? '<br><small style="color:' + (s.pnl > 0 ? '#3B6D11' : '#A32D2D') + '">$' + s.pnl.toFixed(0) + '</small>' : ''}</span>
+          <span style="font-size:12px; color:var(--color-text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${s.notes}">${s.notes || '—'}</span>
+          <div class="row-btns"><button class="btn btn-danger" style="padding:4px 10px; font-size:12px;" onclick="deleteSession(${s.id})">Delete</button></div>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function pct(num, den) { return den === 0 ? 0 : Math.round(num / den * 100); }
+
+function renderPerf() {
+  const c = document.getElementById('perf-container');
+  const tradeSessions = sessions.filter(s => s.dir !== 'none' && s.result !== 'none');
+  if (tradeSessions.length < 5) {
+    c.innerHTML = `<div class="empty-state">Log at least 5 sessions to see your stats.<br><br><span style="font-size:12px;">You have ${sessions.length} session${sessions.length !== 1 ? 's' : ''} logged so far.</span></div>`;
+    return;
+  }
+
+  const wins = tradeSessions.filter(s => s.result === 'win').length;
+  const losses = tradeSessions.filter(s => s.result === 'loss').length;
+  const scratches = tradeSessions.filter(s => s.result === 'scratch').length;
+  const totalPnl = tradeSessions.reduce((a, s) => a + s.pnl, 0);
+  const avgWin = wins ? tradeSessions.filter(s => s.result === 'win').reduce((a,s) => a+s.pnl, 0) / wins : 0;
+  const avgLoss = losses ? Math.abs(tradeSessions.filter(s => s.result === 'loss').reduce((a,s) => a+s.pnl, 0) / losses) : 0;
+  const expectancy = avgWin * (wins/tradeSessions.length) - avgLoss * (losses/tradeSessions.length);
+  const winRate = pct(wins, tradeSessions.length);
+
+  const sweepLowSessions = tradeSessions.filter(s => s.sweep === 'low');
+  const sweepLowWins = sweepLowSessions.filter(s => s.result === 'win').length;
+  const sweepHighSessions = tradeSessions.filter(s => s.sweep === 'high');
+  const sweepHighWins = sweepHighSessions.filter(s => s.result === 'win').length;
+  const noSweepSessions = tradeSessions.filter(s => s.sweep === 'none');
+  const noSweepWins = noSweepSessions.filter(s => s.result === 'win').length;
+
+  const e935 = tradeSessions.filter(s => s.entry === '935');
+  const e935wins = e935.filter(s => s.result === 'win').length;
+  const e1000 = tradeSessions.filter(s => s.entry === '1000');
+  const e1000wins = e1000.filter(s => s.result === 'win').length;
+  const e1030 = tradeSessions.filter(s => s.entry === '1030');
+  const e1030wins = e1030.filter(s => s.result === 'win').length;
+
+  const riskOnSessions = tradeSessions.filter(s => s.macro === 'on');
+  const riskOnWins = riskOnSessions.filter(s => s.result === 'win').length;
+  const riskOffSessions = tradeSessions.filter(s => s.macro === 'off');
+  const riskOffWins = riskOffSessions.filter(s => s.result === 'win').length;
+
+  const gradeAPlus = tradeSessions.filter(s => s.grade === 'A+');
+  const gradeAPlusWins = gradeAPlus.filter(s => s.result === 'win').length;
+  const gradeAMinus = tradeSessions.filter(s => s.grade === 'A-');
+  const gradeAMinusWins = gradeAMinus.filter(s => s.result === 'win').length;
+  const gradeB = tradeSessions.filter(s => s.grade === 'B');
+  const gradeBWins = gradeB.filter(s => s.result === 'win').length;
+
+  const pnlData = [...tradeSessions].reverse().map(s => s.pnl);
+  const cumPnl = pnlData.reduce((acc, v) => { acc.push((acc[acc.length-1] || 0) + v); return acc; }, []);
+  const labels = [...tradeSessions].reverse().map((s, i) => `#${i+1}`);
+
+  c.innerHTML = `
+    <div class="section-head">Overall performance</div>
+    <div class="grid-4">
+      <div class="metric"><div class="metric-label">Win rate</div><div class="metric-val ${winRate >= 55 ? 'green' : winRate >= 45 ? 'amber' : 'red'}">${winRate}%</div></div>
+      <div class="metric"><div class="metric-label">Total P&L</div><div class="metric-val ${totalPnl >= 0 ? 'green' : 'red'}">$${totalPnl.toFixed(0)}</div></div>
+      <div class="metric"><div class="metric-label">Expectancy/trade</div><div class="metric-val ${expectancy >= 0 ? 'green' : 'red'}">$${expectancy.toFixed(0)}</div></div>
+      <div class="metric"><div class="metric-label">Trades logged</div><div class="metric-val blue">${tradeSessions.length}</div></div>
+    </div>
+    <div class="grid-4">
+      <div class="metric"><div class="metric-label">Avg winner</div><div class="metric-val green">$${avgWin.toFixed(0)}</div></div>
+      <div class="metric"><div class="metric-label">Avg loser</div><div class="metric-val red">-$${avgLoss.toFixed(0)}</div></div>
+      <div class="metric"><div class="metric-label">Win/loss ratio</div><div class="metric-val ${avgLoss > 0 && avgWin/avgLoss >= 1 ? 'green' : 'amber'}">${avgLoss > 0 ? (avgWin/avgLoss).toFixed(2) : '—'}</div></div>
+      <div class="metric"><div class="metric-label">Scratches</div><div class="metric-val amber">${scratches}</div></div>
+    </div>
+
+    <div class="section-head" style="margin-top:1.5rem;">Cumulative P&L</div>
+    <div class="card">
+      <div class="chart-wrap"><canvas id="pnl-chart" role="img" aria-label="Cumulative P&L chart across all logged sessions">${cumPnl[cumPnl.length-1] >= 0 ? 'Net positive' : 'Net negative'} P&L over ${tradeSessions.length} sessions.</canvas></div>
+    </div>
+
+    <div class="section-head" style="margin-top:0.5rem;">Win rate by setup condition</div>
+    <div class="card">
+      ${barRow('London low sweep', sweepLowWins, sweepLowSessions.length, '#3B6D11')}
+      ${barRow('London high sweep', sweepHighWins, sweepHighSessions.length, '#A32D2D')}
+      ${barRow('No London sweep', noSweepWins, noSweepSessions.length, '#854F0B')}
+      ${barRow('Risk ON (DXY/TNX)', riskOnWins, riskOnSessions.length, '#185FA5')}
+      ${barRow('Risk OFF (DXY/TNX)', riskOffWins, riskOffSessions.length, '#A32D2D')}
+      ${barRow('Grade A+ entries', gradeAPlusWins, gradeAPlus.length, '#3B6D11')}
+      ${barRow('Grade A- entries', gradeAMinusWins, gradeAMinus.length, '#639922')}
+      ${barRow('Grade B entries', gradeBWins, gradeB.length, '#854F0B')}
+    </div>
+
+    <div class="section-head" style="margin-top:0.5rem;">Win rate by entry window</div>
+    <div class="card">
+      ${barRow('9:35 – 10:00 AM', e935wins, e935.length, '#3B6D11')}
+      ${barRow('10:00 – 10:30 AM', e1000wins, e1000.length, '#854F0B')}
+      ${barRow('10:30 – 11:00 AM', e1030wins, e1030.length, '#A32D2D')}
+    </div>
+
+    <div class="export-row">
+      <button class="btn btn-success" onclick="exportData()">Export JSON backup</button>
+      <button class="btn" onclick="document.getElementById('import-file').click()">Import JSON</button>
+    </div>
+  `;
+
+  if (pnlChart) { pnlChart.destroy(); pnlChart = null; }
+  const ctx = document.getElementById('pnl-chart');
+  if (ctx) {
+    pnlChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Cumulative P&L',
+          data: cumPnl,
+          borderColor: totalPnl >= 0 ? '#3B6D11' : '#A32D2D',
+          backgroundColor: totalPnl >= 0 ? 'rgba(59,109,17,0.08)' : 'rgba(163,45,45,0.08)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: cumPnl.length <= 20 ? 4 : 2,
+          pointBackgroundColor: totalPnl >= 0 ? '#3B6D11' : '#A32D2D',
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { font: { size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } },
+          y: { ticks: { font: { size: 11 }, callback: v => '$' + Math.round(v) } }
+        }
+      }
+    });
+  }
+}
+
+function barRow(label, wins, total, color) {
+  const p = pct(wins, total);
+  const countStr = total > 0 ? `${wins}/${total} — ${p}%` : 'No data';
+  return `
+    <div class="bar-row">
+      <span style="min-width:160px; color:var(--color-text-secondary); font-size:13px;">${label}</span>
+      <div class="bar-outer"><div class="bar-inner" style="width:${p}%; background:${color};"></div></div>
+      <span style="min-width:80px; font-size:13px; font-weight:500; text-align:right;">${countStr}</span>
+    </div>`;
+}
+
+document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+document.getElementById('session-count').textContent = sessions.length;
+</script>
