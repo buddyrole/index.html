@@ -1,0 +1,533 @@
+
+<h2 class="sr-only">Maverick Pro Stop Loss Calculator v2 — professional SPY options calculator with $25/$50 loss rules</h2>
+
+<style>
+* { box-sizing: border-box; }
+.wrap { padding: 1.5rem 0; font-family: var(--font-sans); }
+.tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab { padding: 7px 14px; font-size: 13px; border-radius: var(--border-radius-md); cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); }
+.tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); font-weight: 500; border-color: var(--color-border-primary); }
+.sl { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-tertiary); margin: 0 0 10px; font-weight: 500; }
+.r2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.r3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.r4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.ig { display: flex; flex-direction: column; gap: 5px; }
+.ig label { font-size: 12px; color: var(--color-text-secondary); }
+.ig input, .ig select { width: 100%; }
+.div { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1.25rem 0; }
+.rg { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+.rc { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+.rc .rl { font-size: 11px; color: var(--color-text-secondary); margin: 0 0 3px; }
+.rc .rv { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin: 0; }
+.rc .rs { font-size: 11px; color: var(--color-text-tertiary); margin: 3px 0 0; }
+.rc.danger .rv { color: var(--color-text-danger); }
+.rc.success .rv { color: var(--color-text-success); }
+.rc.info .rv { color: var(--color-text-info); }
+.rc.warn .rv { color: var(--color-text-warning); }
+.st { border-radius: var(--border-radius-md); padding: 10px 14px; font-size: 13px; font-weight: 500; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+.st.go { background: var(--color-background-success); color: var(--color-text-success); border: 0.5px solid var(--color-border-success); }
+.st.wait { background: var(--color-background-warning); color: var(--color-text-warning); border: 0.5px solid var(--color-border-warning); }
+.st.stop { background: var(--color-background-danger); color: var(--color-text-danger); border: 0.5px solid var(--color-border-danger); }
+.rr { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+.rr:last-child { border-bottom: none; }
+.rr .rn { color: var(--color-text-secondary); }
+.pass { color: var(--color-text-success); font-weight: 500; }
+.fail { color: var(--color-text-danger); font-weight: 500; }
+.neu { color: var(--color-text-tertiary); }
+.badge { font-size: 11px; padding: 3px 8px; border-radius: var(--border-radius-md); display: inline-block; margin-bottom: 4px; }
+.badge.info { background: var(--color-background-info); color: var(--color-text-info); }
+.badge.warn { background: var(--color-background-warning); color: var(--color-text-warning); }
+.badge.success { background: var(--color-background-success); color: var(--color-text-success); }
+.badge.danger { background: var(--color-background-danger); color: var(--color-text-danger); }
+.rule-box { border-radius: var(--border-radius-md); padding: 14px 16px; margin-bottom: 1.25rem; border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+.rule-box .rb-title { font-size: 13px; font-weight: 500; margin: 0 0 8px; color: var(--color-text-primary); }
+.rule-box .rb-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-secondary); }
+.rule-box .rb-row:last-child { border-bottom: none; }
+.rule-box .rb-val { font-weight: 500; color: var(--color-text-primary); }
+.asym { margin-bottom: 1.25rem; }
+.asym-lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
+.asym-bar { height: 12px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; border: 0.5px solid var(--color-border-tertiary); display: flex; }
+.asym-loss { background: var(--color-background-danger); height: 100%; transition: width 0.3s; }
+.asym-gain { background: var(--color-background-success); height: 100%; transition: width 0.3s; }
+.sb { width: 100%; margin-top: 1rem; padding: 10px; font-size: 13px; }
+.live-track { height: 10px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; border: 0.5px solid var(--color-border-tertiary); }
+.live-fill { height: 100%; border-radius: 99px; transition: width 0.3s, background 0.3s; }
+.hl-box { border-radius: var(--border-radius-md); padding: 10px 14px; font-size: 13px; margin-bottom: 1.25rem; }
+.hl-box.warn { background: var(--color-background-warning); color: var(--color-text-warning); border: 0.5px solid var(--color-border-warning); }
+.hl-box.success { background: var(--color-background-success); color: var(--color-text-success); border: 0.5px solid var(--color-border-success); }
+.size-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+.size-card { border-radius: var(--border-radius-md); padding: 12px 14px; border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); }
+.size-card.recommended { border: 1.5px solid var(--color-border-success); }
+.size-card .sc-label { font-size: 11px; color: var(--color-text-secondary); margin: 0 0 4px; }
+.size-card .sc-val { font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin: 0; }
+.size-card .sc-sub { font-size: 11px; color: var(--color-text-tertiary); margin: 3px 0 0; }
+</style>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab active" onclick="sw('entry')" id="t-entry">Entry setup</button>
+    <button class="tab" onclick="sw('struct')" id="t-struct">Structure stop</button>
+    <button class="tab" onclick="sw('sizer')" id="t-sizer">Position sizer</button>
+    <button class="tab" onclick="sw('live')" id="t-live">Live tracker</button>
+    <button class="tab" onclick="sw('log')" id="t-log">Trade log</button>
+  </div>
+
+  <!-- ENTRY SETUP -->
+  <div id="p-entry">
+    <div class="rule-box">
+      <p class="rb-title">Maverick rules</p>
+      <div class="rb-row"><span>A+ setup max loss</span><span class="rb-val" style="color:var(--color-text-success)">$25</span></div>
+      <div class="rb-row"><span>Pullback/B setup max loss</span><span class="rb-val" style="color:var(--color-text-warning)">$50</span></div>
+      <div class="rb-row"><span>Delta minimum</span><span class="rb-val">0.50+ (prefer 0.60+)</span></div>
+      <div class="rb-row"><span>Profit target</span><span class="rb-val">20% — done for the day</span></div>
+      <div class="rb-row"><span>Stop loss</span><span class="rb-val">Set immediately at entry</span></div>
+      <div class="rb-row"><span>C grade trades</span><span class="rb-val" style="color:var(--color-text-danger)">Never</span></div>
+    </div>
+
+    <p class="sl">Trade setup</p>
+    <div class="r3">
+      <div class="ig"><label>Premium paid ($)</label><input type="number" id="e-prem" placeholder="1.00" step="0.01" oninput="calcEntry()"/></div>
+      <div class="ig"><label>Contracts</label><input type="number" id="e-cont" placeholder="1" min="1" value="1" oninput="calcEntry()"/></div>
+      <div class="ig"><label>Delta</label><input type="number" id="e-delta" placeholder="0.60" step="0.01" min="0" max="1" oninput="calcEntry()"/></div>
+    </div>
+    <div class="r3">
+      <div class="ig"><label>DTE</label><select id="e-dte" onchange="calcEntry()"><option value="0">0DTE</option><option value="1">1 DTE</option><option value="2" selected>2 DTE</option><option value="3">3 DTE</option><option value="4">4 DTE</option><option value="5">5 DTE</option></select></div>
+      <div class="ig"><label>Direction</label><select id="e-dir" onchange="calcEntry()"><option value="call">Call</option><option value="put">Put</option></select></div>
+      <div class="ig"><label>Setup grade</label><select id="e-grade" onchange="calcEntry()"><option value="a">A+ setup</option><option value="b">B — pullback</option><option value="c">C — no trade</option></select></div>
+    </div>
+    <hr class="div"/>
+    <div id="e-status" class="st wait"><i class="ti ti-info-circle" aria-hidden="true"></i><span id="e-stxt">Enter trade details above</span></div>
+    <div class="rg">
+      <div class="rc"><p class="rl">Total cost</p><p class="rv" id="e-cost">—</p><p class="rs">per contract × 100</p></div>
+      <div class="rc danger"><p class="rl">Stop out at</p><p class="rv" id="e-stopv">—</p><p class="rs" id="e-stopp">stop %: —</p></div>
+      <div class="rc danger"><p class="rl">Max $ loss</p><p class="rv" id="e-maxl">—</p><p class="rs" id="e-maxl-rule">rule: —</p></div>
+      <div class="rc success"><p class="rl">Target (20%)</p><p class="rv" id="e-tgtv">—</p><p class="rs" id="e-profit">profit: —</p></div>
+      <div class="rc info"><p class="rl">Risk / reward</p><p class="rv" id="e-rr">—</p><p class="rs" id="e-rrsub">—</p></div>
+    </div>
+    <div class="asym">
+      <div class="asym-lbl"><span id="al-loss">Loss —</span><span id="al-gain">Gain —</span></div>
+      <div class="asym-bar"><div class="asym-loss" id="ab-loss" style="width:50%"></div><div class="asym-gain" id="ab-gain" style="width:50%"></div></div>
+    </div>
+    <p class="sl">Rule checklist</p>
+    <div class="rr"><span class="rn">Delta ≥ 0.50 (prefer 0.60+)</span><span id="ck-delta" class="neu">—</span></div>
+    <div class="rr"><span class="rn">DTE 0–5</span><span class="pass">✓ pass</span></div>
+    <div class="rr"><span class="rn">Max loss ≤ $50</span><span id="ck-loss" class="neu">—</span></div>
+    <div class="rr"><span class="rn">Risk/reward ≥ 1:1</span><span id="ck-rr" class="neu">—</span></div>
+    <div class="rr"><span class="rn">Setup grade</span><span id="ck-grade" class="neu">—</span></div>
+    <div class="rr"><span class="rn">Stop set at entry</span><span id="ck-stop" class="neu">—</span></div>
+    <button class="sb" onclick="sendPrompt('Analyze my SPY options trade: ' + document.getElementById('e-dir').value + ', premium $' + document.getElementById('e-prem').value + ', delta ' + document.getElementById('e-delta').value + ', ' + document.getElementById('e-dte').value + 'DTE, grade ' + document.getElementById('e-grade').value + '. Does this meet Maverick rules?')">Ask Goose to validate this trade ↗</button>
+  </div>
+
+  <!-- STRUCTURE STOP -->
+  <div id="p-struct" style="display:none">
+    <p class="sl">Price inputs</p>
+    <div class="r3">
+      <div class="ig"><label>SPY entry price ($)</label><input type="number" id="s-spy" placeholder="746.50" step="0.01" oninput="calcStruct()"/></div>
+      <div class="ig"><label>Premium paid ($)</label><input type="number" id="s-prem" placeholder="1.00" step="0.01" oninput="calcStruct()"/></div>
+      <div class="ig"><label>Delta</label><input type="number" id="s-delta" placeholder="0.60" step="0.01" oninput="calcStruct()"/></div>
+    </div>
+    <div class="r2">
+      <div class="ig"><label>Contracts</label><input type="number" id="s-cont" placeholder="1" min="1" value="1" oninput="calcStruct()"/></div>
+      <div class="ig"><label>Setup grade</label><select id="s-grade" onchange="calcStruct()"><option value="a">A+ — max loss $25</option><option value="b">B pullback — max loss $50</option></select></div>
+    </div>
+    <hr class="div"/>
+    <p class="sl">Structure levels — enter levels that would prove your thesis wrong</p>
+    <div class="r3">
+      <div class="ig"><span class="badge info">VWAP</span><label>VWAP ($)</label><input type="number" id="s-vwap" placeholder="745.37" step="0.01" oninput="calcStruct()"/></div>
+      <div class="ig"><span class="badge warn">London high</span><label>London high ($)</label><input type="number" id="s-lh" placeholder="746.65" step="0.01" oninput="calcStruct()"/></div>
+      <div class="ig"><span class="badge info">Candle low</span><label>Prev candle low ($)</label><input type="number" id="s-cl" placeholder="745.80" step="0.01" oninput="calcStruct()"/></div>
+    </div>
+    <div class="r3">
+      <div class="ig"><span class="badge success">Higher low</span><label>Higher low ($)</label><input type="number" id="s-hl" placeholder="744.87" step="0.01" oninput="calcStruct()"/></div>
+      <div class="ig"><span class="badge info">ATR stop</span><label>ATR value ($)</label><input type="number" id="s-atr" placeholder="0.85" step="0.01" oninput="calcStruct()"/></div>
+      <div class="ig"><span class="badge warn">Asia low</span><label>Asia low ($)</label><input type="number" id="s-asia" placeholder="744.50" step="0.01" oninput="calcStruct()"/></div>
+    </div>
+    <hr class="div"/>
+    <div id="s-status" class="st wait"><i class="ti ti-ruler" aria-hidden="true"></i><span id="s-stxt">Enter SPY price and structure levels</span></div>
+    <div id="s-best" style="display:none" class="hl-box success"></div>
+    <div id="s-results"></div>
+    <div class="rg" style="margin-top:1.25rem">
+      <div class="rc danger"><p class="rl">Tightest stop</p><p class="rv" id="s-tight">—</p><p class="rs" id="s-tightl">—</p></div>
+      <div class="rc warn"><p class="rl">Widest stop</p><p class="rv" id="s-wide">—</p><p class="rs" id="s-widel">—</p></div>
+      <div class="rc success"><p class="rl">Recommended</p><p class="rv" id="s-rec">—</p><p class="rs" id="s-recwhy">—</p></div>
+      <div class="rc info"><p class="rl">Max $ loss</p><p class="rv" id="s-ml">—</p><p class="rs" id="s-mlrule">vs rule</p></div>
+    </div>
+    <button class="sb" onclick="sendPrompt('Help me pick the best structure stop for SPY. Entry: $' + document.getElementById('s-spy').value + ', premium: $' + document.getElementById('s-prem').value + ', delta: ' + document.getElementById('s-delta').value + ', VWAP: $' + document.getElementById('s-vwap').value + ', London high: $' + document.getElementById('s-lh').value + '. Which level best protects me within $50 max loss?')">Ask Goose which structure stop to use ↗</button>
+  </div>
+
+  <!-- POSITION SIZER -->
+  <div id="p-sizer" style="display:none">
+    <p class="sl">Find optimal contracts for your $25/$50 rule</p>
+    <div class="r3">
+      <div class="ig"><label>Premium paid ($)</label><input type="number" id="sz-prem" placeholder="1.00" step="0.01" oninput="calcSizer()"/></div>
+      <div class="ig"><label>Stop loss %</label><input type="number" id="sz-stop" placeholder="25" value="25" step="1" oninput="calcSizer()"/></div>
+      <div class="ig"><label>Setup grade</label><select id="sz-grade" onchange="calcSizer()"><option value="25">A+ — max $25</option><option value="50">B pullback — max $50</option></select></div>
+    </div>
+    <hr class="div"/>
+    <div id="sz-status" class="st wait"><i class="ti ti-calculator" aria-hidden="true"></i><span id="sz-stxt">Enter premium and stop % to calculate position size</span></div>
+    <p class="sl">Contract options</p>
+    <div class="size-grid" id="sz-grid"></div>
+    <div class="rg">
+      <div class="rc success"><p class="rl">Recommended contracts</p><p class="rv" id="sz-rec">—</p><p class="rs" id="sz-recl">—</p></div>
+      <div class="rc danger"><p class="rl">Max loss at rec.</p><p class="rv" id="sz-ml">—</p><p class="rs" id="sz-mll">—</p></div>
+      <div class="rc info"><p class="rl">Target profit (20%)</p><p class="rv" id="sz-profit">—</p><p class="rs">at rec. contracts</p></div>
+      <div class="rc"><p class="rl">Stop price</p><p class="rv" id="sz-stopv">—</p><p class="rs" id="sz-stopl">—</p></div>
+    </div>
+    <button class="sb" onclick="sendPrompt('Help me size my position correctly. Premium: $' + document.getElementById('sz-prem').value + ', stop: ' + document.getElementById('sz-stop').value + '%, max loss rule: $' + document.getElementById('sz-grade').value + '. How many contracts should I buy?')">Ask Goose to confirm position size ↗</button>
+  </div>
+
+  <!-- LIVE TRACKER -->
+  <div id="p-live" style="display:none">
+    <p class="sl">Live trade monitor</p>
+    <div class="r3">
+      <div class="ig"><label>Entry premium ($)</label><input type="number" id="l-entry" placeholder="1.00" step="0.01" oninput="calcLive()"/></div>
+      <div class="ig"><label>Current premium ($)</label><input type="number" id="l-curr" placeholder="1.20" step="0.01" oninput="calcLive()"/></div>
+      <div class="ig"><label>Contracts</label><input type="number" id="l-cont" placeholder="1" value="1" min="1" oninput="calcLive()"/></div>
+    </div>
+    <div class="r3">
+      <div class="ig"><label>Max loss rule ($)</label><select id="l-rule" onchange="calcLive()"><option value="25">A+ rule — $25</option><option value="50">B pullback — $50</option></select></div>
+      <div class="ig"><label>Direction</label><select id="l-dir" onchange="calcLive()"><option value="call">Call</option><option value="put">Put</option></select></div>
+      <div class="ig"><label>DTE remaining</label><select id="l-dte"><option value="0">0DTE</option><option value="1">1 DTE</option><option value="2" selected>2 DTE</option><option value="3">3 DTE</option></select></div>
+    </div>
+    <hr class="div"/>
+    <div id="l-status" class="st wait"><i class="ti ti-activity" aria-hidden="true"></i><span id="l-stxt">Enter entry and current premium</span></div>
+    <div class="rg">
+      <div class="rc"><p class="rl">P&L</p><p class="rv" id="l-pnl">—</p><p class="rs" id="l-pnlp">—</p></div>
+      <div class="rc danger"><p class="rl">Stop level</p><p class="rv" id="l-stopv">—</p><p class="rs" id="l-stopdist">—</p></div>
+      <div class="rc success"><p class="rl">Target (20%)</p><p class="rv" id="l-tgtv">—</p><p class="rs" id="l-tgtdist">—</p></div>
+      <div class="rc info"><p class="rl">Buffer to stop</p><p class="rv" id="l-buf">—</p><p class="rs">remaining</p></div>
+    </div>
+    <div style="margin-bottom:1.25rem">
+      <div class="asym-lbl"><span>Stop</span><span>Entry</span><span>20% target</span></div>
+      <div class="live-track"><div class="live-fill" id="l-bar" style="width:50%"></div></div>
+    </div>
+    <div id="l-trail" style="display:none" class="hl-box warn"></div>
+    <div id="l-done" style="display:none" class="hl-box success"></div>
+    <button class="sb" onclick="sendPrompt('Live trade check: entry $' + document.getElementById('l-entry').value + ', current $' + document.getElementById('l-curr').value + ', ' + document.getElementById('l-cont').value + ' contracts, ' + document.getElementById('l-dir').value + ', max loss rule $' + document.getElementById('l-rule').value + '. Hold, trail stop, or take 20% profit?')">Ask Goose: hold, trail, or exit? ↗</button>
+  </div>
+
+  <!-- TRADE LOG -->
+  <div id="p-log" style="display:none">
+    <p class="sl">Log a completed trade</p>
+    <div class="r4">
+      <div class="ig"><label>Date</label><input type="date" id="j-date"/></div>
+      <div class="ig"><label>Direction</label><select id="j-dir"><option value="Call">Call</option><option value="Put">Put</option></select></div>
+      <div class="ig"><label>Grade</label><select id="j-grade"><option value="A+">A+</option><option value="B">B</option><option value="C">C</option></select></div>
+      <div class="ig"><label>DTE</label><select id="j-dte"><option value="0">0DTE</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
+    </div>
+    <div class="r3">
+      <div class="ig"><label>Entry ($)</label><input type="number" id="j-entry" placeholder="1.00" step="0.01"/></div>
+      <div class="ig"><label>Exit ($)</label><input type="number" id="j-exit" placeholder="1.20" step="0.01"/></div>
+      <div class="ig"><label>Contracts</label><input type="number" id="j-cont" placeholder="1" value="1" min="1"/></div>
+    </div>
+    <div class="ig" style="margin-bottom:12px"><label>Notes</label><input type="text" id="j-notes" placeholder="What worked, what didn't, followed rules?"/></div>
+    <button style="width:100%;padding:9px;font-size:13px;margin-bottom:1.25rem" onclick="logTrade()">Log trade</button>
+    <hr class="div"/>
+    <p class="sl">Performance summary</p>
+    <div class="rg">
+      <div class="rc"><p class="rl">Total trades</p><p class="rv" id="j-total">0</p></div>
+      <div class="rc success"><p class="rl">Winners</p><p class="rv" id="j-wins">0</p></div>
+      <div class="rc danger"><p class="rl">Losers</p><p class="rv" id="j-losses">0</p></div>
+      <div class="rc info"><p class="rl">Win rate</p><p class="rv" id="j-wr">—</p></div>
+      <div class="rc success"><p class="rl">Total P&L</p><p class="rv" id="j-pnl">$0</p></div>
+      <div class="rc warn"><p class="rl">A+ win rate</p><p class="rv" id="j-apr">—</p></div>
+    </div>
+    <div id="j-list"></div>
+    <button class="sb" onclick="sendPrompt('Review my SPY options trading performance and give me specific feedback on my A+ vs B setup win rates, whether I should adjust my $25/$50 rules, and what patterns you see in my trade log')">Ask Goose to review my performance ↗</button>
+  </div>
+</div>
+
+<script>
+var trades = [];
+try { trades = JSON.parse(localStorage.getItem('mav_v2_trades') || '[]'); } catch(e) { trades = []; }
+
+function sw(t) {
+  ['entry','struct','sizer','live','log'].forEach(function(p) {
+    document.getElementById('p-' + p).style.display = p === t ? '' : 'none';
+    document.getElementById('t-' + p).className = 'tab' + (p === t ? ' active' : '');
+  });
+  if (t === 'log') renderLog();
+}
+
+function f2(n) { return '$' + Math.abs(n).toFixed(2); }
+function fS(n) { return (n >= 0 ? '+$' : '-$') + Math.abs(n).toFixed(2); }
+function fP(n) { return (n >= 0 ? '+' : '') + n.toFixed(1) + '%'; }
+
+function calcEntry() {
+  var prem = parseFloat(document.getElementById('e-prem').value);
+  var cont = parseInt(document.getElementById('e-cont').value) || 1;
+  var delta = parseFloat(document.getElementById('e-delta').value);
+  var grade = document.getElementById('e-grade').value;
+  var maxRule = grade === 'a' ? 25 : grade === 'b' ? 50 : 0;
+
+  if (isNaN(prem) || prem <= 0) return;
+
+  var stopPct = (maxRule / (prem * 100 * cont)) * 100;
+  stopPct = Math.min(stopPct, 50);
+  var stopV = prem * (1 - stopPct / 100);
+  var maxLoss = (prem - stopV) * 100 * cont;
+  var tgtV = prem * 1.20;
+  var profit = (tgtV - prem) * 100 * cont;
+  var rr = profit / maxLoss;
+  var cost = prem * 100 * cont;
+
+  document.getElementById('e-cost').textContent = f2(cost);
+  document.getElementById('e-stopv').textContent = f2(stopV);
+  document.getElementById('e-stopp').textContent = 'stop %: ' + stopPct.toFixed(0) + '%';
+  document.getElementById('e-maxl').textContent = f2(maxLoss);
+  document.getElementById('e-maxl-rule').textContent = 'rule: $' + maxRule;
+  document.getElementById('e-tgtv').textContent = f2(tgtV);
+  document.getElementById('e-profit').textContent = 'profit: ' + f2(profit);
+  document.getElementById('e-rr').textContent = '1:' + rr.toFixed(1);
+  document.getElementById('e-rrsub').textContent = 'risk $' + maxLoss.toFixed(0) + ' / reward $' + profit.toFixed(0);
+
+  var tot = maxLoss + profit;
+  document.getElementById('ab-loss').style.width = ((maxLoss/tot)*100).toFixed(0) + '%';
+  document.getElementById('ab-gain').style.width = ((profit/tot)*100).toFixed(0) + '%';
+  document.getElementById('al-loss').textContent = 'Max loss ' + f2(maxLoss);
+  document.getElementById('al-gain').textContent = 'Target gain ' + f2(profit);
+
+  var deltaOk = !isNaN(delta) && delta >= 0.50;
+  var deltaPref = !isNaN(delta) && delta >= 0.60;
+  var lossOk = maxLoss <= maxRule;
+  var rrOk = rr >= 1;
+  var gradeOk = grade !== 'c';
+
+  document.getElementById('ck-delta').textContent = isNaN(delta) ? '—' : (deltaPref ? '✓ pass (0.60+)' : deltaOk ? '⚠ ok but prefer 0.60+' : '✗ fail — below 0.50');
+  document.getElementById('ck-delta').className = isNaN(delta) ? 'neu' : (deltaPref ? 'pass' : deltaOk ? 'neu' : 'fail');
+  document.getElementById('ck-loss').textContent = lossOk ? '✓ within $' + maxRule + ' rule' : '✗ exceeds $' + maxRule + ' — reduce contracts';
+  document.getElementById('ck-loss').className = lossOk ? 'pass' : 'fail';
+  document.getElementById('ck-rr').textContent = rrOk ? '✓ pass' : '✗ fail — widen target';
+  document.getElementById('ck-rr').className = rrOk ? 'pass' : 'fail';
+  document.getElementById('ck-grade').textContent = grade === 'a' ? '✓ A+ — full conviction' : grade === 'b' ? '⚠ B pullback — $50 rule applies' : '✗ C — stand aside';
+  document.getElementById('ck-grade').className = grade === 'a' ? 'pass' : grade === 'b' ? 'neu' : 'fail';
+  document.getElementById('ck-stop').textContent = prem > 0 ? '✓ set at $' + stopV.toFixed(2) + ' immediately' : '—';
+  document.getElementById('ck-stop').className = prem > 0 ? 'pass' : 'neu';
+
+  var sb = document.getElementById('e-status');
+  var st = document.getElementById('e-stxt');
+  if (grade === 'c') { sb.className = 'st stop'; st.textContent = '✗ C grade — stand aside. Zero exceptions.'; }
+  else if (deltaOk && lossOk && rrOk) { sb.className = 'st go'; st.textContent = '✓ Rules pass — enter and set stop at $' + stopV.toFixed(2) + ' immediately'; }
+  else if (!lossOk) { sb.className = 'st stop'; st.textContent = '✗ Exceeds $' + maxRule + ' rule — reduce contracts or wait for better premium'; }
+  else { sb.className = 'st wait'; st.textContent = '⚠ Check delta — adjust before entering'; }
+}
+
+function calcStruct() {
+  var spy = parseFloat(document.getElementById('s-spy').value);
+  var prem = parseFloat(document.getElementById('s-prem').value);
+  var delta = parseFloat(document.getElementById('s-delta').value) || 0.60;
+  var cont = parseInt(document.getElementById('s-cont').value) || 1;
+  var maxRule = document.getElementById('s-grade').value === 'a' ? 25 : 50;
+
+  if (isNaN(spy) || isNaN(prem) || prem <= 0 || spy <= 0) return;
+
+  var levels = [
+    { name: 'VWAP', val: parseFloat(document.getElementById('s-vwap').value) },
+    { name: 'London high', val: parseFloat(document.getElementById('s-lh').value) },
+    { name: 'Candle low', val: parseFloat(document.getElementById('s-cl').value) },
+    { name: 'Higher low', val: parseFloat(document.getElementById('s-hl').value) },
+    { name: 'ATR stop', val: isNaN(parseFloat(document.getElementById('s-atr').value)) ? NaN : spy - parseFloat(document.getElementById('s-atr').value) },
+    { name: 'Asia low', val: parseFloat(document.getElementById('s-asia').value) }
+  ].filter(function(l) { return !isNaN(l.val) && l.val > 0 && l.val < spy; });
+
+  if (!levels.length) return;
+
+  var calced = levels.map(function(l) {
+    var diff = spy - l.val;
+    var ps = Math.max(0.01, prem - diff * delta);
+    var pct = ((prem - ps) / prem) * 100;
+    var ml = (prem - ps) * 100 * cont;
+    return { name: l.name, level: l.val, ps: ps, pct: pct, ml: ml };
+  }).sort(function(a,b) { return a.pct - b.pct; });
+
+  var html = '';
+  calced.forEach(function(l) {
+    var ok = l.ml <= maxRule;
+    html += '<div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)">' +
+      '<div><span class="badge ' + (ok ? 'success' : 'danger') + '">' + l.name + '</span><div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">$' + l.level.toFixed(2) + '</div></div>' +
+      '<div><div style="font-size:11px;color:var(--color-text-secondary)">SPY distance</div><div style="font-size:13px;font-weight:500">$' + (parseFloat(document.getElementById('s-spy').value) - l.level).toFixed(2) + '</div></div>' +
+      '<div><div style="font-size:11px;color:var(--color-text-secondary)">Premium stop</div><div style="font-size:13px;font-weight:500;color:var(--color-text-danger)">$' + l.ps.toFixed(2) + ' (' + l.pct.toFixed(0) + '%)</div></div>' +
+      '<div><div style="font-size:11px;color:var(--color-text-secondary)">$ loss</div><div style="font-size:13px;font-weight:500;color:' + (ok ? 'var(--color-text-success)' : 'var(--color-text-danger)') + '">$' + l.ml.toFixed(0) + (ok ? ' ✓' : ' ✗') + '</div></div>' +
+      '</div>';
+  });
+  document.getElementById('s-results').innerHTML = html;
+
+  var valid = calced.filter(function(l) { return l.ml <= maxRule; });
+  var rec = valid.length > 0 ? valid[valid.length - 1] : calced[0];
+  var tight = calced[0];
+  var wide = calced[calced.length - 1];
+
+  document.getElementById('s-tight').textContent = f2(tight.ps) + ' (' + tight.pct.toFixed(0) + '%)';
+  document.getElementById('s-tightl').textContent = 'loss: $' + tight.ml.toFixed(0);
+  document.getElementById('s-wide').textContent = f2(wide.ps) + ' (' + wide.pct.toFixed(0) + '%)';
+  document.getElementById('s-widel').textContent = 'loss: $' + wide.ml.toFixed(0);
+  document.getElementById('s-rec').textContent = f2(rec.ps) + ' (' + rec.pct.toFixed(0) + '%)';
+  document.getElementById('s-recwhy').textContent = 'based on ' + rec.name;
+  document.getElementById('s-ml').textContent = '$' + rec.ml.toFixed(0);
+  document.getElementById('s-mlrule').textContent = rec.ml <= maxRule ? '✓ within $' + maxRule + ' rule' : '✗ exceeds $' + maxRule;
+
+  var best = document.getElementById('s-best');
+  best.style.display = '';
+  best.textContent = '✓ Best stop: $' + rec.ps.toFixed(2) + ' based on ' + rec.name + ' at $' + rec.level.toFixed(2) + ' — max loss $' + rec.ml.toFixed(0) + (rec.ml <= maxRule ? ' (within rule)' : ' (exceeds rule — size down)');
+
+  document.getElementById('s-status').className = 'st ' + (valid.length > 0 ? 'go' : 'wait');
+  document.getElementById('s-stxt').textContent = valid.length > 0 ? '✓ ' + valid.length + ' structure stops within $' + maxRule + ' rule' : '⚠ All stops exceed $' + maxRule + ' — reduce contracts or wait for better entry';
+}
+
+function calcSizer() {
+  var prem = parseFloat(document.getElementById('sz-prem').value);
+  var stopPct = parseFloat(document.getElementById('sz-stop').value) || 25;
+  var maxRule = parseInt(document.getElementById('sz-grade').value);
+
+  if (isNaN(prem) || prem <= 0) return;
+
+  var lossPerContract = prem * (stopPct / 100) * 100;
+  var stopV = prem * (1 - stopPct / 100);
+
+  document.getElementById('sz-stopv').textContent = f2(stopV);
+  document.getElementById('sz-stopl').textContent = stopPct + '% stop = $' + lossPerContract.toFixed(0) + '/contract';
+
+  var html = '';
+  var recContracts = 1;
+  for (var c = 1; c <= 5; c++) {
+    var ml = lossPerContract * c;
+    var ok = ml <= maxRule;
+    if (ok) recContracts = c;
+    var profit = prem * 0.20 * 100 * c;
+    html += '<div class="size-card ' + (ok && c === Math.floor(maxRule / lossPerContract) ? 'recommended' : '') + '">' +
+      '<div class="sc-label">' + c + ' contract' + (c > 1 ? 's' : '') + (ok && lossPerContract > 0 && c === Math.min(5, Math.floor(maxRule / lossPerContract)) ? ' ⭐' : '') + '</div>' +
+      '<div class="sc-val" style="color:' + (ok ? 'var(--color-text-success)' : 'var(--color-text-danger)') + '">' + (ok ? '✓' : '✗') + ' $' + ml.toFixed(0) + '</div>' +
+      '<div class="sc-sub">target: +$' + profit.toFixed(0) + '</div>' +
+      '</div>';
+  }
+  document.getElementById('sz-grid').innerHTML = html;
+
+  var optContracts = lossPerContract > 0 ? Math.min(5, Math.floor(maxRule / lossPerContract)) : 1;
+  optContracts = Math.max(1, optContracts);
+  var optLoss = lossPerContract * optContracts;
+  var optProfit = prem * 0.20 * 100 * optContracts;
+
+  document.getElementById('sz-rec').textContent = optContracts + ' contract' + (optContracts > 1 ? 's' : '');
+  document.getElementById('sz-recl').textContent = 'max loss $' + optLoss.toFixed(0) + ' within $' + maxRule;
+  document.getElementById('sz-ml').textContent = '$' + optLoss.toFixed(0);
+  document.getElementById('sz-mll').textContent = optLoss <= maxRule ? '✓ within $' + maxRule + ' rule' : '✗ exceeds rule';
+  document.getElementById('sz-profit').textContent = '$' + optProfit.toFixed(0);
+
+  var ss = document.getElementById('sz-status');
+  var st = document.getElementById('sz-stxt');
+  if (lossPerContract > maxRule) {
+    ss.className = 'st stop';
+    st.textContent = '✗ Even 1 contract exceeds $' + maxRule + ' — tighten stop or wait for lower premium';
+  } else {
+    ss.className = 'st go';
+    st.textContent = '✓ Buy ' + optContracts + ' contract' + (optContracts > 1 ? 's' : '') + ' — set stop at $' + stopV.toFixed(2) + ' immediately';
+  }
+}
+
+function calcLive() {
+  var entry = parseFloat(document.getElementById('l-entry').value);
+  var curr = parseFloat(document.getElementById('l-curr').value);
+  var cont = parseInt(document.getElementById('l-cont').value) || 1;
+  var maxRule = parseInt(document.getElementById('l-rule').value);
+
+  if (isNaN(entry) || isNaN(curr) || entry <= 0) return;
+
+  var stopPct = (maxRule / (entry * 100 * cont)) * 100;
+  stopPct = Math.min(stopPct, 50);
+  var stopV = entry * (1 - stopPct / 100);
+  var tgtV = entry * 1.20;
+  var pnl = (curr - entry) * 100 * cont;
+  var pnlPct = ((curr - entry) / entry) * 100;
+  var buf = ((curr - stopV) / entry) * 100;
+  var barPct = Math.min(100, Math.max(0, ((curr - stopV) / (tgtV - stopV)) * 100));
+
+  document.getElementById('l-pnl').textContent = fS(pnl);
+  document.getElementById('l-pnl').style.color = pnl >= 0 ? 'var(--color-text-success)' : 'var(--color-text-danger)';
+  document.getElementById('l-pnlp').textContent = fP(pnlPct);
+  document.getElementById('l-stopv').textContent = f2(stopV);
+  document.getElementById('l-stopdist').textContent = 'dist: $' + Math.abs(curr - stopV).toFixed(2);
+  document.getElementById('l-tgtv').textContent = f2(tgtV);
+  document.getElementById('l-tgtdist').textContent = 'dist: $' + Math.abs(tgtV - curr).toFixed(2);
+  document.getElementById('l-buf').textContent = buf.toFixed(1) + '%';
+
+  var bar = document.getElementById('l-bar');
+  bar.style.width = barPct.toFixed(0) + '%';
+  bar.style.background = barPct < 25 ? 'var(--color-background-danger)' : barPct < 60 ? 'var(--color-background-warning)' : 'var(--color-background-success)';
+
+  var ls = document.getElementById('l-status');
+  var lst = document.getElementById('l-stxt');
+  var trail = document.getElementById('l-trail');
+  var done = document.getElementById('l-done');
+  trail.style.display = 'none';
+  done.style.display = 'none';
+
+  if (curr <= stopV) {
+    ls.className = 'st stop'; lst.textContent = '🛑 Stop hit — exit NOW. Max loss $' + maxRule + '. No hesitation.';
+  } else if (pnlPct >= 20) {
+    ls.className = 'st go'; lst.textContent = '🎯 20% target hit — take profit. Done for the day. ✈️';
+    done.style.display = '';
+    done.textContent = '✓ 20% target reached — P&L: ' + fS(pnl) + '. Exit the trade. Done for the day per Maverick rules.';
+  } else if (pnlPct >= 10) {
+    ls.className = 'st go'; lst.textContent = '✓ Half way to target — trail stop to entry to lock in no-loss';
+    trail.style.display = '';
+    trail.textContent = '⚡ Trail stop suggestion: move stop to entry ($' + entry.toFixed(2) + ') — now risk-free trade. Let it run to 20%.';
+  } else if (buf < 8) {
+    ls.className = 'st wait'; lst.textContent = '⚠ Close to stop — watch carefully';
+  } else {
+    ls.className = 'st go'; lst.textContent = '✓ Trade within parameters — hold and let it run';
+  }
+}
+
+function logTrade() {
+  var entry = parseFloat(document.getElementById('j-entry').value);
+  var exit = parseFloat(document.getElementById('j-exit').value);
+  var cont = parseInt(document.getElementById('j-cont').value) || 1;
+  if (isNaN(entry) || isNaN(exit)) return;
+  var pnl = (exit - entry) * 100 * cont;
+  var pct = ((exit - entry) / entry) * 100;
+  trades.push({
+    date: document.getElementById('j-date').value || new Date().toISOString().split('T')[0],
+    dir: document.getElementById('j-dir').value,
+    grade: document.getElementById('j-grade').value,
+    dte: document.getElementById('j-dte').value,
+    entry: entry, exit: exit, cont: cont, pnl: pnl, pct: pct,
+    notes: document.getElementById('j-notes').value
+  });
+  try { localStorage.setItem('mav_v2_trades', JSON.stringify(trades)); } catch(e) {}
+  document.getElementById('j-entry').value = '';
+  document.getElementById('j-exit').value = '';
+  document.getElementById('j-notes').value = '';
+  renderLog();
+}
+
+function renderLog() {
+  var wins = trades.filter(function(t) { return t.pnl > 0; });
+  var losses = trades.filter(function(t) { return t.pnl <= 0; });
+  var totalPnl = trades.reduce(function(s,t) { return s + t.pnl; }, 0);
+  var wr = trades.length > 0 ? (wins.length / trades.length * 100).toFixed(0) + '%' : '—';
+  var aPlus = trades.filter(function(t) { return t.grade === 'A+'; });
+  var aPlusWins = aPlus.filter(function(t) { return t.pnl > 0; });
+  var apr = aPlus.length > 0 ? (aPlusWins.length / aPlus.length * 100).toFixed(0) + '%' : '—';
+
+  document.getElementById('j-total').textContent = trades.length;
+  document.getElementById('j-wins').textContent = wins.length;
+  document.getElementById('j-losses').textContent = losses.length;
+  document.getElementById('j-wr').textContent = wr;
+  document.getElementById('j-pnl').textContent = fS(totalPnl);
+  document.getElementById('j-pnl').style.color = totalPnl >= 0 ? 'var(--color-text-success)' : 'var(--color-text-danger)';
+  document.getElementById('j-apr').textContent = apr;
+
+  var html = '';
+  trades.slice().reverse().forEach(function(t) {
+    html += '<div class="rr">' +
+      '<span class="rn" style="font-size:12px;min-width:80px">' + t.date + '</span>' +
+      '<span style="font-size:12px;color:var(--color-text-tertiary);margin:0 8px">' + t.dir + ' · ' + t.grade + ' · ' + t.dte + 'DTE</span>' +
+      '<span style="font-size:12px;color:var(--color-text-tertiary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (t.notes||'') + '</span>' +
+      '<span style="font-size:13px;font-weight:500;margin-left:8px;color:' + (t.pnl>0?'var(--color-text-success)':'var(--color-text-danger)') + '">' + fS(t.pnl) + ' (' + fP(t.pct) + ')</span>' +
+      '</div>';
+  });
+  document.getElementById('j-list').innerHTML = html || '<p style="font-size:13px;color:var(--color-text-tertiary);margin:0">No trades logged yet — start logging Maverick</p>';
+}
+
+renderLog();
+</script>
