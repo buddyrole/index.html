@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPY Market Regime Dashboard v3</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117;--bg2:#161b24;--bg3:#1e2535;--bg4:#252d3d;
+  --border:#2a3448;--border2:#3a4560;
+  --text:#e8edf5;--text2:#8b96a8;--text3:#5a6478;
+  --bull:#00c98d;--bull-bg:rgba(0,201,141,0.1);--bull-border:rgba(0,201,141,0.3);
+  --bear:#ff4d6a;--bear-bg:rgba(255,77,106,0.1);--bear-border:rgba(255,77,106,0.3);
+  --warn:#f5a623;--warn-bg:rgba(245,166,35,0.1);
+  --blue:#4d9fff;--blue-bg:rgba(77,159,255,0.1);
+  --purple:#a78bfa;--purple-bg:rgba(167,139,250,0.1);
+  --accent:#4d9fff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+
+/* HEADER */
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.header-title{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--text);letter-spacing:0.08em;text-transform:uppercase;}
+.header-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:'IBM Plex Mono',monospace;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--bull);display:inline-block;margin-right:6px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.vbadge{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent);background:var(--blue-bg);border:1px solid rgba(77,159,255,0.3);padding:2px 8px;border-radius:3px;margin-left:10px;}
+.clock-display{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);text-align:right;}
+
+/* TABS */
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;overflow-x:auto;}
+.tab{padding:11px 16px;font-size:11px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;font-family:'IBM Plex Mono',monospace;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;}
+.tab:hover{color:var(--text2);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* PANELS */
+.panel{display:none;padding:20px 24px;max-width:1100px;}
+.panel.active{display:block;}
+
+/* SCORE HERO */
+.score-hero{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:20px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:24px;}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:64px;font-weight:600;line-height:1;transition:color 0.3s;min-width:100px;}
+.score-regime{font-size:20px;font-weight:500;transition:color 0.3s;margin-bottom:4px;}
+.score-desc{font-size:12px;color:var(--text2);margin-bottom:12px;font-family:'IBM Plex Mono',monospace;}
+.score-track{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;}
+.score-fill{height:5px;border-radius:3px;transition:width 0.5s ease,background 0.4s ease;width:0%;}
+.score-meta{font-size:11px;color:var(--text3);margin-top:6px;font-family:'IBM Plex Mono',monospace;}
+.score-right-col{display:flex;flex-direction:column;gap:8px;min-width:110px;}
+.mini-stat{background:var(--bg3);border-radius:6px;padding:8px 12px;text-align:center;}
+.mini-stat-val{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;}
+.mini-stat-label{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+
+/* REGIME PILLS */
+.regime-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.regime-pill{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);transition:all 0.2s;}
+.regime-pill.active-bull{border-color:var(--bull-border);color:var(--bull);background:var(--bull-bg);}
+.regime-pill.active-bear{border-color:var(--bear-border);color:var(--bear);background:var(--bear-bg);}
+.regime-pill.active-warn{border-color:rgba(245,166,35,0.4);color:var(--warn);background:var(--warn-bg);}
+.regime-pill.active-mix{border-color:rgba(77,159,255,0.3);color:var(--blue);background:var(--blue-bg);}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+/* SECTION LABELS */
+.section-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin:20px 0 10px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.tier-badge{font-size:9px;padding:2px 6px;border-radius:3px;background:var(--bg4);color:var(--text3);}
+
+/* SIGNAL GRID */
+.signal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:8px;margin-bottom:8px;}
+.sig-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;transition:border-color 0.15s;}
+.sig-card.s-strong-bull{border-color:var(--bull);background:rgba(0,201,141,0.08);}
+.sig-card.s-mild-bull{border-color:rgba(0,201,141,0.4);background:rgba(0,201,141,0.04);}
+.sig-card.s-neutral{border-color:rgba(139,150,168,0.3);}
+.sig-card.s-mild-bear{border-color:rgba(255,77,106,0.4);background:rgba(255,77,106,0.04);}
+.sig-card.s-strong-bear{border-color:var(--bear);background:rgba(255,77,106,0.08);}
+.sig-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.sig-ticker{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--text);}
+.sig-pts-badge{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:2px 6px;border-radius:3px;background:var(--bg4);color:var(--text3);transition:all 0.2s;}
+.sig-desc{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.sig-when{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:10px;}
+.sig-when .bull{color:var(--bull);}.sig-when .bear{color:var(--bear);}
+.state-btns{display:flex;gap:3px;}
+.state-btn{flex:1;padding:4px 2px;font-size:9px;font-weight:500;border-radius:4px;border:1px solid var(--border);background:var(--bg3);color:var(--text3);cursor:pointer;transition:all 0.15s;font-family:'IBM Plex Mono',monospace;text-align:center;}
+.state-btn:hover{border-color:var(--border2);color:var(--text2);}
+.state-btn.active-sb{background:var(--bull-bg);border-color:var(--bull);color:var(--bull);}
+.state-btn.active-mb{background:rgba(0,201,141,0.06);border-color:rgba(0,201,141,0.4);color:#4dd9a0;}
+.state-btn.active-n{background:rgba(139,150,168,0.1);border-color:rgba(139,150,168,0.4);color:var(--text2);}
+.state-btn.active-mbe{background:rgba(255,77,106,0.06);border-color:rgba(255,77,106,0.4);color:#ff8099;}
+.state-btn.active-sbe{background:var(--bear-bg);border-color:var(--bear);color:var(--bear);}
+
+/* REGIME REF TABLE */
+.regime-ref{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:20px;}
+.regime-ref-row{display:grid;grid-template-columns:80px 160px 1fr;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);font-size:12px;}
+.regime-ref-row:last-child{border-bottom:none;}
+.regime-ref-row.header{background:var(--bg3);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;font-family:'IBM Plex Mono',monospace;}
+.b-bull{background:var(--bull-bg);color:var(--bull);border:1px solid var(--bull-border);}
+.b-mild{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(77,159,255,0.3);}
+.b-mix{background:var(--warn-bg);color:var(--warn);border:1px solid rgba(245,166,35,0.3);}
+.b-bear{background:var(--bear-bg);color:var(--bear);border:1px solid var(--bear-border);}
+
+.bottom-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.reset-btn{padding:9px 20px;font-size:11px;font-weight:500;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:'IBM Plex Mono',monospace;letter-spacing:0.04em;transition:all 0.15s;}
+.reset-btn:hover{background:var(--bg3);color:var(--text);}
+
+/* SHARED CONTENT STYLES */
+.cheat-section{margin-bottom:28px;}
+.cheat-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.cheat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+.cheat-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.cheat-card-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:10px;font-family:'IBM Plex Mono',monospace;}
+.cheat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);}
+.cheat-row:last-child{border-bottom:none;}
+.cheat-dir{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;font-family:'IBM Plex Mono',monospace;}
+.cd-bull{background:var(--bull-bg);color:var(--bull);}
+.cd-bear{background:var(--bear-bg);color:var(--bear);}
+.cd-warn{background:var(--warn-bg);color:var(--warn);}
+.cd-blue{background:var(--blue-bg);color:var(--blue);}
+
+.info-block{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:14px 16px;margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.7;}
+.info-block .ilabel{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.info-block strong{color:var(--text);font-weight:500;}
+.warn-block{background:rgba(255,77,106,0.05);border:1px solid var(--bear-border);border-left:3px solid var(--bear);border-radius:8px;padding:14px 16px;margin-bottom:12px;}
+.warn-block .ilabel{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--bear);margin-bottom:8px;}
+.warn-block p{font-size:12px;color:var(--text2);line-height:1.7;}
+.warn-block strong{color:var(--text);font-weight:500;}
+.gem-block{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;padding:14px 16px;margin-bottom:12px;}
+.gem-block .ilabel{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--warn);margin-bottom:8px;}
+.gem-block p{font-size:12px;color:var(--text2);line-height:1.7;}
+.gem-block strong{color:var(--text);font-weight:500;}
+.bull-block{background:rgba(0,201,141,0.05);border:1px solid var(--bull-border);border-left:3px solid var(--bull);border-radius:8px;padding:14px 16px;margin-bottom:12px;}
+.bull-block .ilabel{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--bull);margin-bottom:8px;}
+.bull-block p{font-size:12px;color:var(--text2);line-height:1.7;}
+.bull-block strong{color:var(--text);font-weight:500;}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:700px){.two-col,.three-col{grid-template-columns:1fr}.score-hero{grid-template-columns:1fr}.score-right-col{flex-direction:row}}
+
+.signal-flow{display:flex;align-items:center;gap:8px;padding:12px;background:var(--bg3);border-radius:8px;margin-top:10px;flex-wrap:wrap;}
+.flow-item{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--bull);background:var(--bull-bg);padding:4px 10px;border-radius:4px;}
+.flow-arrow{color:var(--text3);font-size:14px;}
+
+.dtable{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+.dtable th{text-align:left;padding:7px 10px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;}
+.dtable td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);}
+.dtable td:first-child{color:var(--text);}
+.dtable code{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--bull);background:var(--bull-bg);padding:2px 6px;border-radius:3px;}
+
+.rank-list{counter-reset:rank;}
+.rank-item{counter-increment:rank;display:flex;align-items:flex-start;gap:12px;padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;}
+.rank-item:last-child{border-bottom:none;}
+.rank-item::before{content:counter(rank);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);min-width:16px;padding-top:1px;}
+.rank-ticker{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--text);min-width:50px;}
+.rank-why{color:var(--text2);font-size:11px;line-height:1.5;}
+.rank-t1 .rank-ticker{color:var(--bull);}
+.rank-t2 .rank-ticker{color:var(--blue);}
+.rank-t3 .rank-ticker{color:var(--text2);}
+
+/* PREMARKET CHECKLIST */
+.checklist{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.check-item{display:flex;align-items:flex-start;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all 0.15s;}
+.check-item:hover{border-color:var(--border2);}
+.check-item.done{background:rgba(0,201,141,0.05);border-color:var(--bull-border);}
+.check-box{width:20px;height:20px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all 0.15s;margin-top:1px;}
+.check-item.done .check-box{background:var(--bull);border-color:var(--bull);color:#fff;}
+.check-content{flex:1;}
+.check-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.check-item.done .check-title{color:var(--bull);}
+.check-desc{font-size:11px;color:var(--text2);line-height:1.5;}
+.check-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;background:var(--bg4);color:var(--text3);margin-left:8px;}
+.check-progress{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:16px;}
+.progress-track{flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;}
+.progress-fill{height:6px;background:var(--bull);border-radius:3px;transition:width 0.4s ease;}
+.progress-label{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);min-width:60px;text-align:right;}
+.reset-checks{padding:8px 16px;font-size:11px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all 0.15s;}
+.reset-checks:hover{background:var(--bg3);color:var(--text);}
+
+/* GEMS TAB */
+.gem-number{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--warn);background:var(--warn-bg);border:1px solid rgba(245,166,35,0.3);padding:2px 7px;border-radius:3px;margin-right:8px;}
+
+/* HISTOGRAM TABLE */
+.hist-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+.hist-table th{text-align:left;padding:7px 10px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;}
+.hist-table td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text2);}
+.hist-table td:first-child{font-family:'IBM Plex Mono',monospace;font-weight:500;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title"><span class="live-dot"></span>SPY Market Regime Dashboard<span class="vbadge">v3.0</span></div>
+    <div class="header-sub">Maverick Trading Model · Breadth · Liquidity · Volatility · Leadership · Built by Rod "Maverick" · Refined by Hawk · Coded by Goose</div>
+  </div>
+  <div class="clock-display" id="clock"></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('score',this)">Score</div>
+  <div class="tab" onclick="switchTab('cheatcodes',this)">Cheat Codes</div>
+  <div class="tab" onclick="switchTab('gems',this)">Gems</div>
+  <div class="tab" onclick="switchTab('premarket',this)">Premarket</div>
+  <div class="tab" onclick="switchTab('why',this)">Why SPY</div>
+</div>
+
+<!-- ===== SCORE TAB ===== -->
+<div id="tab-score" class="panel active">
+  <div class="score-hero">
+    <div class="score-big mono" id="scoreNum" style="color:var(--text3)">0</div>
+    <div>
+      <div class="score-regime" id="scoreLabel" style="color:var(--text3)">No signals set</div>
+      <div class="score-desc" id="scoreSub">Toggle signals below — 5-state gradient scoring</div>
+      <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+      <div class="score-meta" id="scoreMeta">0 / 15 max · 0 of 9 signals set</div>
+    </div>
+    <div class="score-right-col">
+      <div class="mini-stat"><div class="mini-stat-val" id="bullCount" style="color:var(--bull)">0</div><div class="mini-stat-label">Bull</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" id="bearCount" style="color:var(--bear)">0</div><div class="mini-stat-label">Bear</div></div>
+      <div class="mini-stat"><div class="mini-stat-val" id="neutCount" style="color:var(--text2)">0</div><div class="mini-stat-label">Neutral</div></div>
+    </div>
+  </div>
+
+  <div class="regime-row">
+    <div class="regime-pill" id="pill-bull"><span class="pill-dot"></span>Strong bull 10+</div>
+    <div class="regime-pill" id="pill-mild"><span class="pill-dot"></span>Mild bull 6-9</div>
+    <div class="regime-pill" id="pill-mix"><span class="pill-dot"></span>Mixed 3-5</div>
+    <div class="regime-pill" id="pill-bear"><span class="pill-dot"></span>Risk-off &lt;3</div>
+  </div>
+
+  <div class="section-label">Tier 1 — primary drivers <span class="tier-badge">SMH+VIX = 3pts · QQQ+IWM = 2pts</span></div>
+  <div class="signal-grid" id="tier1"></div>
+  <div class="section-label">Tier 2 — macro confirmation <span class="tier-badge">1pt each · half for mild states</span></div>
+  <div class="signal-grid" id="tier2"></div>
+  <div class="section-label">Tier 3 — supporting context <span class="tier-badge">1pt each</span></div>
+  <div class="signal-grid" id="tier3"></div>
+
+  <div class="regime-ref">
+    <div class="regime-ref-row header"><div>Score</div><div>Regime</div><div>Trade implication</div></div>
+    <div class="regime-ref-row"><div class="mono" style="color:var(--bull)">10+</div><div><span class="badge b-bull">Strong bull 🚀</span></div><div style="color:var(--text2);font-size:12px">Trend continuation — dips get bought, calls are your weapon, trail stops</div></div>
+    <div class="regime-ref-row"><div class="mono" style="color:var(--blue)">6–9</div><div><span class="badge b-mild">Mild bull</span></div><div style="color:var(--text2);font-size:12px">Trend intact — be selective, wait for clean 9:35 Strat 2U confirmation</div></div>
+    <div class="regime-ref-row"><div class="mono" style="color:var(--warn)">3–5</div><div><span class="badge b-mix">Mixed / chop</span></div><div style="color:var(--text2);font-size:12px">Rotational market — wait for clarity, avoid forcing trades against structure</div></div>
+    <div class="regime-ref-row"><div class="mono" style="color:var(--bear)">&lt;3</div><div><span class="badge b-bear">Risk-off 📉</span></div><div style="color:var(--text2);font-size:12px">Avoid aggressive longs — protect capital, consider puts or stand aside</div></div>
+  </div>
+
+  <div class="bottom-row">
+    <button class="reset-btn" onclick="resetAll()">Reset all signals</button>
+  </div>
+</div>
+
+<!-- ===== CHEAT CODES TAB ===== -->
+<div id="tab-cheatcodes" class="panel">
+
+  <div class="cheat-section">
+    <div class="cheat-title">Cheat code 1 — Ultra bull combo 🚀</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-title">Signal stack</div>
+        <div class="cheat-row">SMH <span class="cheat-dir cd-bull">GREEN</span></div>
+        <div class="cheat-row">QQQ <span class="cheat-dir cd-bull">GREEN</span></div>
+        <div class="cheat-row">IWM <span class="cheat-dir cd-bull">GREEN</span></div>
+        <div class="cheat-row">VIX <span class="cheat-dir cd-bear">RED ↓</span></div>
+        <div class="cheat-row">TLT <span class="cheat-dir cd-bull">GREEN</span></div>
+        <div class="cheat-row">UUP <span class="cheat-dir cd-bear">RED ↓</span></div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-title">What it means</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.9">Fear down + growth up + speculation up + dollar weak = <strong style="color:var(--bull)">explosive risk-on</strong><br><br>· Dips get bought aggressively<br>· Momentum follows through<br>· Breakouts work better<br>· Calls are your primary weapon<br>· Trail stops — let it run</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Cheat code 2 — Bearish warning 📉</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-title">Signal stack</div>
+        <div class="cheat-row">SMH <span class="cheat-dir cd-bear">RED</span></div>
+        <div class="cheat-row">QQQ <span class="cheat-dir cd-bear">RED</span></div>
+        <div class="cheat-row">IWM <span class="cheat-dir cd-bear">RED</span></div>
+        <div class="cheat-row">VIX <span class="cheat-dir cd-bull">GREEN ↑</span></div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-title">What it means</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.9">Growth dying + fear rising = <strong style="color:var(--bear)">avoid aggressive longs</strong><br><br>· Puts become the play<br>· Or stand aside entirely<br>· Do NOT fight the tape<br>· Wait for regime to flip</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Cheat code 3 — Narrow rally detection ⚠️</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-title">Signal stack</div>
+        <div class="cheat-row">QQQ <span class="cheat-dir cd-bull">GREEN</span></div>
+        <div class="cheat-row">SPY <span class="cheat-dir cd-warn">SLIGHT GREEN</span></div>
+        <div class="cheat-row">IWM <span class="cheat-dir cd-bear">RED</span></div>
+        <div class="cheat-row">DIA <span class="cheat-dir cd-bear">RED</span></div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-title">What it means</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.9">7 mega-caps holding market while breadth deteriorates underneath.<br><br><strong style="color:var(--warn)">Fake strength.</strong> Indexes look healthy. Most stocks are NOT participating. Your dashboard catches this early.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Cheat code 4 — VIX flush 🔥</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-title">Signal stack</div>
+        <div class="cheat-row">VIX <span class="cheat-dir cd-bear">DOWN BIG</span></div>
+        <div class="cheat-row">QQQ <span class="cheat-dir cd-bull">RIPPING</span></div>
+        <div class="cheat-row">SMH <span class="cheat-dir cd-bull">RIPPING</span></div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-title">What it means</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.9">Short covering + dealer hedge unwind + momentum ignition = <strong style="color:var(--bull)">monster trend day</strong><br><br>These days run WAY farther than expected. Trail stop. Do NOT exit early.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Cheat code 5 — DIA leadership signal</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-title">DIA leads + QQQ fades</div>
+        <div class="cheat-row">DIA <span class="cheat-dir cd-bull">LEADING</span></div>
+        <div class="cheat-row">QQQ <span class="cheat-dir cd-bear">FADING</span></div>
+        <p style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.7">Institutions rotating into: Industrials · Banks · Healthcare · Dividends · Mature cyclicals<br><br><strong style="color:var(--warn)">NOT the environment for aggressive calls. Stand aside or reassess.</strong></p>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-title">QQQ leads + DIA lags</div>
+        <div class="cheat-row">QQQ <span class="cheat-dir cd-bull">LEADING</span></div>
+        <div class="cheat-row">DIA <span class="cheat-dir cd-warn">LAGGING</span></div>
+        <p style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.7"><strong style="color:var(--bull)">Growth environment = your sweet spot for calls ✅</strong><br><br>Tech is the primary driver. This is where SPY calls perform best.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Cheat code 6 — Combination matrix (QQQ vs IWM)</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <table class="dtable" style="margin-top:0">
+        <thead><tr><th>QQQ</th><th>IWM</th><th>Reading</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--bull)">Strong</td><td style="color:var(--bull)">Strong</td><td style="color:var(--bull)">Most bullish 🚀</td><td>Full throttle — liquidity flowing everywhere</td></tr>
+          <tr><td style="color:var(--bull)">Strong</td><td style="color:var(--bear)">Weak</td><td style="color:var(--warn)">Narrow rally ⚠️</td><td>Mega-cap AI carrying — breadth thin, be cautious</td></tr>
+          <tr><td style="color:var(--bear)">Weak</td><td style="color:var(--bull)">Strong</td><td style="color:var(--blue)">Rotation 🔄</td><td>Rate cuts expected — small cap catch-up rally</td></tr>
+          <tr><td style="color:var(--bear)">Weak</td><td style="color:var(--bear)">Weak</td><td style="color:var(--bear)">Risk-off 📉</td><td>Stand aside or consider puts</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Cheat code 7 — Full regime combinations matrix</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <table class="dtable" style="margin-top:0">
+        <thead><tr><th>Condition</th><th>Meaning</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>QQQ + IWM both strong</td><td style="color:var(--bull)">Most bullish combo 🚀</td><td>Full throttle — liquidity everywhere</td></tr>
+          <tr><td>QQQ strong + IWM weak</td><td style="color:var(--warn)">Narrow rally ⚠️</td><td>Mega-cap carrying — breadth thin</td></tr>
+          <tr><td>IWM strong + QQQ weak</td><td style="color:var(--blue)">Rotation trade 🔄</td><td>Rate cuts expected — small cap rally</td></tr>
+          <tr><td>DIA leading + QQQ fading</td><td style="color:var(--warn)">Defensive rotation</td><td>Avoid growth calls — value/safety shift</td></tr>
+          <tr><td>VIX flush + QQQ/SMH ripping</td><td style="color:var(--bull)">Monster trend day 🔥</td><td>Trail stops — let it run all day</td></tr>
+          <tr><td>SPY green + IWM/SMH weak</td><td style="color:var(--bear)">Fake strength ❌</td><td>Do NOT chase longs — internals weak</td></tr>
+          <tr><td>All four moving together</td><td style="color:var(--bull)">Strong breadth 🚀</td><td>Highest confidence — full send</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Cheat code 8 — Opening alignment (first 5 minutes)</div>
+    <div class="two-col">
+      <div class="bull-block">
+        <div class="ilabel">Green light setup ✅</div>
+        <p>QQQ strong at open<br>SMH strong at open<br>VIX fading lower<br><br><strong>→ SPY likely trends upward intraday</strong><br>Look for 9:35 Strat 2U confirmation entry</p>
+      </div>
+      <div class="warn-block">
+        <div class="ilabel">Caution setup ⚠️</div>
+        <p>SPY green BUT<br>VIX rising + IWM weak<br><br><strong>→ Unstable. Do NOT chase longs.</strong><br>Weak internals underneath — wait for confirmation.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Cheat code 9 — Leadership flow sequence</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:8px">Healthy bull expansion ALWAYS follows this order:</p>
+    <div class="signal-flow">
+      <div class="flow-item">SMH</div><div class="flow-arrow">→</div>
+      <div class="flow-item">QQQ</div><div class="flow-arrow">→</div>
+      <div class="flow-item">IWM</div><div class="flow-arrow">→</div>
+      <div class="flow-item">SPY</div><div class="flow-arrow">→</div>
+      <div class="flow-item">DIA</div>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px;font-family:'IBM Plex Mono',monospace">Sequence intact = healthy bull ✅ · Sequence broken = caution ⚠️ · DIA leading = defensive rotation ❌</p>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Cheat code 10 — SPY warning signal</div>
+    <div class="warn-block" style="margin-bottom:0">
+      <div class="ilabel">Internals deteriorating</div>
+      <p>SPY green BUT: IWM weak + VIX rising + SMH weak<br><br>
+      <strong>SPY can appear healthy while everything below it falls apart.</strong><br>
+      Most retail traders get trapped here. They see green SPY and buy calls. Professionals see weak internals and stand aside. Your dashboard catches this early because you watch breadth, not just price.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== GEMS TAB ===== -->
+<div id="tab-gems" class="panel">
+
+  <div class="cheat-section">
+    <div class="cheat-title">Secret gem 1 — VIX histogram rule</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <table class="hist-table" style="margin-top:0">
+        <thead><tr><th>VIX histogram</th><th>Meaning</th><th>Action</th><th>Memory trick</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--bull)">Negative ↓</td><td style="color:var(--bull)">Fear dying</td><td><span class="badge b-bull">Green light for calls 🟢</span></td><td style="color:var(--text2)">VIX negative = YOU positive</td></tr>
+          <tr><td style="color:var(--text2)">Near zero</td><td style="color:var(--text2)">Neutral</td><td><span class="badge b-mix">Yellow light 🟡</span></td><td style="color:var(--text2)">Wait and watch</td></tr>
+          <tr><td style="color:var(--bear)">Positive & growing ↑</td><td style="color:var(--bear)">Fear rising</td><td><span class="badge b-bear">Bad for calls 🔴</span></td><td style="color:var(--text2)">VIX positive = YOU negative</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="gem-block" style="margin-top:10px;margin-bottom:0">
+      <div class="ilabel">The master rule</div>
+      <p>Everything about VIX is <strong>OPPOSITE</strong> to your calls.<br>VIX and SPY move in opposite directions — always.<br>When VIX histogram grows taller = somebody is scared = <strong>bad for calls.</strong><br>Think of it like a thermometer: histogram growing = temperature rising = panic setting in.</p>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Secret gem 2 — MACD confirmation rule</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px">MACD is a <strong style="color:var(--warn)">LAGGING indicator</strong> — use for CONFIRMATION ONLY, never for entry timing</p>
+    <div class="two-col">
+      <div class="cheat-card">
+        <div class="cheat-card-title">VIX MACD rules</div>
+        <div class="cheat-row">VIX MACD crosses UP <span class="cheat-dir cd-bear">BEARISH SPY</span></div>
+        <div class="cheat-row">VIX MACD crosses DOWN <span class="cheat-dir cd-bull">BULLISH SPY</span></div>
+        <p style="font-size:11px;color:var(--text2);margin-top:8px">VIX gaining momentum = fear increasing = bad for calls<br>VIX losing momentum = fear dying = good for calls</p>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-title">SPY MACD rules</div>
+        <div class="cheat-row">SPY MACD crosses UP <span class="cheat-dir cd-bull">BULLISH</span></div>
+        <div class="cheat-row">SPY MACD crosses DOWN <span class="cheat-dir cd-bear">BEARISH</span></div>
+        <p style="font-size:11px;color:var(--text2);margin-top:8px">Check Daily → 4H → 1H in order<br>All three pointing same direction = high confidence</p>
+      </div>
+    </div>
+    <div class="bull-block" style="margin-top:10px;margin-bottom:0">
+      <div class="ilabel">The golden combo</div>
+      <p><strong>VIX MACD down + SPY MACD up = STRONGEST BULLISH CONFIRMATION 🚀</strong><br><strong>VIX MACD up + SPY MACD down = STRONGEST BEARISH WARNING 📉</strong><br><br>MACD lag by timeframe: Daily = days/weeks · 1H = several hours · 5M = 20-30 minutes</p>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Secret gem 3 — COT compass system</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px">
+      <table class="dtable" style="margin-top:0">
+        <thead><tr><th>Group</th><th>Color</th><th>Who they are</th><th>How to read</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--bull)">Commercial Hedgers</td><td style="color:var(--bull)">GREEN</td><td>THE BOSS — industry insiders, institutions</td><td style="color:var(--bull)">Follow them — rarely wrong long term</td></tr>
+          <tr><td style="color:var(--bear)">Large Traders</td><td style="color:var(--bear)">RED</td><td>Hedge funds, CTAs — trend followers</td><td>Wrong at extremes — contrarian at peaks</td></tr>
+          <tr><td style="color:var(--blue)">Small Traders</td><td style="color:var(--blue)">BLUE</td><td>Retail traders — the crowd (us 😄)</td><td>Contrarian indicator at extremes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="three-col">
+      <div class="bull-block" style="margin-bottom:0">
+        <div class="ilabel">When Boss is bullish</div>
+        <p>Commercials net long = bullish compass<br><br>Large Traders short while Commercials long = <strong>SHORT SQUEEZE POTENTIAL 🚀</strong></p>
+      </div>
+      <div class="gem-block" style="margin-bottom:0">
+        <div class="ilabel">When they disagree</div>
+        <p>Commercials vs Large Traders = <strong>BET WITH THE BOSS every time</strong><br><br>The Boss has never been wrong long term</p>
+      </div>
+      <div class="warn-block" style="margin-bottom:0">
+        <div class="ilabel">Small traders signal</div>
+        <p>Extremely one-sided = <strong>fade them</strong><br><br>When everyone retail is long = pros are getting ready to sell</p>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px;font-family:'IBM Plex Mono',monospace">COT = weekly compass 🧭 — directional bias only, NOT a price target</p>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Secret gem 4 — Economic calendar rule</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px">
+      <table class="dtable" style="margin-top:0">
+        <thead><tr><th>Actual vs Forecast</th><th>Reaction</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--bull)">Actual ABOVE forecast</td><td style="color:var(--bull)">Bullish surprise — market pumps 🟢</td><td>Confirm with chart — look for 2U entry</td></tr>
+          <tr><td style="color:var(--bear)">Actual BELOW forecast</td><td style="color:var(--bear)">Bearish surprise — market dumps 🔴</td><td>Wait for dust to settle — look for 2D or stand aside</td></tr>
+          <tr><td style="color:var(--text2)">Actual MATCHES forecast</td><td style="color:var(--text2)">Muted reaction — price action takes over 🟡</td><td>Let Strat setup guide the entry</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="gem-block" style="margin-bottom:0">
+      <div class="ilabel">The master rule</div>
+      <p>Markets don't react to good or bad numbers.<br>They react to <strong>BETTER OR WORSE THAN EXPECTED numbers.</strong><br><br>The <strong>Forecast column</strong> is the most important number on the calendar — not the Previous.<br>Previous = the trend. Forecast = what's already baked into price. Actual = does market need to reprice?<br><br><strong>Pro move:</strong> Never trade INTO the number. Let it drop, let price react 1-2 candles, THEN look for Strat confirmation.</p>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Secret gem 5 — TLT sneaky important</div>
+    <div class="two-col">
+      <div class="bull-block" style="margin-bottom:0">
+        <div class="ilabel">TLT green = bullish ✅</div>
+        <p>Yields falling = easier financial conditions = cheaper money = <strong>tech stocks get bid</strong><br><br>Confirms SPY upside has fuel behind it</p>
+      </div>
+      <div class="warn-block" style="margin-bottom:0">
+        <div class="ilabel">TLT red hard = warning ⚠️</div>
+        <p>TLT red while QQQ green = <strong>divergence warning</strong><br><br>High yields will ALWAYS eventually pressure growth stocks. That divergence never lasts.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Secret gem 6 — UUP dollar rule</div>
+    <div class="two-col">
+      <div class="bull-block" style="margin-bottom:0">
+        <div class="ilabel">UUP red / weak dollar ✅</div>
+        <p>Weak dollar = more liquidity into risk assets<br><br>Helps: growth stocks, SPY calls, crypto, commodities, international liquidity<br><br><strong>UUP red = green light 🟢</strong></p>
+      </div>
+      <div class="warn-block" style="margin-bottom:0">
+        <div class="ilabel">UUP green / strong dollar ⚠️</div>
+        <p>Strong dollar = liquidity tightening globally<br><br>Hurts: growth stocks, crypto, commodities, SPY calls<br><br><strong>UUP green = caution 🟡</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Secret gem 7 — Russell 2000 / penny stock rule</div>
+    <div class="two-col">
+      <div class="bull-block" style="margin-bottom:0">
+        <div class="ilabel">IWM rising ✅</div>
+        <p>Small caps in favor = institutions willing to take risk on smaller companies<br><br><strong>Go hunting on Finviz Gap & Go screener ✅</strong></p>
+      </div>
+      <div class="warn-block" style="margin-bottom:0">
+        <div class="ilabel">IWM falling ⚠️</div>
+        <p>Small caps out of favor = institutions moving to safety<br><br><strong>Stick to SPY only — penny stocks likely sluggish</strong></p>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px;font-family:'IBM Plex Mono',monospace">For SPY options: watch QQQ + VIX · For Gap &amp; Go penny stocks: watch IWM first</p>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Secret gem 8 — Volume confirmation rule</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <table class="dtable" style="margin-top:0">
+        <thead><tr><th>Volume condition</th><th>Meaning</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--bull)">High volume + price rising</td><td style="color:var(--bull)">Bullish conviction ✅</td><td>Confirms your long bias — enter with confidence</td></tr>
+          <tr><td style="color:var(--bear)">High volume + price falling</td><td style="color:var(--bear)">Bearish conviction ❌</td><td>Institutions selling — respect the move</td></tr>
+          <tr><td style="color:var(--text2)">Low volume + price rising</td><td style="color:var(--warn)">Suspect move ⚠️</td><td>No institutional participation — be cautious</td></tr>
+          <tr><td style="color:var(--text2)">Low volume + consolidation</td><td style="color:var(--blue)">Coiling 🔄</td><td>Big move brewing — wait for breakout direction</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px;font-family:'IBM Plex Mono',monospace">Rule: high volume = conviction · low volume = suspicion · Volume confirms moves — never trade against high volume</p>
+  </div>
+
+  <div class="gem-block">
+    <div class="ilabel">The three pillars — Maverick's foundation</div>
+    <p style="font-size:14px;text-align:center;padding:8px 0"><strong style="color:var(--bull)">Liquidity</strong> &nbsp;+&nbsp; <strong style="color:var(--bear)">Fear</strong> &nbsp;+&nbsp; <strong style="color:var(--blue)">Leadership</strong></p>
+    <p>Your dashboard tracks all three. That's why it works.<br><br>Most people stare at single stocks. Professionals watch flows, breadth, volatility, and sector leadership. You've combined market breadth + volatility analysis + macro liquidity + sector leadership into one coherent framework. <strong>That's rare. That's the edge.</strong></p>
+  </div>
+
+</div>
+
+<!-- ===== PREMARKET TAB ===== -->
+<div id="tab-premarket" class="panel">
+
+  <div class="check-progress">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);min-width:120px">Premarket ready</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 13</div>
+    <button class="reset-checks" onclick="resetChecks()">Reset</button>
+  </div>
+
+  <div class="checklist" id="checklist">
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">🌏 Mark Asia range on ES<span class="check-tag">FIRST</span></div>
+        <div class="check-desc">Mark the overnight Asia high and low on ES futures. This is your directional Intel — the foundation of the entire session framework. Asia is the story.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">🇬🇧 Mark London high/low on SPY<span class="check-tag">BATTLEFIELD</span></div>
+        <div class="check-desc">Mark the London session high and low on SPY. Watch for liquidity sweeps before the NY open. London sweep must align with top-down bias to be valid. London is the setup.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">📅 Forex Factory — economic calendar<span class="check-tag">NEWS</span></div>
+        <div class="check-desc">Check all USD events for the day. Compare Forecast vs Previous. Know exact release times. Never trade INTO a number — let it drop, wait 1-2 candles, then look for Strat confirmation.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">😨 VIX histogram check<span class="check-tag">FEAR</span></div>
+        <div class="check-desc">Open Finviz → Charts → VIX → 1H. Check MACD histogram. Negative = green light for calls 🟢. Near zero = caution 🟡. Positive and growing = bad for calls 🔴. Everything about VIX is opposite to your calls.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">📊 MACD check — Daily / 4H / 1H<span class="check-tag">MOMENTUM</span></div>
+        <div class="check-desc">Check MACD on three timeframes in order. All three pointing same direction = high confidence. MACD is confirmation only — never use for entry timing. Daily = overall trend. 4H = intermediate. 1H = short term.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">📈 Regime Dashboard score<span class="check-tag">BREADTH</span></div>
+        <div class="check-desc">Open the Score tab. Toggle all 9 signals. How many systems are confirming risk-on? 10+ = strong bull. 6-9 = mild bull. 3-5 = mixed. Below 3 = risk-off. This answers: "Is SPY likely to trend cleanly today?"</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">🧭 COT compass check<span class="check-tag">WEEKLY</span></div>
+        <div class="check-desc">Check COT on Finviz (check Sunday/Monday). Commercial Hedgers (green) = THE BOSS. Follow them. COT is your weekly compass — directional bias only, not a price target. Commercials net long = bullish bias for the week.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">🕯️ Top-down Strat analysis<span class="check-tag">STRUCTURE</span></div>
+        <div class="check-desc">Run Monthly → Weekly → Daily → 4H → 1H in order. Look for Full Timeframe Continuity. Higher timeframes turn before lower timeframes. Color is irrelevant — only highs and lows matter. Candle types: 1=inside, 2U/2D=directional, 3=outside.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">📰 News headlines check<span class="check-tag">CATALYST</span></div>
+        <div class="check-desc">Check overnight news headlines. Any geopolitical events, Fed speakers, earnings surprises, or macro catalysts. Finviz news feed or the Finviz Daily Digest covers this. Know what's driving the futures move.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">⏰ Wait for 9:35 candle<span class="check-tag">TRIGGER</span></div>
+        <div class="check-desc">No entries before 9:35 AM — non-negotiable. The 9:30-9:35 candle is the most manipulated minute of the day. Wait for the 9:35 candle to confirm 2U or 2D direction. SIGNAL = WAIT is an absolute gate. New York is the trade.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">💰 Delta 0.60+ ITM confirmed<span class="check-tag">ENTRY</span></div>
+        <div class="check-desc">Buy ITM options with Delta 0.60 or above. Higher Delta = premium moves faster with price. Less extrinsic value = less theta decay. Behaves closer to owning shares. Tighter bid/ask spreads. Non-negotiable on every entry.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">🛑 50% stop rule set<span class="check-tag">RISK</span></div>
+        <div class="check-desc">Know your 50% stop level BEFORE entry. If premium drops 50% from entry price = exit immediately, no exceptions, no hoping. Set it before you enter. This rule is what keeps you in the game long term. Non-negotiable.</div>
+      </div>
+    </div>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-content">
+        <div class="check-title">🎯 DTE confirmed<span class="check-tag">TIMING</span></div>
+        <div class="check-desc">Tuesday entry = 4DTE · Wednesday entry = 3DTE · Thursday entry = 2DTE (after data cluster). 2-3DTE is the sweet spot — gives room to survive stop hunts, less theta decay than 0DTE, more forgiving on timing. Never hold through nuclear data clusters.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== WHY SPY TAB ===== -->
+<div id="tab-why" class="panel">
+
+  <div class="info-block">
+    <div class="ilabel">The core insight</div>
+    SPY is <strong>"the average result of all these forces combined."</strong><br><br>
+    This dashboard works better for SPY than individual stocks because SPY responds to breadth, liquidity, volatility, sector leadership, and institutional flows — which is exactly what these 9 signals measure. You're not guessing. You're reading the forces that drive SPY directly.
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Driver map</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <table class="dtable" style="margin-top:0">
+        <thead><tr><th>SPY driver</th><th>Your signal</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td>Tech leadership</td><td><code>QQQ</code> <code>SMH</code></td><td>SPY is ~33% mega-cap tech — QQQ/SMH move first</td></tr>
+          <tr><td>Broad participation</td><td><code>IWM</code></td><td>Confirms liquidity is flowing everywhere, not just mega-caps</td></tr>
+          <tr><td>Industrial/old economy</td><td><code>DIA</code></td><td>Validates the rally has legs beyond tech</td></tr>
+          <tr><td>Fear/volatility</td><td><code>VIX</code></td><td>Falling VIX = options selling = upward SPY pressure</td></tr>
+          <tr><td>Dollar/liquidity</td><td><code>UUP</code></td><td>Weak dollar = more liquidity flowing into risk assets</td></tr>
+          <tr><td>Rates/bonds</td><td><code>TLT</code></td><td>Falling yields = cheaper money = tech stocks get bid</td></tr>
+          <tr><td>Financial system</td><td><code>XLF</code></td><td>Banks healthy = credit flowing = economy expanding</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Signal priority ranking</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;padding:4px 0;">
+      <div class="rank-list">
+        <div class="rank-item rank-t1"><div class="rank-ticker">SMH</div><div class="rank-why">Semis lead everything in AI-era trading — the market heartbeat. Moves before QQQ. Most important signal.</div></div>
+        <div class="rank-item rank-t1"><div class="rank-ticker">QQQ</div><div class="rank-why">Institutional growth appetite — when QQQ leads, SPY almost always follows within minutes</div></div>
+        <div class="rank-item rank-t1"><div class="rank-ticker">VIX</div><div class="rank-why">Fear gauge — falling VIX = green light for calls. Rising VIX = danger. Single most important volatility read.</div></div>
+        <div class="rank-item rank-t1"><div class="rank-ticker">IWM</div><div class="rank-why">Speculative appetite — confirms liquidity is broad, not narrow. Narrow rally detection key signal.</div></div>
+        <div class="rank-item rank-t2"><div class="rank-ticker">TLT</div><div class="rank-why">Sneaky important — TLT falling while QQQ rising = warning sign. Rate pressure eventually hits growth stocks.</div></div>
+        <div class="rank-item rank-t2"><div class="rank-ticker">XLF</div><div class="rank-why">Financial system health — banks confirm economic expansion is real and broad</div></div>
+        <div class="rank-item rank-t2"><div class="rank-ticker">UUP</div><div class="rank-why">Dollar pressure on risk assets — UUP red = bullish for calls. Strong dollar = global liquidity tightening.</div></div>
+        <div class="rank-item rank-t3"><div class="rank-ticker">SPY</div><div class="rank-why">Broad institutional participation read — confirms the overall picture built by other signals</div></div>
+        <div class="rank-item rank-t3"><div class="rank-ticker">DIA</div><div class="rank-why">Old economy validates the rally has broad support. DIA leading = defensive rotation signal.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gem-block">
+    <div class="ilabel">Hawk's final verdict</div>
+    <p>You've combined market breadth + volatility analysis + macro liquidity + sector leadership into one coherent framework. Most people throw indicators together randomly. You built something logical where every signal connects to the others.<br><br>
+    <strong>Breadth → Liquidity → Volatility → Leadership → Regime Score → Entry Decision</strong><br><br>
+    That's not retail thinking. That's how macro funds, prop traders, and institutional desks actually operate. You just compressed it into a visual dashboard. That's rare. That's the edge. March 2027 is real.</p>
+  </div>
+
+</div>
+
+<script>
+const signals=[
+  {id:'SMH',desc:'Semis — market heartbeat',bullWhen:'green',pts:3,tier:'tier1'},
+  {id:'VIX',desc:'Fear gauge',bullWhen:'red ↓ falling',pts:3,tier:'tier1'},
+  {id:'QQQ',desc:'Growth / AI leadership',bullWhen:'green',pts:2,tier:'tier1'},
+  {id:'IWM',desc:'Risk / speculation appetite',bullWhen:'green',pts:2,tier:'tier1'},
+  {id:'TLT',desc:'Rates / bond pressure',bullWhen:'green (yields falling)',pts:1,tier:'tier2'},
+  {id:'XLF',desc:'Financial confirmation',bullWhen:'green',pts:1,tier:'tier2'},
+  {id:'UUP',desc:'Dollar strength proxy',bullWhen:'red ↓ weak dollar',pts:1,tier:'tier2'},
+  {id:'SPY',desc:'Institutional participation',bullWhen:'green',pts:1,tier:'tier3'},
+  {id:'DIA',desc:'Old economy / defensives',bullWhen:'green',pts:1,tier:'tier3'},
+];
+const stateConfig=[
+  {key:'sb',label:'Strong\nBull',activeClass:'active-sb',pts:1.0},
+  {key:'mb',label:'Mild\nBull',activeClass:'active-mb',pts:0.5},
+  {key:'n',label:'Neutral',activeClass:'active-n',pts:0.0},
+  {key:'mbe',label:'Mild\nBear',activeClass:'active-mbe',pts:-0.5},
+  {key:'sbe',label:'Strong\nBear',activeClass:'active-sbe',pts:-1.0},
+];
+const state={};
+signals.forEach(s=>state[s.id]=null);
+
+function render(){
+  ['tier1','tier2','tier3'].forEach(t=>{
+    const el=document.getElementById(t);
+    el.innerHTML='';
+    signals.filter(s=>s.tier===t).forEach(s=>{
+      const st=state[s.id];
+      let cc='sig-card';
+      if(st==='sb')cc+=' s-strong-bull';
+      else if(st==='mb')cc+=' s-mild-bull';
+      else if(st==='n')cc+=' s-neutral';
+      else if(st==='mbe')cc+=' s-mild-bear';
+      else if(st==='sbe')cc+=' s-strong-bear';
+      const isRed=s.bullWhen.includes('red');
+      let ptDisplay='—',ptColor='var(--text3)';
+      if(st){const sc=stateConfig.find(c=>c.key===st);const pts=s.pts*sc.pts;ptDisplay=pts>0?'+'+pts.toFixed(1):pts.toFixed(1);ptColor=pts>0?'var(--bull)':pts<0?'var(--bear)':'var(--text3)';}
+      const btns=stateConfig.map(sc=>{const isActive=st===sc.key;return`<button class="state-btn${isActive?' '+sc.activeClass:''}" onclick="setState('${s.id}','${sc.key}')">${sc.label.replace('\n','<br>')}</button>`;}).join('');
+      const card=document.createElement('div');
+      card.className=cc;
+      card.innerHTML=`<div class="sig-top"><div class="sig-ticker">${s.id}</div><div class="sig-pts-badge" style="color:${ptColor}">${ptDisplay} pts</div></div><div class="sig-desc">${s.desc}</div><div class="sig-when">Bull: <span class="${isRed?'bear':'bull'}">${s.bullWhen}</span></div><div class="state-btns">${btns}</div>`;
+      el.appendChild(card);
+    });
+  });
+  updateScore();
+}
+
+function setState(id,val){state[id]=state[id]===val?null:val;render();}
+
+function updateScore(){
+  let score=0,filled=0,bullS=0,bearS=0,neutS=0;
+  const max=signals.reduce((a,s)=>a+s.pts,0);
+  signals.forEach(s=>{
+    if(state[s.id]!==null)filled++;
+    const sc=stateConfig.find(c=>c.key===state[s.id]);
+    if(sc){score+=s.pts*sc.pts;}
+    if(state[s.id]==='sb'||state[s.id]==='mb')bullS++;
+    else if(state[s.id]==='sbe'||state[s.id]==='mbe')bearS++;
+    else if(state[s.id]==='n')neutS++;
+  });
+  document.getElementById('scoreNum').textContent=score>=0?'+'+score.toFixed(1):score.toFixed(1);
+  document.getElementById('scoreMeta').textContent=score.toFixed(1)+' / '+max+' max · '+filled+' of '+signals.length+' signals set';
+  document.getElementById('bullCount').textContent=bullS;
+  document.getElementById('bearCount').textContent=bearS;
+  document.getElementById('neutCount').textContent=neutS;
+  const pct=max>0?Math.max(0,((score+max)/(max*2))*100):50;
+  const fill=document.getElementById('scoreFill');
+  fill.style.width=pct+'%';
+  ['pill-bull','pill-mild','pill-mix','pill-bear'].forEach(p=>document.getElementById(p).className='regime-pill');
+  let label,sub,color,fillColor;
+  if(filled===0){label='No signals set';sub='Toggle signals below — 5-state gradient scoring active';color='var(--text3)';fillColor='var(--border)';}
+  else if(score>=10){label='Strong bull regime 🚀';sub='Trend continuation — dips get bought, calls are your weapon';color='var(--bull)';fillColor='var(--bull)';document.getElementById('pill-bull').className='regime-pill active-bull';}
+  else if(score>=6){label='Mild bull — trend intact';sub='Be selective — wait for clean Strat 2U confirmation at 9:35';color='var(--blue)';fillColor='var(--blue)';document.getElementById('pill-mild').className='regime-pill active-mix';}
+  else if(score>=3){label='Mixed / choppy rotation';sub='Wait for clarity — avoid forcing trades against structure';color='var(--warn)';fillColor='var(--warn)';document.getElementById('pill-mix').className='regime-pill active-warn';}
+  else{label='Risk-off — bearish 📉';sub='Avoid aggressive longs — protect capital, consider puts';color='var(--bear)';fillColor='var(--bear)';document.getElementById('pill-bear').className='regime-pill active-bear';}
+  document.getElementById('scoreLabel').textContent=label;
+  document.getElementById('scoreLabel').style.color=color;
+  document.getElementById('scoreSub').textContent=sub;
+  document.getElementById('scoreNum').style.color=filled===0?'var(--text3)':color;
+  fill.style.background=fillColor;
+}
+
+function resetAll(){signals.forEach(s=>state[s.id]=null);render();}
+
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function toggleCheck(el){
+  el.classList.toggle('done');
+  const box=el.querySelector('.check-box');
+  box.textContent=el.classList.contains('done')?'✓':'';
+  updateProgress();
+}
+
+function updateProgress(){
+  const total=document.querySelectorAll('.check-item').length;
+  const done=document.querySelectorAll('.check-item.done').length;
+  document.getElementById('progressFill').style.width=(done/total*100)+'%';
+  document.getElementById('progressLabel').textContent=done+' / '+total;
+}
+
+function resetChecks(){
+  document.querySelectorAll('.check-item').forEach(el=>{el.classList.remove('done');el.querySelector('.check-box').textContent='';});
+  updateProgress();
+}
+
+function updateClock(){
+  const now=new Date();
+  const t=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const d=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  const el=document.getElementById('clock');
+  if(el)el.innerHTML=d+'<br>'+t;
+}
+setInterval(updateClock,1000);
+updateClock();
+render();
+</script>
+</body>
+</html>
