@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPY Market Regime Dashboard v2</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #161b24;
+  --bg3: #1e2535;
+  --bg4: #252d3d;
+  --border: #2a3448;
+  --border2: #3a4560;
+  --text: #e8edf5;
+  --text2: #8b96a8;
+  --text3: #5a6478;
+  --bull: #00c98d;
+  --bull-bg: rgba(0,201,141,0.1);
+  --bull-border: rgba(0,201,141,0.3);
+  --mild-bull: #4dd9a0;
+  --bear: #ff4d6a;
+  --bear-bg: rgba(255,77,106,0.1);
+  --bear-border: rgba(255,77,106,0.3);
+  --mild-bear: #ff8099;
+  --neutral: #8b96a8;
+  --neutral-bg: rgba(139,150,168,0.1);
+  --warn: #f5a623;
+  --warn-bg: rgba(245,166,35,0.1);
+  --blue: #4d9fff;
+  --blue-bg: rgba(77,159,255,0.1);
+  --accent: #4d9fff;
+  --purple: #a78bfa;
+  --purple-bg: rgba(167,139,250,0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+.mono { font-family: 'IBM Plex Mono', monospace; }
+
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.version-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--accent); background: var(--blue-bg); border: 1px solid rgba(77,159,255,0.3); padding: 2px 8px; border-radius: 3px; }
+.header-title { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: 0.08em; text-transform: uppercase; }
+.header-sub { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bull); display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.clock-display { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); text-align: right; }
+
+.tabs { display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 24px; gap: 0; overflow-x: auto; }
+.tab { padding: 11px 18px; font-size: 11px; font-weight: 500; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+.tab:hover { color: var(--text2); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.panel { display: none; padding: 20px 24px; max-width: 1100px; }
+.panel.active { display: block; }
+
+/* Score hero */
+.score-hero {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+}
+.score-big { font-family: 'IBM Plex Mono', monospace; font-size: 64px; font-weight: 600; line-height: 1; transition: color 0.3s; }
+.score-center { flex: 1; }
+.score-regime { font-size: 20px; font-weight: 500; transition: color 0.3s; margin-bottom: 4px; }
+.score-desc { font-size: 12px; color: var(--text2); margin-bottom: 12px; font-family: 'IBM Plex Mono', monospace; }
+.score-track { height: 5px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+.score-fill { height: 5px; border-radius: 3px; transition: width 0.5s ease, background 0.4s ease; width: 0%; }
+.score-meta { font-size: 11px; color: var(--text3); margin-top: 6px; font-family: 'IBM Plex Mono', monospace; }
+.score-right-col { display: flex; flex-direction: column; gap: 8px; min-width: 120px; }
+.mini-stat { background: var(--bg3); border-radius: 6px; padding: 8px 12px; text-align: center; }
+.mini-stat-val { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; }
+.mini-stat-label { font-size: 10px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+
+/* Regime indicator pills */
+.regime-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.regime-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+  color: var(--text3); transition: all 0.2s; cursor: default;
+}
+.regime-pill.active-bull { border-color: var(--bull-border); color: var(--bull); background: var(--bull-bg); }
+.regime-pill.active-bear { border-color: var(--bear-border); color: var(--bear); background: var(--bear-bg); }
+.regime-pill.active-warn { border-color: rgba(245,166,35,0.4); color: var(--warn); background: var(--warn-bg); }
+.regime-pill.active-mix { border-color: rgba(77,159,255,0.3); color: var(--blue); background: var(--blue-bg); }
+.pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* Section */
+.section-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3);
+  margin: 20px 0 10px; display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.tier-badge { font-size: 9px; padding: 2px 6px; border-radius: 3px; background: var(--bg4); color: var(--text3); }
+
+.signal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 8px; margin-bottom: 8px; }
+
+/* 5-state signal card */
+.sig-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px;
+  transition: border-color 0.15s;
+}
+.sig-card.s-strong-bull { border-color: var(--bull); background: rgba(0,201,141,0.08); }
+.sig-card.s-mild-bull { border-color: rgba(0,201,141,0.4); background: rgba(0,201,141,0.04); }
+.sig-card.s-neutral { border-color: rgba(139,150,168,0.3); }
+.sig-card.s-mild-bear { border-color: rgba(255,77,106,0.4); background: rgba(255,77,106,0.04); }
+.sig-card.s-strong-bear { border-color: var(--bear); background: rgba(255,77,106,0.08); }
+
+.sig-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.sig-ticker { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; color: var(--text); }
+.sig-pts-badge { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 2px 6px; border-radius: 3px; background: var(--bg4); color: var(--text3); transition: all 0.2s; }
+.sig-desc { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+.sig-when { font-size: 10px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; margin-bottom: 10px; }
+.sig-when .bull { color: var(--bull); }
+.sig-when .bear { color: var(--bear); }
+
+/* 5-state buttons */
+.state-btns { display: flex; gap: 3px; }
+.state-btn {
+  flex: 1; padding: 4px 2px; font-size: 9px; font-weight: 500; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--bg3); color: var(--text3);
+  cursor: pointer; transition: all 0.15s; font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.02em; text-align: center;
+}
+.state-btn:hover { border-color: var(--border2); color: var(--text2); }
+.state-btn.active-sb { background: var(--bull-bg); border-color: var(--bull); color: var(--bull); }
+.state-btn.active-mb { background: rgba(0,201,141,0.06); border-color: rgba(0,201,141,0.4); color: var(--mild-bull); }
+.state-btn.active-n { background: var(--neutral-bg); border-color: rgba(139,150,168,0.4); color: var(--neutral); }
+.state-btn.active-mbe { background: rgba(255,77,106,0.06); border-color: rgba(255,77,106,0.4); color: var(--mild-bear); }
+.state-btn.active-sbe { background: var(--bear-bg); border-color: var(--bear); color: var(--bear); }
+
+.current-score-label { font-size: 11px; text-align: center; margin-top: 6px; font-family: 'IBM Plex Mono', monospace; color: var(--text3); transition: color 0.2s; }
+
+/* Regime reference table */
+.regime-ref { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 20px; }
+.regime-ref-row { display: grid; grid-template-columns: 80px 160px 1fr; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 12px; }
+.regime-ref-row:last-child { border-bottom: none; }
+.regime-ref-row.header { background: var(--bg3); font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+.badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; }
+.b-bull { background: var(--bull-bg); color: var(--bull); border: 1px solid var(--bull-border); }
+.b-mild { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(77,159,255,0.3); }
+.b-mix { background: var(--warn-bg); color: var(--warn); border: 1px solid rgba(245,166,35,0.3); }
+.b-bear { background: var(--bear-bg); color: var(--bear); border: 1px solid var(--bear-border); }
+
+.bottom-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.reset-btn { padding: 9px 20px; font-size: 11px; font-weight: 500; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em; transition: all 0.15s; }
+.reset-btn:hover { background: var(--bg3); color: var(--text); }
+
+/* Score breakdown bar */
+.breakdown { display: flex; gap: 3px; height: 24px; border-radius: 6px; overflow: hidden; margin-top: 10px; }
+.bd-seg { transition: flex 0.4s ease; display: flex; align-items: center; justify-content: center; font-size: 9px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+
+/* Cheat codes */
+.cheat-section { margin-bottom: 24px; }
+.cheat-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.cheat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.cheat-card-title { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 10px; font-family: 'IBM Plex Mono', monospace; }
+.cheat-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px; color: var(--text2); border-bottom: 1px solid var(--border); }
+.cheat-row:last-child { border-bottom: none; }
+.cheat-dir { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; }
+.cd-bull { background: var(--bull-bg); color: var(--bull); }
+.cd-bear { background: var(--bear-bg); color: var(--bear); }
+.cd-warn { background: var(--warn-bg); color: var(--warn); }
+
+.info-block { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; font-size: 13px; color: var(--text2); line-height: 1.7; }
+.info-block .ilabel { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.info-block strong { color: var(--text); font-weight: 500; }
+
+.warn-block { background: rgba(255,77,106,0.05); border: 1px solid var(--bear-border); border-left: 3px solid var(--bear); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+.warn-block .ilabel { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--bear); margin-bottom: 8px; }
+.warn-block p { font-size: 12px; color: var(--text2); line-height: 1.7; }
+.warn-block strong { color: var(--text); font-weight: 500; }
+
+.gem-block { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--warn); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+.gem-block .ilabel { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--warn); margin-bottom: 8px; }
+.gem-block p { font-size: 12px; color: var(--text2); line-height: 1.7; }
+.gem-block strong { color: var(--text); font-weight: 500; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:600px){.two-col{grid-template-columns:1fr}.score-hero{grid-template-columns:1fr;}.score-right-col{flex-direction:row}}
+
+.signal-flow { display: flex; align-items: center; gap: 8px; padding: 12px; background: var(--bg3); border-radius: 8px; margin-top: 10px; flex-wrap: wrap; }
+.flow-item { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: var(--bull); background: var(--bull-bg); padding: 4px 10px; border-radius: 4px; }
+.flow-arrow { color: var(--text3); font-size: 14px; }
+
+.driver-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+.driver-table th { text-align: left; padding: 6px 10px; color: var(--text3); font-weight: 500; border-bottom: 1px solid var(--border); font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; }
+.driver-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text2); }
+.driver-table td:first-child { color: var(--text); }
+.driver-table td code { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--bull); background: var(--bull-bg); padding: 2px 6px; border-radius: 3px; }
+
+.rank-list { counter-reset: rank; }
+.rank-item { counter-increment: rank; display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12px; }
+.rank-item:last-child { border-bottom: none; }
+.rank-item::before { content: counter(rank); font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); min-width: 16px; }
+.rank-ticker { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--text); min-width: 50px; }
+.rank-why { color: var(--text2); font-size: 11px; }
+.rank-t1 .rank-ticker { color: var(--bull); }
+.rank-t2 .rank-ticker { color: var(--blue); }
+.rank-t3 .rank-ticker { color: var(--text2); }
+
+/* Upgrade note */
+.upgrade-note { background: var(--purple-bg); border: 1px solid rgba(167,139,250,0.3); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 12px; color: var(--text2); }
+.upgrade-note strong { color: var(--purple); font-family: 'IBM Plex Mono', monospace; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="header-title"><span class="live-dot"></span>SPY Market Regime Dashboard</div>
+      <div class="header-sub">Maverick Trading Model · Breadth · Liquidity · Volatility · Leadership</div>
+    </div>
+    <div class="version-badge">v2.0</div>
+  </div>
+  <div class="header-right">
+    <div class="clock-display" id="clock"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('score',this)">Score</div>
+  <div class="tab" onclick="switchTab('cheatcodes',this)">Cheat Codes</div>
+  <div class="tab" onclick="switchTab('why',this)">Why SPY</div>
+</div>
+
+<!-- SCORE TAB -->
+<div id="tab-score" class="panel active">
+
+  <div class="upgrade-note">
+    <strong>v2 upgrade:</strong> 5-state scoring — Strong Bull · Mild Bull · Neutral · Mild Bear · Strong Bear — with gradient points. More precise than binary Bull/Bear. Hawk-approved.
+  </div>
+
+  <div class="score-hero">
+    <div class="score-big mono" id="scoreNum" style="color:var(--text3)">0</div>
+    <div class="score-center">
+      <div class="score-regime" id="scoreLabel" style="color:var(--text3)">No signals set</div>
+      <div class="score-desc" id="scoreSub">Toggle signals below — 5-state scoring active</div>
+      <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+      <div class="score-meta" id="scoreMeta">0 / 15 max points · 0 of 9 signals set</div>
+      <div class="breakdown" id="breakdown">
+        <div class="bd-seg" id="bd-bull" style="flex:0;background:var(--bull);"></div>
+        <div class="bd-seg" id="bd-mild" style="flex:0;background:rgba(0,201,141,0.4);"></div>
+        <div class="bd-seg" id="bd-neutral" style="flex:1;background:var(--bg4);"></div>
+        <div class="bd-seg" id="bd-mbear" style="flex:0;background:rgba(255,77,106,0.4);"></div>
+        <div class="bd-seg" id="bd-bear" style="flex:0;background:var(--bear);"></div>
+      </div>
+    </div>
+    <div class="score-right-col">
+      <div class="mini-stat">
+        <div class="mini-stat-val" id="bullCount" style="color:var(--bull)">0</div>
+        <div class="mini-stat-label">Bull signals</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-val" id="bearCount" style="color:var(--bear)">0</div>
+        <div class="mini-stat-label">Bear signals</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-val" id="neutCount" style="color:var(--text2)">0</div>
+        <div class="mini-stat-label">Neutral</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="regime-row" id="regimePills">
+    <div class="regime-pill" id="pill-bull"><span class="pill-dot"></span>Strong bull 10+</div>
+    <div class="regime-pill" id="pill-mild"><span class="pill-dot"></span>Mild bull 6-9</div>
+    <div class="regime-pill" id="pill-mix"><span class="pill-dot"></span>Mixed 3-5</div>
+    <div class="regime-pill" id="pill-bear"><span class="pill-dot"></span>Risk-off &lt;3</div>
+  </div>
+
+  <div class="section-label">Tier 1 — primary drivers <span class="tier-badge">SMH +3 · VIX +3 · QQQ +2 · IWM +2</span></div>
+  <div class="signal-grid" id="tier1"></div>
+
+  <div class="section-label">Tier 2 — macro confirmation <span class="tier-badge">+1 each · half points for mild states</span></div>
+  <div class="signal-grid" id="tier2"></div>
+
+  <div class="section-label">Tier 3 — supporting context <span class="tier-badge">+1 each</span></div>
+  <div class="signal-grid" id="tier3"></div>
+
+  <div class="regime-ref">
+    <div class="regime-ref-row header"><div>Score</div><div>Regime</div><div>Trade implication</div></div>
+    <div class="regime-ref-row"><div class="mono" style="color:var(--bull)">10+</div><div><span class="badge b-bull">Strong bull 🚀</span></div><div style="color:var(--text2);font-size:12px">Trend continuation — dips get bought, calls are your weapon</div></div>
+    <div class="regime-ref-row"><div class="mono" style="color:var(--blue)">6–9</div><div><span class="badge b-mild">Mild bull</span></div><div style="color:var(--text2);font-size:12px">Trend intact — be selective, wait for clean 9:35 2U setup</div></div>
+    <div class="regime-ref-row"><div class="mono" style="color:var(--warn)">3–5</div><div><span class="badge b-mix">Mixed / chop</span></div><div style="color:var(--text2);font-size:12px">Rotational market — wait for clarity, avoid forcing trades</div></div>
+    <div class="regime-ref-row"><div class="mono" style="color:var(--bear)">&lt;3</div><div><span class="badge b-bear">Risk-off 📉</span></div><div style="color:var(--text2);font-size:12px">Avoid aggressive longs — consider puts or stand aside</div></div>
+  </div>
+
+  <div class="bottom-row">
+    <button class="reset-btn" onclick="resetAll()">Reset all signals</button>
+  </div>
+</div>
+
+<!-- CHEAT CODES TAB -->
+<div id="tab-cheatcodes" class="panel">
+
+  <div class="cheat-section">
+    <div class="cheat-title">Ultra bull combo — monster rally mode 🚀</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-title">Signal stack</div>
+        <div class="cheat-row">SMH <span class="cheat-dir cd-bull">GREEN</span></div>
+        <div class="cheat-row">QQQ <span class="cheat-dir cd-bull">GREEN</span></div>
+        <div class="cheat-row">IWM <span class="cheat-dir cd-bull">GREEN</span></div>
+        <div class="cheat-row">VIX <span class="cheat-dir cd-bear">RED ↓</span></div>
+        <div class="cheat-row">TLT <span class="cheat-dir cd-bull">GREEN</span></div>
+        <div class="cheat-row">UUP <span class="cheat-dir cd-bear">RED ↓</span></div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-title">What it means</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.9">Fear down + growth up + speculation up + dollar weak = <strong style="color:var(--bull)">explosive risk-on</strong><br><br>· Dips get bought<br>· Momentum follows through<br>· Breakouts work better<br>· Calls are your weapon<br>· Trail stops — let it run</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Bearish warning — risk-off mode 📉</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-title">Signal stack</div>
+        <div class="cheat-row">SMH <span class="cheat-dir cd-bear">RED</span></div>
+        <div class="cheat-row">QQQ <span class="cheat-dir cd-bear">RED</span></div>
+        <div class="cheat-row">IWM <span class="cheat-dir cd-bear">RED</span></div>
+        <div class="cheat-row">VIX <span class="cheat-dir cd-bull">GREEN ↑</span></div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-title">What it means</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.9">Growth dying + fear rising = <strong style="color:var(--bear)">avoid aggressive longs</strong><br><br>· Puts become the play<br>· Or stand aside entirely<br>· Do not fight the tape<br>· Wait for regime to flip back</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Narrow rally detection — fake strength ⚠️</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-title">Signal stack</div>
+        <div class="cheat-row">QQQ <span class="cheat-dir cd-bull">GREEN</span></div>
+        <div class="cheat-row">SPY <span class="cheat-dir cd-warn">SLIGHT GREEN</span></div>
+        <div class="cheat-row">IWM <span class="cheat-dir cd-bear">RED</span></div>
+        <div class="cheat-row">DIA <span class="cheat-dir cd-bear">RED</span></div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-title">What it means</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.9">7 mega-caps holding the market while breadth deteriorates underneath.<br><br><strong style="color:var(--warn)">Dangerous setup.</strong> Indexes look healthy but most stocks are not. Be cautious chasing longs here.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">VIX flush — trend day ignition 🔥</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-title">Signal stack</div>
+        <div class="cheat-row">VIX <span class="cheat-dir cd-bear">DOWN BIG</span></div>
+        <div class="cheat-row">QQQ <span class="cheat-dir cd-bull">RIPPING</span></div>
+        <div class="cheat-row">SMH <span class="cheat-dir cd-bull">RIPPING</span></div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-title">What it means</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.9">Short covering + dealer hedge unwind + momentum ignition = <strong style="color:var(--bull)">monster trend day</strong><br><br>These days run WAY farther than expected. Trail your stop. Don't exit early.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Combination matrix — QQQ vs IWM</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <table class="driver-table" style="margin-top:0">
+        <thead><tr><th>QQQ</th><th>IWM</th><th>Reading</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--bull)">Strong</td><td style="color:var(--bull)">Strong</td><td style="color:var(--bull)">Most bullish combo</td><td style="color:var(--text2)">Full throttle — tech + liquidity everywhere</td></tr>
+          <tr><td style="color:var(--bull)">Strong</td><td style="color:var(--bear)">Weak</td><td style="color:var(--warn)">Narrow rally</td><td style="color:var(--text2)">Mega-cap AI carrying — breadth thin, be cautious</td></tr>
+          <tr><td style="color:var(--bear)">Weak</td><td style="color:var(--bull)">Strong</td><td style="color:var(--blue)">Rotation trade</td><td style="color:var(--text2)">Rate cuts expected — small cap catch-up rally</td></tr>
+          <tr><td style="color:var(--bear)">Weak</td><td style="color:var(--bear)">Weak</td><td style="color:var(--bear)">Risk-off</td><td style="color:var(--text2)">Stand aside or consider puts</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Opening alignment — first 5 minutes</div>
+    <div class="two-col">
+      <div class="info-block" style="border-left-color:var(--bull)">
+        <div class="ilabel">Green light setup</div>
+        QQQ strong at open<br>SMH strong at open<br>VIX fading lower<br><br>
+        <strong>→ SPY likely trends up intraday</strong><br>
+        Look for 9:35 2U confirmation entry
+      </div>
+      <div class="warn-block">
+        <div class="ilabel">Caution setup</div>
+        <p>SPY green BUT VIX rising + IWM weak<br><br><strong>→ Unstable. Do not chase longs.</strong><br>Weak internals underneath — wait for confirmation.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Leadership flow — who leads first</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:8px">Healthy bull expansion follows this sequence:</p>
+    <div class="signal-flow">
+      <div class="flow-item">SMH</div><div class="flow-arrow">→</div>
+      <div class="flow-item">QQQ</div><div class="flow-arrow">→</div>
+      <div class="flow-item">IWM</div><div class="flow-arrow">→</div>
+      <div class="flow-item">SPY</div><div class="flow-arrow">→</div>
+      <div class="flow-item">DIA</div>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px;font-family:'IBM Plex Mono',monospace">Semis lead tech → tech leads SPY → small caps confirm → old economy validates</p>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">SPY warning signal — internals deteriorating</div>
+    <div class="warn-block" style="margin-bottom:0">
+      <div class="ilabel">Warning pattern</div>
+      <p>SPY green BUT: IWM weak + VIX rising + SMH weak<br><br>
+      <strong>SPY can appear healthy while internals fall apart underneath.</strong><br>
+      This is where most traders get trapped. Your dashboard catches it early because you're watching breadth, not just price.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- WHY SPY TAB -->
+<div id="tab-why" class="panel">
+
+  <div class="info-block">
+    <div class="ilabel">The core insight</div>
+    SPY is <strong>"the average result of all these forces combined."</strong><br><br>
+    This dashboard tracks every major driver behind SPY movement — which is why it works better for SPY options than for individual stock picks. SPY responds to breadth, liquidity, volatility, sector leadership, and institutional flows. That's exactly what these 9 signals measure.
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Driver map — what each signal covers</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <table class="driver-table" style="margin-top:0">
+        <thead><tr><th>SPY driver</th><th>Your signal</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td>Tech leadership</td><td><code>QQQ</code> <code>SMH</code></td><td>SPY is ~33% mega-cap tech — QQQ/SMH move first</td></tr>
+          <tr><td>Broad participation</td><td><code>IWM</code></td><td>Small caps confirm liquidity is flowing everywhere, not just mega-caps</td></tr>
+          <tr><td>Industrial / old economy</td><td><code>DIA</code></td><td>Validates the rally has legs beyond tech</td></tr>
+          <tr><td>Fear / volatility</td><td><code>VIX</code></td><td>Falling VIX = options selling = upward SPY pressure</td></tr>
+          <tr><td>Dollar / liquidity</td><td><code>UUP</code></td><td>Weak dollar = more liquidity flowing into risk assets</td></tr>
+          <tr><td>Rates / bonds</td><td><code>TLT</code></td><td>Falling yields = cheaper money = tech stocks get bid</td></tr>
+          <tr><td>Financial system</td><td><code>XLF</code></td><td>Banks healthy = credit flowing = economy expanding</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">Signal priority ranking for SPY</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;padding:4px 0;">
+      <div class="rank-list">
+        <div class="rank-item rank-t1"><div class="rank-ticker">SMH</div><div class="rank-why">Semis lead everything in AI-era trading — the market heartbeat. Moves before QQQ.</div></div>
+        <div class="rank-item rank-t1"><div class="rank-ticker">QQQ</div><div class="rank-why">Institutional growth appetite — when QQQ leads, SPY almost always follows</div></div>
+        <div class="rank-item rank-t1"><div class="rank-ticker">VIX</div><div class="rank-why">Fear gauge — falling VIX = green light for calls. Rising VIX = danger</div></div>
+        <div class="rank-item rank-t1"><div class="rank-ticker">IWM</div><div class="rank-why">Speculative appetite — confirms liquidity is broad, not narrow</div></div>
+        <div class="rank-item rank-t2"><div class="rank-ticker">TLT</div><div class="rank-why">Sneaky important — TLT falling while QQQ rising = warning sign eventually</div></div>
+        <div class="rank-item rank-t2"><div class="rank-ticker">XLF</div><div class="rank-why">Financial system health — banks confirm economic expansion</div></div>
+        <div class="rank-item rank-t2"><div class="rank-ticker">UUP</div><div class="rank-why">Dollar pressure on risk assets — UUP red = bullish for your calls</div></div>
+        <div class="rank-item rank-t3"><div class="rank-ticker">SPY</div><div class="rank-why">Broad institutional participation read — confirms the overall picture</div></div>
+        <div class="rank-item rank-t3"><div class="rank-ticker">DIA</div><div class="rank-why">Old economy validates the rally has broad support beyond tech</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">TLT — the sneaky gem</div>
+    <div class="two-col">
+      <div class="info-block" style="border-left-color:var(--bull)">
+        <div class="ilabel">TLT green = bullish</div>
+        Yields falling = easier financial conditions = cheaper money = <strong>tech stocks get bid</strong><br><br>
+        Confirms SPY upside has fuel behind it
+      </div>
+      <div class="warn-block">
+        <div class="ilabel">TLT red hard = warning</div>
+        <p>TLT red while QQQ green = <strong>divergence warning</strong><br><br>High yields will eventually pressure growth stocks. That divergence never lasts forever.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="gem-block">
+    <div class="ilabel">The bottom line — Hawk's final verdict</div>
+    <p>Your dashboard answers one question every morning:<br><br>
+    <strong>"Is SPY likely to trend cleanly today?"</strong><br><br>
+    That's enormously valuable for SPY options, 2-3DTE swing trades, and intraday momentum entries. Most retail traders stare at single stock charts. Professionals watch flows, breadth, volatility, and sector leadership. You've combined market breadth + volatility analysis + macro liquidity + sector leadership into one coherent framework. That's rare. That's the edge.</p>
+  </div>
+
+</div>
+
+<script>
+const signals = [
+  { id:'SMH', desc:'Semis — market heartbeat', bullWhen:'green', bearWhen:'red', pts:3, tier:'tier1' },
+  { id:'VIX', desc:'Fear gauge', bullWhen:'red ↓ falling', bearWhen:'green ↑ rising', pts:3, tier:'tier1' },
+  { id:'QQQ', desc:'Growth / AI leadership', bullWhen:'green', bearWhen:'red', pts:2, tier:'tier1' },
+  { id:'IWM', desc:'Risk / speculation appetite', bullWhen:'green', bearWhen:'red', pts:2, tier:'tier1' },
+  { id:'TLT', desc:'Rates / bond pressure', bullWhen:'green (yields falling)', bearWhen:'red (yields rising)', pts:1, tier:'tier2' },
+  { id:'XLF', desc:'Financial confirmation', bullWhen:'green', bearWhen:'red', pts:1, tier:'tier2' },
+  { id:'UUP', desc:'Dollar strength proxy', bullWhen:'red ↓ weak dollar', bearWhen:'green ↑ strong dollar', pts:1, tier:'tier2' },
+  { id:'SPY', desc:'Institutional participation', bullWhen:'green', bearWhen:'red', pts:1, tier:'tier3' },
+  { id:'DIA', desc:'Old economy / defensives', bullWhen:'green', bearWhen:'red', pts:1, tier:'tier3' },
+];
+
+// States: sb=strong bull, mb=mild bull, n=neutral, mbe=mild bear, sbe=strong bear, null=unset
+// Points: sb=full, mb=half, n=0, mbe=-half, sbe=-full
+const state = {};
+signals.forEach(s => state[s.id] = null);
+
+const stateConfig = [
+  { key:'sb', label:'Strong\nBull', activeClass:'active-sb', pts: 1.0 },
+  { key:'mb', label:'Mild\nBull', activeClass:'active-mb', pts: 0.5 },
+  { key:'n',  label:'Neutral', activeClass:'active-n', pts: 0.0 },
+  { key:'mbe',label:'Mild\nBear', activeClass:'active-mbe', pts: -0.5 },
+  { key:'sbe',label:'Strong\nBear', activeClass:'active-sbe', pts: -1.0 },
+];
+
+function getScore() {
+  let score = 0;
+  signals.forEach(s => {
+    const st = state[s.id];
+    if (!st) return;
+    const sc = stateConfig.find(c => c.key === st);
+    if (sc) score += s.pts * sc.pts;
+  });
+  return score;
+}
+
+function render() {
+  ['tier1','tier2','tier3'].forEach(t => {
+    const el = document.getElementById(t);
+    el.innerHTML = '';
+    signals.filter(s => s.tier === t).forEach(s => {
+      const st = state[s.id];
+      let cardClass = 'sig-card';
+      if (st === 'sb') cardClass += ' s-strong-bull';
+      else if (st === 'mb') cardClass += ' s-mild-bull';
+      else if (st === 'n') cardClass += ' s-neutral';
+      else if (st === 'mbe') cardClass += ' s-mild-bear';
+      else if (st === 'sbe') cardClass += ' s-strong-bear';
+
+      const isVixOrUup = s.id === 'VIX' || s.id === 'UUP';
+      const bullColor = 'bull'; const bearColor = 'bear';
+
+      let ptDisplay = '—';
+      let ptColor = 'var(--text3)';
+      if (st) {
+        const sc = stateConfig.find(c => c.key === st);
+        const pts = s.pts * sc.pts;
+        ptDisplay = pts > 0 ? '+' + pts.toFixed(1) : pts.toFixed(1);
+        ptColor = pts > 0 ? 'var(--bull)' : pts < 0 ? 'var(--bear)' : 'var(--text3)';
+      }
+
+      const btns = stateConfig.map(sc => {
+        const isActive = st === sc.key;
+        return `<button class="state-btn${isActive ? ' ' + sc.activeClass : ''}" onclick="setState('${s.id}','${sc.key}')">${sc.label.replace('\n','<br>')}</button>`;
+      }).join('');
+
+      const card = document.createElement('div');
+      card.className = cardClass;
+      card.innerHTML = `
+        <div class="sig-top">
+          <div class="sig-ticker">${s.id}</div>
+          <div class="sig-pts-badge" style="color:${ptColor}">${ptDisplay} pts</div>
+        </div>
+        <div class="sig-desc">${s.desc}</div>
+        <div class="sig-when">Bull: <span class="${bullColor}">${s.bullWhen}</span></div>
+        <div class="state-btns">${btns}</div>
+      `;
+      el.appendChild(card);
+    });
+  });
+  updateScore();
+}
+
+function setState(id, val) {
+  state[id] = state[id] === val ? null : val;
+  render();
+}
+
+function updateScore() {
+  const score = getScore();
+  const maxPts = signals.reduce((a,s) => a + s.pts, 0);
+  let filled = 0, bullSigs = 0, bearSigs = 0, neutSigs = 0;
+  signals.forEach(s => {
+    if (state[s.id] !== null) { filled++; }
+    if (state[s.id] === 'sb' || state[s.id] === 'mb') bullSigs++;
+    else if (state[s.id] === 'sbe' || state[s.id] === 'mbe') bearSigs++;
+    else if (state[s.id] === 'n') neutSigs++;
+  });
+
+  document.getElementById('scoreNum').textContent = score >= 0 ? '+' + score.toFixed(1) : score.toFixed(1);
+  document.getElementById('scoreMeta').textContent = score.toFixed(1) + ' / ' + maxPts + ' max · ' + filled + ' of ' + signals.length + ' signals set';
+  document.getElementById('bullCount').textContent = bullSigs;
+  document.getElementById('bearCount').textContent = bearSigs;
+  document.getElementById('neutCount').textContent = neutSigs;
+
+  const pct = maxPts > 0 ? Math.max(0, ((score + maxPts) / (maxPts * 2)) * 100) : 50;
+  const fill = document.getElementById('scoreFill');
+  fill.style.width = pct + '%';
+
+  ['pill-bull','pill-mild','pill-mix','pill-bear'].forEach(p => {
+    document.getElementById(p).className = 'regime-pill';
+  });
+
+  let label, sub, color, fillColor;
+  if (filled === 0) {
+    label = 'No signals set'; sub = 'Toggle signals below — 5-state scoring active';
+    color = 'var(--text3)'; fillColor = 'var(--border)';
+  } else if (score >= 10) {
+    label = 'Strong bull regime 🚀'; sub = 'Trend continuation — dips get bought, calls are your weapon';
+    color = 'var(--bull)'; fillColor = 'var(--bull)';
+    document.getElementById('pill-bull').className = 'regime-pill active-bull';
+  } else if (score >= 6) {
+    label = 'Mild bull — trend intact'; sub = 'Be selective — wait for clean Strat 2U confirmation';
+    color = 'var(--blue)'; fillColor = 'var(--blue)';
+    document.getElementById('pill-mild').className = 'regime-pill active-mix';
+  } else if (score >= 3) {
+    label = 'Mixed / choppy rotation'; sub = 'Wait for clarity — avoid forcing trades against structure';
+    color = 'var(--warn)'; fillColor = 'var(--warn)';
+    document.getElementById('pill-mix').className = 'regime-pill active-warn';
+  } else {
+    label = 'Risk-off — bearish 📉'; sub = 'Avoid aggressive longs — protect capital, consider puts';
+    color = 'var(--bear)'; fillColor = 'var(--bear)';
+    document.getElementById('pill-bear').className = 'regime-pill active-bear';
+  }
+
+  document.getElementById('scoreLabel').textContent = label;
+  document.getElementById('scoreLabel').style.color = color;
+  document.getElementById('scoreSub').textContent = sub;
+  document.getElementById('scoreNum').style.color = filled === 0 ? 'var(--text3)' : color;
+  fill.style.background = fillColor;
+}
+
+function resetAll() {
+  signals.forEach(s => state[s.id] = null);
+  render();
+}
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function updateClock() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const d = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  const el = document.getElementById('clock');
+  if (el) el.innerHTML = d + '<br>' + t;
+}
+setInterval(updateClock, 1000);
+updateClock();
+render();
+</script>
+</body>
+</html>
