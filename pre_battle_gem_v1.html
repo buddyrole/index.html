@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-Battle Intelligence GEM v1.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050a0e;
+    --panel: #0a1520;
+    --panel2: #0d1c2e;
+    --border: #1a3a5c;
+    --accent: #00d4ff;
+    --accent2: #00ff88;
+    --bull: #00e676;
+    --bear: #ff3d57;
+    --warn: #ffd740;
+    --neutral: #90a4ae;
+    --text: #cfe8ff;
+    --dim: #546e7a;
+    --master: #ffd740;
+    --glow: 0 0 20px rgba(0,212,255,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image: 
+      radial-gradient(ellipse at 20% 0%, rgba(0,212,255,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(0,255,136,0.04) 0%, transparent 50%),
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,212,255,0.015) 40px, rgba(0,212,255,0.015) 41px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,212,255,0.015) 40px, rgba(0,212,255,0.015) 41px);
+  }
+
+  .scanline {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none; z-index: 1000;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 40px 20px 32px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 50%; transform: translateX(-50%);
+    width: 200px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .callsign {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+  .title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 6vw, 72px);
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--dim);
+    letter-spacing: 2px;
+  }
+
+  /* MASTER RULE */
+  .master-rule {
+    background: linear-gradient(135deg, rgba(255,215,64,0.08), rgba(255,215,64,0.03));
+    border: 1px solid rgba(255,215,64,0.4);
+    border-left: 4px solid var(--master);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .master-rule::before {
+    content: '⭐ MASTER RULE';
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--master);
+    letter-spacing: 3px;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .master-rule p {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--master);
+    line-height: 1.5;
+  }
+  .master-rule .sub {
+    font-size: 13px;
+    color: rgba(255,215,64,0.6);
+    margin-top: 8px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* GRID */
+  .grid { display: grid; gap: 20px; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  @media (max-width: 1100px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 768px) { .grid-3, .grid-2, .grid-4 { grid-template-columns: 1fr; } }
+
+  /* PANEL */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .panel.tier1::before { background: linear-gradient(90deg, var(--master), rgba(255,215,64,0.2)); }
+  .panel.tier2::before { background: linear-gradient(90deg, var(--accent), rgba(0,212,255,0.2)); }
+  .panel.tier3::before { background: linear-gradient(90deg, var(--bear), rgba(255,61,87,0.2)); }
+  .panel.tier4::before { background: linear-gradient(90deg, var(--accent2), rgba(0,255,136,0.2)); }
+  .panel.tier5::before { background: linear-gradient(90deg, #b388ff, rgba(179,136,255,0.2)); }
+
+  .panel-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.2);
+  }
+  .tier-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    letter-spacing: 2px;
+  }
+  .tier1 .tier-badge { background: rgba(255,215,64,0.15); color: var(--master); border: 1px solid rgba(255,215,64,0.3); }
+  .tier2 .tier-badge { background: rgba(0,212,255,0.15); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+  .tier3 .tier-badge { background: rgba(255,61,87,0.15); color: var(--bear); border: 1px solid rgba(255,61,87,0.3); }
+  .tier4 .tier-badge { background: rgba(0,255,136,0.15); color: var(--accent2); border: 1px solid rgba(0,255,136,0.3); }
+  .tier5 .tier-badge { background: rgba(179,136,255,0.15); color: #b388ff; border: 1px solid rgba(179,136,255,0.3); }
+
+  .panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+  .panel-body { padding: 16px 18px; }
+
+  /* TABLE */
+  .gem-table { width: 100%; border-collapse: collapse; }
+  .gem-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--dim);
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+  }
+  .gem-table td {
+    padding: 9px 10px;
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(26,58,92,0.4);
+    vertical-align: middle;
+  }
+  .gem-table tr:last-child td { border-bottom: none; }
+  .gem-table tr:hover td { background: rgba(0,212,255,0.03); }
+
+  .indicator {
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .indicator .star { color: var(--master); font-size: 12px; }
+  .indicator .mono { font-family: 'Share Tech Mono', monospace; font-size: 13px; }
+
+  .bull-cell { color: var(--bull); font-weight: 600; }
+  .bear-cell { color: var(--bear); font-weight: 600; }
+  .warn-cell { color: var(--warn); font-weight: 600; }
+  .neutral-cell { color: var(--neutral); font-weight: 500; }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .pill-bull { background: rgba(0,230,118,0.15); color: var(--bull); border: 1px solid rgba(0,230,118,0.3); }
+  .pill-bear { background: rgba(255,61,87,0.15); color: var(--bear); border: 1px solid rgba(255,61,87,0.3); }
+  .pill-warn { background: rgba(255,215,64,0.15); color: var(--warn); border: 1px solid rgba(255,215,64,0.3); }
+  .pill-neutral { background: rgba(144,164,174,0.15); color: var(--neutral); border: 1px solid rgba(144,164,174,0.3); }
+
+  /* MATRIX TABLE */
+  .matrix-table { width: 100%; border-collapse: collapse; }
+  .matrix-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 1px;
+  }
+  .matrix-table td {
+    padding: 10px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(26,58,92,0.4);
+    font-weight: 500;
+  }
+  .matrix-table tr:last-child td { border-bottom: none; }
+
+  /* FLOW */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: border-color 0.2s;
+  }
+  .flow-step:hover { border-color: var(--accent); }
+  .flow-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--accent);
+    line-height: 1;
+    min-width: 28px;
+  }
+  .flow-content { flex: 1; }
+  .flow-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+  .flow-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    margin-top: 2px;
+    letter-spacing: 1px;
+  }
+  .flow-arrow {
+    text-align: center;
+    color: var(--dim);
+    font-size: 12px;
+    padding: 0 14px;
+  }
+
+  /* DIVERGENCE */
+  .diverg-item {
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    border-left: 3px solid;
+    background: rgba(0,0,0,0.2);
+  }
+  .diverg-item:last-child { margin-bottom: 0; }
+  .diverg-item.bull { border-color: var(--bull); }
+  .diverg-item.bear { border-color: var(--bear); }
+  .diverg-item.warn { border-color: var(--warn); }
+  .diverg-item.neutral { border-color: var(--neutral); }
+  .diverg-condition {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  .diverg-meaning { font-size: 14px; font-weight: 600; }
+
+  /* MEMORY BOX */
+  .memory-box {
+    background: linear-gradient(135deg, rgba(0,212,255,0.06), rgba(0,255,136,0.03));
+    border: 1px solid rgba(0,212,255,0.25);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-top: 20px;
+    text-align: center;
+  }
+  .memory-box .label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+  .memory-rule {
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.7;
+  }
+  .memory-rule span.follow { color: var(--bull); }
+  .memory-rule span.flip { color: var(--warn); }
+
+  /* BATTLEFIELD QUOTE */
+  .battlefield {
+    margin-top: 32px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    text-align: center;
+  }
+  .bf-item {}
+  .bf-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .bf-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+  .bf-sub { font-size: 13px; color: var(--neutral); margin-top: 4px; }
+  .bf-item:nth-child(1) .bf-value { color: var(--accent); }
+  .bf-item:nth-child(2) .bf-value { color: var(--warn); }
+  .bf-item:nth-child(3) .bf-value { color: #b388ff; }
+
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin: 28px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    padding: 10px 14px;
+    border-left: 2px solid var(--border);
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 32px 0 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,64,0); }
+    50% { box-shadow: 0 0 0 3px rgba(255,215,64,0.1); }
+  }
+  .master-rule { animation: pulse-border 3s ease-in-out infinite; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .panel { animation: fadeInUp 0.4s ease both; }
+  .panel:nth-child(2) { animation-delay: 0.05s; }
+  .panel:nth-child(3) { animation-delay: 0.1s; }
+  .panel:nth-child(4) { animation-delay: 0.15s; }
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="callsign">// MAVERICK — LTPROV7.25 — CLASSIFIED //</div>
+    <div class="title">Pre-Battle Intelligence GEM</div>
+    <div class="subtitle">VERSION 1.0 &nbsp;·&nbsp; SPY OPTIONS FRAMEWORK &nbsp;·&nbsp; JUNE 2026</div>
+  </div>
+
+  <!-- MASTER RULE -->
+  <div class="master-rule">
+    <p>"If ES disagrees with everything else — pause. Do not force the trade. Investigate ES first."</p>
+    <div class="sub">// ES IS THE MASTER SIGNAL. EVERYTHING ELSE IS CONTEXT. //</div>
+  </div>
+
+  <!-- BATTLEFIELD ROLES -->
+  <div class="battlefield">
+    <div class="bf-item">
+      <div class="bf-label">ES TELLS YOU</div>
+      <div class="bf-value">THE BATTLEFIELD</div>
+      <div class="bf-sub">Real-time market pulse</div>
+    </div>
+    <div class="bf-item">
+      <div class="bf-label">YIELDS / VIX / FINVIZ TELL YOU</div>
+      <div class="bf-value">THE WEATHER</div>
+      <div class="bf-sub">Risk environment context</div>
+    </div>
+    <div class="bf-item">
+      <div class="bf-label">LTPROV7 TELLS YOU</div>
+      <div class="bf-value">WHEN TO PULL THE TRIGGER</div>
+      <div class="bf-sub">Structured execution signal</div>
+    </div>
+  </div>
+
+  <!-- TIER 1 -->
+  <div class="section-label">TIER 1 — MARKET PULSE</div>
+  <div class="panel tier1">
+    <div class="panel-header">
+      <span class="tier-badge">TIER 1</span>
+      <span class="panel-title">ES — Master Signal + Equity Futures</span>
+    </div>
+    <div class="panel-body">
+      <table class="gem-table">
+        <thead>
+          <tr>
+            <th>Future</th>
+            <th>Rank</th>
+            <th>🔴 Red = Yields/Price Down</th>
+            <th>🟢 Green = Yields/Price Up</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="indicator"><span class="star">⭐</span><span class="mono">ES</span></span></td>
+            <td><span class="pill pill-warn">MASTER</span></td>
+            <td class="bear-cell">Bearish SPY — Trust This</td>
+            <td class="bull-cell">Bullish SPY — Trust This</td>
+          </tr>
+          <tr>
+            <td><span class="indicator"><span class="mono">NQ</span></span></td>
+            <td><span class="pill pill-neutral">TIER 2</span></td>
+            <td class="bear-cell">Bearish confirmation</td>
+            <td class="bull-cell">Bullish confirmation</td>
+          </tr>
+          <tr>
+            <td><span class="indicator"><span class="mono">RTY</span></span></td>
+            <td><span class="pill pill-neutral">TIER 2</span></td>
+            <td class="bear-cell">Bearish confirmation</td>
+            <td class="bull-cell">Bullish confirmation</td>
+          </tr>
+          <tr>
+            <td><span class="indicator"><span class="mono">YM</span></span></td>
+            <td><span class="pill pill-neutral">TIER 3</span></td>
+            <td class="neutral-cell">Weakest signal</td>
+            <td class="neutral-cell">Weakest signal</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">If ES and NQ agree → ears perk up. If ES conflicts with anything → ES wins. Always.</div>
+    </div>
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="section-label">TIER 2 — RISK APPETITE</div>
+  <div class="grid grid-2">
+    <div class="panel tier2">
+      <div class="panel-header">
+        <span class="tier-badge">TIER 2</span>
+        <span class="panel-title">Treasury Yields</span>
+      </div>
+      <div class="panel-body">
+        <table class="gem-table">
+          <thead>
+            <tr>
+              <th>Yield</th>
+              <th>🔴 Red (Rising)</th>
+              <th>🟢 Green (Falling)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="indicator"><span class="mono">5Y</span></span></td>
+              <td class="bull-cell">Risk-On Bias</td>
+              <td class="bear-cell">Risk-Off Bias</td>
+            </tr>
+            <tr>
+              <td><span class="indicator"><span class="star">⭐</span><span class="mono">10Y</span></span></td>
+              <td class="bull-cell">Risk-On Bias</td>
+              <td class="bear-cell">Risk-Off Bias</td>
+            </tr>
+            <tr>
+              <td><span class="indicator"><span class="mono">30Y</span></span></td>
+              <td class="bull-cell">Risk-On Bias</td>
+              <td class="bear-cell">Risk-Off Bias</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">10Y is primary. 5Y + 30Y = confirmation. Rising yields ≠ automatically bullish — use ES as tie-breaker.</div>
+      </div>
+    </div>
+
+    <div class="panel tier2">
+      <div class="panel-header">
+        <span class="tier-badge">TIER 2</span>
+        <span class="panel-title">ES + Yield Matrix</span>
+      </div>
+      <div class="panel-body">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>ES</th>
+              <th>YIELDS</th>
+              <th>INTERPRETATION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="bull-cell">🟢 Green</td>
+              <td class="bull-cell">🟢 Green</td>
+              <td class="bull-cell">Risk-On — watch for yield spike</td>
+            </tr>
+            <tr>
+              <td class="bull-cell">🟢 Green</td>
+              <td class="bear-cell">🔴 Red</td>
+              <td class="warn-cell">Growth concerns lurking</td>
+            </tr>
+            <tr>
+              <td class="bear-cell">🔴 Red</td>
+              <td class="bear-cell">🔴 Red</td>
+              <td class="bear-cell">Risk-Off confirmed</td>
+            </tr>
+            <tr>
+              <td class="bear-cell">🔴 Red</td>
+              <td class="bull-cell">🟢 Green</td>
+              <td class="warn-cell">Inflation / Fed concern</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="section-label">TIER 3 — FEAR GAUGE</div>
+  <div class="grid grid-2">
+    <div class="panel tier3">
+      <div class="panel-header">
+        <span class="tier-badge">TIER 3</span>
+        <span class="panel-title">VIX — Volatility Index</span>
+      </div>
+      <div class="panel-body">
+        <table class="gem-table">
+          <thead>
+            <tr><th>VIX Reading</th><th>Meaning</th><th>SPY Bias</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="bull-cell">Falling</span></td>
+              <td>Fear leaving market</td>
+              <td class="bull-cell">Supports Longs</td>
+            </tr>
+            <tr>
+              <td><span class="warn-cell">Rising</span></td>
+              <td>Uncertainty building</td>
+              <td class="warn-cell">Caution</td>
+            </tr>
+            <tr>
+              <td><span class="bear-cell">Exploding</span></td>
+              <td>Institutional fear</td>
+              <td class="bear-cell">Risk-Off — Stand Down</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">ES dumping + VIX flat = fake breakdown. ES dumping + VIX exploding = real institutional fear.</div>
+      </div>
+    </div>
+
+    <div class="panel tier3">
+      <div class="panel-header">
+        <span class="tier-badge">TIER 3</span>
+        <span class="panel-title">Gold + Commodities</span>
+      </div>
+      <div class="panel-body">
+        <table class="gem-table">
+          <thead>
+            <tr><th>Commodity</th><th>🔴 Red</th><th>🟢 Green</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="indicator"><span class="mono">Gold</span></span></td>
+              <td class="bull-cell">Fear leaving — Bullish</td>
+              <td class="bear-cell">Fear trade active — Bearish</td>
+            </tr>
+            <tr>
+              <td><span class="indicator"><span class="mono">Crude Oil</span></span></td>
+              <td class="bull-cell">Energy costs falling — Bullish</td>
+              <td class="bear-cell">Inflation fear rising — Bearish</td>
+            </tr>
+            <tr>
+              <td><span class="indicator"><span class="mono">Nat Gas</span></span></td>
+              <td class="bull-cell">Costs easing — Mild Bullish</td>
+              <td class="bear-cell">Costs rising — Mild Bearish</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">Gold = context only. Never let Gold override ES. Gold rises for multiple reasons (fear, inflation, dollar weakness).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIER 4 -->
+  <div class="section-label">TIER 4 — MARKET CONFIRMATION (FINVIZ)</div>
+  <div class="panel tier4">
+    <div class="panel-header">
+      <span class="tier-badge">TIER 4</span>
+      <span class="panel-title">Finviz Elite — Market Health Score</span>
+    </div>
+    <div class="panel-body">
+      <div class="grid grid-2">
+        <div>
+          <table class="gem-table">
+            <thead>
+              <tr><th>Breadth Metric</th><th>Bullish</th><th>Bearish</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Advancers vs Decliners</td>
+                <td class="bull-cell">Advancers &gt; 50%</td>
+                <td class="bear-cell">Decliners &gt; 50%</td>
+              </tr>
+              <tr>
+                <td>New Highs vs New Lows</td>
+                <td class="bull-cell">Highs &gt; Lows</td>
+                <td class="bear-cell">Lows &gt; Highs</td>
+              </tr>
+              <tr>
+                <td>Above SMA50</td>
+                <td class="bull-cell">&gt; 50%</td>
+                <td class="bear-cell">&lt; 50%</td>
+              </tr>
+              <tr>
+                <td>Above SMA200</td>
+                <td class="bull-cell">&gt; 50%</td>
+                <td class="bear-cell">&lt; 50%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <table class="gem-table">
+            <thead>
+              <tr><th>Leadership Check</th><th>Bullish</th><th>Bearish</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>NVDA / MSFT / AAPL</td>
+                <td class="bull-cell">Generals green</td>
+                <td class="bear-cell">Generals red</td>
+              </tr>
+              <tr>
+                <td>META / AMZN / GOOGL</td>
+                <td class="bull-cell">Participating</td>
+                <td class="bear-cell">Diverging</td>
+              </tr>
+              <tr>
+                <td>IWM Participation</td>
+                <td class="bull-cell">Small caps joining</td>
+                <td class="bear-cell">Narrow rally</td>
+              </tr>
+              <tr>
+                <td>ES + Generals agree</td>
+                <td class="bull-cell">High conviction</td>
+                <td class="bear-cell">Suspect move</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="note">4/4 breadth metrics bullish = strong market. Generals green + ES green = high conviction long bias. Narrow breadth + record highs = suspect rally — stay alert.</div>
+    </div>
+  </div>
+
+  <!-- DIVERGENCE ALERTS -->
+  <div class="section-label">DIVERGENCE ALERTS</div>
+  <div class="grid grid-2">
+    <div>
+      <div class="diverg-item bull">
+        <div class="diverg-condition">ES 🟢 + NQ 🟢 + RTY 🟢 + VIX ↓</div>
+        <div class="diverg-meaning bull-cell">Strong Risk-On — High Conviction Long</div>
+      </div>
+      <div class="diverg-item bull">
+        <div class="diverg-condition">Equity Futures 🟢 + Gold 🔴</div>
+        <div class="diverg-meaning bull-cell">Strong Risk-On — Bullish Confirmed</div>
+      </div>
+      <div class="diverg-item warn">
+        <div class="diverg-condition">Equity Futures 🟢 + Yields 🟢 (SPY rising)</div>
+        <div class="diverg-meaning warn-cell">Suspect Rally — Divergence Alert</div>
+      </div>
+    </div>
+    <div>
+      <div class="diverg-item bear">
+        <div class="diverg-condition">Equity Futures 🔴 + Gold 🟢</div>
+        <div class="diverg-meaning bear-cell">Fear Trade Active — Risk-Off</div>
+      </div>
+      <div class="diverg-item bear">
+        <div class="diverg-condition">ES 🔴 + Yields 🔴</div>
+        <div class="diverg-meaning bear-cell">Risk-Off Confirmed — Stand Down</div>
+      </div>
+      <div class="diverg-item warn">
+        <div class="diverg-condition">ES conflicts with everything else</div>
+        <div class="diverg-meaning warn-cell">⭐ Investigate ES First — Do Not Force Trade</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIER 5 EXECUTION -->
+  <div class="section-label">TIER 5 — EXECUTION (LTPROV7)</div>
+  <div class="panel tier5">
+    <div class="panel-header">
+      <span class="tier-badge">TIER 5</span>
+      <span class="panel-title">Morning Battle Sequence</span>
+    </div>
+    <div class="panel-body">
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-content">
+            <div class="flow-label">ES OVERNIGHT STRUCTURE</div>
+            <div class="flow-sub">Above or below overnight VWAP? Asia range marked?</div>
+          </div>
+          <span class="pill pill-warn">PRE-MARKET</span>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-content">
+            <div class="flow-label">YIELDS + COMMODITIES CHECK</div>
+            <div class="flow-sub">10Y red or green? Gold red or green? Do they agree with ES?</div>
+          </div>
+          <span class="pill pill-neutral">CONTEXT</span>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-content">
+            <div class="flow-label">VIX + FINVIZ BREADTH</div>
+            <div class="flow-sub">VIX falling or rising? Breadth healthy? Generals participating?</div>
+          </div>
+          <span class="pill pill-neutral">CONFIRMATION</span>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-content">
+            <div class="flow-label">LONDON SESSION LEVELS</div>
+            <div class="flow-sub">Mark London high/low on SPY. Watch for sweep or breakout.</div>
+          </div>
+          <span class="pill pill-neutral">LEVELS</span>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <div class="flow-content">
+            <div class="flow-label">LTPROV7 REGIME SCORE</div>
+            <div class="flow-sub">Bull or Bear? Score? Signal = WAIT until confirmed.</div>
+          </div>
+          <span class="pill pill-bull">EXECUTION</span>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">6</div>
+          <div class="flow-content">
+            <div class="flow-label">9:35 CANDLE CLOSE — PULL TRIGGER</div>
+            <div class="flow-sub">ES alert → LTProv7 fires → Execute. 20% target. 50% stop non-negotiable.</div>
+          </div>
+          <span class="pill pill-bull">EXECUTE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEMORY RULE -->
+  <div class="memory-box">
+    <div class="label">// MEMORY RULE — NEVER FORGET //</div>
+    <div class="memory-rule">
+      Equity Futures → <span class="follow">Follow the color</span><br>
+      Treasuries + Commodities → <span class="flip">Flip the color</span><br>
+      ES conflicts with everything → <span style="color:var(--master)">Investigate ES first</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    PRE-BATTLE INTELLIGENCE GEM v1.0 &nbsp;·&nbsp; MAVERICK &nbsp;·&nbsp; LTPROV7.25 &nbsp;·&nbsp; JUNE 2026 &nbsp;·&nbsp; NOT FINANCIAL ADVICE
+  </div>
+
+</div>
+</body>
+</html>
