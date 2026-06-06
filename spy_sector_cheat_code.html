@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPY Sector Rotation — Maverick Cheat Code</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #080c10;
+    --bg-secondary: #0d1117;
+    --bg-card: #111820;
+    --bg-card-hover: #16202b;
+    --accent-gold: #f0a500;
+    --accent-gold-dim: #9a6800;
+    --accent-red: #ff3b3b;
+    --accent-red-dim: #7a1a1a;
+    --accent-red-bg: rgba(255,59,59,0.08);
+    --accent-green: #00e676;
+    --accent-green-dim: #007a3d;
+    --accent-green-bg: rgba(0,230,118,0.08);
+    --accent-amber: #ffab00;
+    --accent-amber-bg: rgba(255,171,0,0.08);
+    --text-primary: #e8edf2;
+    --text-secondary: #7a8a99;
+    --text-dim: #3d4f5e;
+    --border: rgba(240,165,0,0.15);
+    --border-bright: rgba(240,165,0,0.4);
+    --grid-line: rgba(255,255,255,0.03);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 40px, var(--grid-line) 40px, var(--grid-line) 41px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, var(--grid-line) 40px, var(--grid-line) 41px);
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-bright);
+    padding-bottom: 1.25rem;
+  }
+
+  .header-left .callsign {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--accent-gold);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .header-left h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+  }
+
+  .header-left h1 span {
+    color: var(--accent-gold);
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .date-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--accent-gold);
+    letter-spacing: 0.1em;
+  }
+
+  .status-pill {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 3px 12px;
+    border-radius: 2px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    border: 1px solid;
+  }
+
+  .status-pill.bearish {
+    background: var(--accent-red-bg);
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+  }
+
+  .status-pill.bullish {
+    background: var(--accent-green-bg);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+  }
+
+  .status-pill.neutral {
+    background: var(--accent-amber-bg);
+    border-color: var(--accent-amber);
+    color: var(--accent-amber);
+  }
+
+  /* GOLDEN RULES */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .rule-card {
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    border: 1px solid;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rule-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+  }
+
+  .rule-card.bear {
+    background: var(--accent-red-bg);
+    border-color: rgba(255,59,59,0.3);
+  }
+
+  .rule-card.bear::before { background: var(--accent-red); }
+
+  .rule-card.bull {
+    background: var(--accent-green-bg);
+    border-color: rgba(0,230,118,0.3);
+  }
+
+  .rule-card.bull::before { background: var(--accent-green); }
+
+  .rule-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .rule-card.bear .rule-label { color: var(--accent-red); }
+  .rule-card.bull .rule-label { color: var(--accent-green); }
+
+  .rule-item {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.6;
+    margin-bottom: 2px;
+  }
+
+  .rule-card.bear .rule-item { color: #ff8080; }
+  .rule-card.bull .rule-item { color: #80ffb8; }
+
+  .rule-note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .rule-card.bear .rule-note { color: var(--accent-red); }
+  .rule-card.bull .rule-note { color: var(--accent-green); }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* MAIN TABLE */
+  .sector-table {
+    background: var(--bg-card);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .table-header {
+    display: grid;
+    grid-template-columns: 2.2fr 0.7fr 0.5fr 0.5fr 0.5fr 1.5fr;
+    padding: 8px 16px;
+    background: rgba(240,165,0,0.05);
+    border-bottom: 1px solid var(--border-bright);
+    gap: 8px;
+  }
+
+  .th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+  }
+
+  .th.center { text-align: center; }
+  .th.right { text-align: right; }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 2.2fr 0.7fr 0.5fr 0.5fr 0.5fr 1.5fr;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s;
+    cursor: default;
+  }
+
+  .table-row:hover { background: var(--bg-card-hover); }
+  .table-row:last-child { border-bottom: none; }
+
+  .table-row.engine-row {
+    background: rgba(255,59,59,0.06);
+    border-left: 3px solid var(--accent-red);
+  }
+
+  .table-row.engine-row:hover { background: rgba(255,59,59,0.1); }
+
+  .divider-row {
+    padding: 6px 16px;
+    background: rgba(240,165,0,0.04);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .divider-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--accent-gold-dim);
+    text-transform: uppercase;
+  }
+
+  .sector-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .sector-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .badge.engine {
+    background: rgba(255,59,59,0.15);
+    color: var(--accent-red);
+    border: 1px solid rgba(255,59,59,0.3);
+  }
+
+  .badge.key {
+    background: rgba(0,230,118,0.1);
+    color: var(--accent-green);
+    border: 1px solid rgba(0,230,118,0.25);
+  }
+
+  .badge.def {
+    background: rgba(0,230,118,0.06);
+    color: var(--accent-green-dim);
+    border: 1px solid rgba(0,230,118,0.15);
+  }
+
+  .weight {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  .weight.heavy { color: var(--accent-red); font-weight: 700; }
+
+  /* TIMEFRAME DOTS */
+  .tf-cell {
+    text-align: center;
+  }
+
+  .tf-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 3px;
+    border: 1px solid var(--text-dim);
+    background: var(--bg-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    user-select: none;
+  }
+
+  .tf-dot:hover {
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+  }
+
+  .tf-dot.red {
+    background: var(--accent-red-bg);
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+    box-shadow: 0 0 6px rgba(255,59,59,0.2);
+  }
+
+  .tf-dot.green {
+    background: var(--accent-green-bg);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+    box-shadow: 0 0 6px rgba(0,230,118,0.2);
+  }
+
+  .implication {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: right;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  /* VERDICT TABLE */
+  .verdict-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .verdict-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .verdict-header {
+    padding: 8px 14px;
+    background: rgba(240,165,0,0.05);
+    border-bottom: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+  }
+
+  .verdict-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1.2fr;
+    padding: 8px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: center;
+    gap: 6px;
+  }
+
+  .verdict-row:last-child { border-bottom: none; }
+
+  .verdict-cell {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+  }
+
+  .verdict-cell.red { color: var(--accent-red); }
+  .verdict-cell.green { color: var(--accent-green); }
+  .verdict-cell.amber { color: var(--accent-amber); }
+  .verdict-cell.dim { color: var(--text-secondary); }
+
+  .verdict-result {
+    font-size: 11px;
+    font-weight: 700;
+    text-align: right;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  .verdict-result.bearish { color: var(--accent-red); }
+  .verdict-result.bullish { color: var(--accent-green); }
+  .verdict-result.caution { color: var(--accent-amber); }
+
+  /* MORNING CHECKLIST */
+  .checklist {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .check-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 8px 6px;
+    text-align: center;
+    transition: border-color 0.15s;
+  }
+
+  .check-item:hover { border-color: var(--accent-gold); }
+
+  .check-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .check-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-primary);
+    display: block;
+    font-weight: 600;
+  }
+
+  .check-desc {
+    font-size: 10px;
+    color: var(--text-secondary);
+    display: block;
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+
+  /* SPY VERDICT SUMMARY */
+  .spy-verdict {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .spy-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .spy-box::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .spy-box.red-box::after { background: var(--accent-red); }
+  .spy-box.green-box::after { background: var(--accent-green); }
+  .spy-box.gold-box::after { background: var(--accent-gold); }
+
+  .spy-box-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .spy-box-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .spy-box.red-box .spy-box-value { color: var(--accent-red); }
+  .spy-box.green-box .spy-box-value { color: var(--accent-green); }
+  .spy-box.gold-box .spy-box-value { color: var(--accent-gold); }
+
+  .spy-box-note {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  /* RESET BTN */
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 7px 18px;
+    border-radius: 3px;
+    border: 1px solid var(--border-bright);
+    background: transparent;
+    color: var(--accent-gold);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn:hover {
+    background: rgba(240,165,0,0.1);
+    border-color: var(--accent-gold);
+  }
+
+  .btn.danger {
+    border-color: rgba(255,59,59,0.4);
+    color: var(--accent-red);
+  }
+
+  .btn.danger:hover { background: var(--accent-red-bg); }
+
+  .btn.success {
+    border-color: rgba(0,230,118,0.4);
+    color: var(--accent-green);
+  }
+
+  .btn.success:hover { background: var(--accent-green-bg); }
+
+  .controls-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+  }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-left {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .footer-right {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    color: var(--accent-gold-dim);
+    letter-spacing: 0.2em;
+  }
+
+  /* SCAN ANIMATION */
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(240,165,0,0.08), transparent);
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .container > * {
+    animation: fadeIn 0.4s ease both;
+  }
+
+  .container > *:nth-child(1) { animation-delay: 0.05s; }
+  .container > *:nth-child(2) { animation-delay: 0.1s; }
+  .container > *:nth-child(3) { animation-delay: 0.15s; }
+  .container > *:nth-child(4) { animation-delay: 0.2s; }
+  .container > *:nth-child(5) { animation-delay: 0.25s; }
+  .container > *:nth-child(6) { animation-delay: 0.3s; }
+  .container > *:nth-child(7) { animation-delay: 0.35s; }
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="callsign">// Maverick War Room — Sector Intelligence</div>
+      <h1>SPY Sector <span>Cheat Code</span></h1>
+    </div>
+    <div class="header-right">
+      <div class="date-display" id="date-display">-- --- ----</div>
+      <div class="status-pill neutral" id="overall-verdict">ASSESSING...</div>
+    </div>
+  </div>
+
+  <!-- GOLDEN RULES -->
+  <div class="rules-grid">
+    <div class="rule-card bear">
+      <div class="rule-label">// Bearish Rules</div>
+      <div class="rule-item">XLK red on M + W + D = engine off</div>
+      <div class="rule-item">XLP + XLV green = flight to safety</div>
+      <div class="rule-item">XLK + XLY + XLC red = risk off confirmed</div>
+      <div class="rule-note">→ SPY bounces = relief rallies — sell into them</div>
+    </div>
+    <div class="rule-card bull">
+      <div class="rule-label">// Bullish Rules</div>
+      <div class="rule-item">XLK green on M + W + D = engine on</div>
+      <div class="rule-item">XLP + XLV red = leaving safety</div>
+      <div class="rule-item">XLK + XLY + XLC green = risk on confirmed</div>
+      <div class="rule-note">→ SPY dips = TTO entries — buy the pullback</div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <span class="controls-label">Mark timeframes:</span>
+    <button class="btn danger" onclick="setAll('red')">All Red</button>
+    <button class="btn success" onclick="setAll('green')">All Green</button>
+    <button class="btn" onclick="resetAll()">Reset</button>
+    <span class="controls-label" style="margin-left:auto;">click M · W · D dots to toggle</span>
+  </div>
+
+  <!-- SECTOR TABLE -->
+  <div class="section-label">X-Family Sector Map</div>
+
+  <div class="sector-table">
+    <div class="table-header">
+      <div class="th">Sector / ETF</div>
+      <div class="th center">Weight</div>
+      <div class="th center">M</div>
+      <div class="th center">W</div>
+      <div class="th center">D</div>
+      <div class="th right">SPY Implication</div>
+    </div>
+
+    <!-- ENGINE ROW -->
+    <div class="table-row engine-row" id="row-XLK">
+      <div>
+        <span class="sector-name">XLK <span class="badge engine">ENGINE</span></span>
+        <div class="sector-sub">Technology · AAPL MSFT NVDA AVGO</div>
+      </div>
+      <div class="weight heavy center">~29%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLK" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLK" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLK" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLK">All 3 red = SPY has no engine to rally</div>
+    </div>
+
+    <div class="table-row" id="row-XLF">
+      <div>
+        <span class="sector-name">XLF</span>
+        <div class="sector-sub">Financials · JPM BAC WFC GS MS</div>
+      </div>
+      <div class="weight center">~13%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLF" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLF" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLF" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLF">Follows 10Y yield direction</div>
+    </div>
+
+    <div class="table-row" id="row-XLV">
+      <div>
+        <span class="sector-name">XLV <span class="badge key">KEY</span></span>
+        <div class="sector-sub">Healthcare · UNH JNJ LLY MRK ABT</div>
+      </div>
+      <div class="weight center">~12%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLV" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLV" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLV" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLV">Green = defensive rotation. SPY bearish.</div>
+    </div>
+
+    <div class="table-row" id="row-XLY">
+      <div>
+        <span class="sector-name">XLY</span>
+        <div class="sector-sub">Consumer Discretionary · AMZN TSLA SBUX ABNB</div>
+      </div>
+      <div class="weight center">~10%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLY" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLY" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLY" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLY">Red = risk appetite gone. Confirms bearish.</div>
+    </div>
+
+    <div class="table-row" id="row-XLC">
+      <div>
+        <span class="sector-name">XLC</span>
+        <div class="sector-sub">Communications · META GOOGL NFLX DIS</div>
+      </div>
+      <div class="weight center">~9%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLC" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLC" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLC" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLC">Red = growth selling confirmed.</div>
+    </div>
+
+    <div class="table-row" id="row-XLI">
+      <div>
+        <span class="sector-name">XLI</span>
+        <div class="sector-sub">Industrials · CAT DE BA HON UPS</div>
+      </div>
+      <div class="weight center">~8%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLI" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLI" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLI" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLI">Red = capex slowing. Watch 3-1 setups.</div>
+    </div>
+
+    <div class="divider-row">
+      <div class="divider-label">— defensive sectors — green here = risk off —</div>
+    </div>
+
+    <div class="table-row" id="row-XLP">
+      <div>
+        <span class="sector-name">XLP <span class="badge key">KEY</span></span>
+        <div class="sector-sub">Consumer Staples · WMT COST PG KO PEP</div>
+      </div>
+      <div class="weight center">~6%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLP" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLP" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLP" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLP">Green = institutions fleeing equities.</div>
+    </div>
+
+    <div class="table-row" id="row-XLE">
+      <div>
+        <span class="sector-name">XLE</span>
+        <div class="sector-sub">Energy · CVX OXY EOG XOM SLB</div>
+      </div>
+      <div class="weight center">~4%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLE" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLE" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLE" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLE">Follow CL crude oil direction.</div>
+    </div>
+
+    <div class="table-row" id="row-XLB">
+      <div>
+        <span class="sector-name">XLB</span>
+        <div class="sector-sub">Materials · LIN APD SHW NEM FCX</div>
+      </div>
+      <div class="weight center">~2%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLB" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLB" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLB" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLB">Red = economic growth slowing.</div>
+    </div>
+
+    <div class="table-row" id="row-XLRE">
+      <div>
+        <span class="sector-name">XLRE</span>
+        <div class="sector-sub">Real Estate · AMT PLD CCI EQIX SPG</div>
+      </div>
+      <div class="weight center">~2%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLRE" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLRE" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLRE" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLRE">Inverse 10Y. Rising rates = red.</div>
+    </div>
+
+    <div class="table-row" id="row-XLU">
+      <div>
+        <span class="sector-name">XLU <span class="badge def">Defensive</span></span>
+        <div class="sector-sub">Utilities · NEE DUK SO AEP EXC</div>
+      </div>
+      <div class="weight center">~2%</div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLU" data-tf="M" onclick="toggleDot(this)">M</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLU" data-tf="W" onclick="toggleDot(this)">W</div></div>
+      <div class="tf-cell"><div class="tf-dot" data-ticker="XLU" data-tf="D" onclick="toggleDot(this)">D</div></div>
+      <div class="implication" id="impl-XLU">Green + XLP + XLV = max risk off confirmed.</div>
+    </div>
+
+  </div>
+
+  <!-- SPY VERDICT SUMMARY -->
+  <div class="section-label">Live Verdict</div>
+  <div class="spy-verdict">
+    <div class="spy-box red-box">
+      <div class="spy-box-label">Sectors Red</div>
+      <div class="spy-box-value" id="count-red">0</div>
+      <div class="spy-box-note">bearish weight</div>
+    </div>
+    <div class="spy-box green-box">
+      <div class="spy-box-label">Sectors Green</div>
+      <div class="spy-box-value" id="count-green">0</div>
+      <div class="spy-box-note">bullish / defensive weight</div>
+    </div>
+    <div class="spy-box gold-box">
+      <div class="spy-box-label">SPY Bias</div>
+      <div class="spy-box-value" id="bias-display">—</div>
+      <div class="spy-box-note" id="bias-note">fill in sectors above</div>
+    </div>
+  </div>
+
+  <!-- VERDICT TABLE -->
+  <div class="section-label">Confirmation Table</div>
+  <div class="verdict-section">
+    <div class="verdict-card">
+      <div class="verdict-header">// Bearish Confirmation Stack</div>
+      <div class="verdict-row">
+        <div class="verdict-cell red">XLK M+W+D</div>
+        <div class="verdict-cell green">XLP+XLV</div>
+        <div class="verdict-cell green">10Y green</div>
+        <div class="verdict-result bearish">STRONGLY BEARISH</div>
+      </div>
+      <div class="verdict-row">
+        <div class="verdict-cell red">XLK red</div>
+        <div class="verdict-cell green">XLP+XLV</div>
+        <div class="verdict-cell dim">10Y mixed</div>
+        <div class="verdict-result bearish">BEARISH</div>
+      </div>
+      <div class="verdict-row">
+        <div class="verdict-cell red">XLK red</div>
+        <div class="verdict-cell dim">XLP mixed</div>
+        <div class="verdict-cell green">10Y green</div>
+        <div class="verdict-result caution">BEARISH — WAIT</div>
+      </div>
+    </div>
+    <div class="verdict-card">
+      <div class="verdict-header">// Bullish Confirmation Stack</div>
+      <div class="verdict-row">
+        <div class="verdict-cell green">XLK M+W+D</div>
+        <div class="verdict-cell red">XLP+XLV</div>
+        <div class="verdict-cell red">10Y red</div>
+        <div class="verdict-result bullish">STRONGLY BULLISH</div>
+      </div>
+      <div class="verdict-row">
+        <div class="verdict-cell green">XLK green</div>
+        <div class="verdict-cell red">XLP+XLV</div>
+        <div class="verdict-cell dim">10Y mixed</div>
+        <div class="verdict-result bullish">BULLISH</div>
+      </div>
+      <div class="verdict-row">
+        <div class="verdict-cell green">XLK green</div>
+        <div class="verdict-cell green">XLP green</div>
+        <div class="verdict-cell red">10Y red</div>
+        <div class="verdict-result caution">CAUTIOUS — CONFIRM</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MORNING CHECKLIST -->
+  <div class="section-label">7-Step Morning Checklist</div>
+  <div class="checklist">
+    <div class="checklist-grid">
+      <div class="check-item">
+        <span class="check-num">01</span>
+        <span class="check-name">SPY</span>
+        <span class="check-desc">D+W+M candle + VWAP stack</span>
+      </div>
+      <div class="check-item">
+        <span class="check-num">02</span>
+        <span class="check-name">XLK</span>
+        <span class="check-desc">Engine on or off? D+W+M</span>
+      </div>
+      <div class="check-item">
+        <span class="check-num">03</span>
+        <span class="check-name">XLY</span>
+        <span class="check-desc">Risk appetite on or off?</span>
+      </div>
+      <div class="check-item">
+        <span class="check-num">04</span>
+        <span class="check-name">XLP</span>
+        <span class="check-desc">Green = flight to safety</span>
+      </div>
+      <div class="check-item">
+        <span class="check-num">05</span>
+        <span class="check-name">XLV</span>
+        <span class="check-desc">Green = defensive confirmed</span>
+      </div>
+      <div class="check-item">
+        <span class="check-num">06</span>
+        <span class="check-name">XLU</span>
+        <span class="check-desc">Green = utilities safety bid</span>
+      </div>
+      <div class="check-item">
+        <span class="check-num">07</span>
+        <span class="check-name">10Y</span>
+        <span class="check-desc">Treasury green = risk off</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">MAVERICK WAR ROOM · LTPROV7.25 · BUDDYROLE.GITHUB.IO</div>
+    <div class="footer-right">CLASSIFIED // SECTOR INTEL</div>
+  </div>
+
+</div>
+
+<script>
+  const state = {};
+  const tickers = ['XLK','XLF','XLV','XLY','XLC','XLI','XLP','XLE','XLB','XLRE','XLU'];
+
+  function updateDate() {
+    const now = new Date();
+    const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    document.getElementById('date-display').textContent =
+      days[now.getDay()] + ' ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+  }
+
+  function toggleDot(el) {
+    const ticker = el.dataset.ticker;
+    const tf = el.dataset.tf;
+    const key = ticker + '_' + tf;
+    if (!state[key]) {
+      state[key] = 'red';
+      el.classList.add('red');
+      el.classList.remove('green');
+      el.textContent = '▼';
+    } else if (state[key] === 'red') {
+      state[key] = 'green';
+      el.classList.add('green');
+      el.classList.remove('red');
+      el.textContent = '▲';
+    } else {
+      state[key] = null;
+      el.classList.remove('red','green');
+      el.textContent = tf;
+    }
+    updateVerdict();
+  }
+
+  function setAll(color) {
+    document.querySelectorAll('.tf-dot').forEach(el => {
+      const ticker = el.dataset.ticker;
+      const tf = el.dataset.tf;
+      state[ticker + '_' + tf] = color;
+      el.classList.remove('red','green');
+      el.classList.add(color);
+      el.textContent = color === 'red' ? '▼' : '▲';
+    });
+    updateVerdict();
+  }
+
+  function resetAll() {
+    document.querySelectorAll('.tf-dot').forEach(el => {
+      const ticker = el.dataset.ticker;
+      const tf = el.dataset.tf;
+      state[ticker + '_' + tf] = null;
+      el.classList.remove('red','green');
+      el.textContent = el.dataset.tf;
+    });
+    updateVerdict();
+  }
+
+  function getTickerStatus(ticker) {
+    const m = state[ticker + '_M'];
+    const w = state[ticker + '_W'];
+    const d = state[ticker + '_D'];
+    const vals = [m, w, d].filter(Boolean);
+    if (vals.length === 0) return 'neutral';
+    const reds = vals.filter(v => v === 'red').length;
+    const greens = vals.filter(v => v === 'green').length;
+    if (reds === vals.length) return 'red';
+    if (greens === vals.length) return 'green';
+    return 'mixed';
+  }
+
+  function updateVerdict() {
+    let redCount = 0, greenCount = 0;
+
+    tickers.forEach(ticker => {
+      const status = getTickerStatus(ticker);
+      const impl = document.getElementById('impl-' + ticker);
+      if (status === 'red') {
+        redCount++;
+        if (impl) impl.style.color = 'var(--accent-red)';
+      } else if (status === 'green') {
+        greenCount++;
+        if (impl) impl.style.color = 'var(--accent-green)';
+      } else {
+        if (impl) impl.style.color = 'var(--text-secondary)';
+      }
+    });
+
+    document.getElementById('count-red').textContent = redCount;
+    document.getElementById('count-green').textContent = greenCount;
+
+    const xlkStatus = getTickerStatus('XLK');
+    const xlpStatus = getTickerStatus('XLP');
+    const xlvStatus = getTickerStatus('XLV');
+
+    const biasEl = document.getElementById('bias-display');
+    const noteEl = document.getElementById('bias-note');
+    const verdictEl = document.getElementById('overall-verdict');
+
+    if (xlkStatus === 'red' && (xlpStatus === 'green' || xlvStatus === 'green')) {
+      biasEl.textContent = 'BEARISH';
+      biasEl.style.color = 'var(--accent-red)';
+      noteEl.textContent = 'bounces = sell into them';
+      verdictEl.className = 'status-pill bearish';
+      verdictEl.textContent = 'BEARISH';
+    } else if (xlkStatus === 'green' && xlpStatus !== 'green' && xlvStatus !== 'green') {
+      biasEl.textContent = 'BULLISH';
+      biasEl.style.color = 'var(--accent-green)';
+      noteEl.textContent = 'dips = TTO entries';
+      verdictEl.className = 'status-pill bullish';
+      verdictEl.textContent = 'BULLISH';
+    } else if (redCount > greenCount && redCount >= 4) {
+      biasEl.textContent = 'BEARISH';
+      biasEl.style.color = 'var(--accent-red)';
+      noteEl.textContent = 'broad weakness — confirm with LTProv7';
+      verdictEl.className = 'status-pill bearish';
+      verdictEl.textContent = 'BEARISH';
+    } else if (greenCount > redCount && greenCount >= 4) {
+      biasEl.textContent = 'BULLISH';
+      biasEl.style.color = 'var(--accent-green)';
+      noteEl.textContent = 'broad strength — confirm with LTProv7';
+      verdictEl.className = 'status-pill bullish';
+      verdictEl.textContent = 'BULLISH';
+    } else {
+      biasEl.textContent = 'MIXED';
+      biasEl.style.color = 'var(--accent-amber)';
+      noteEl.textContent = 'wait for confirmation';
+      verdictEl.className = 'status-pill neutral';
+      verdictEl.textContent = 'MIXED';
+    }
+  }
+
+  updateDate();
+  updateVerdict();
+</script>
+</body>
+</html>
