@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Premium Calc — Compass Toolkit</title>
+<style>
+  :root{
+    --bg: #090c10;
+    --panel: #10151c;
+    --panel-2: #141b24;
+    --line: #1f2833;
+    --text: #d7e2ea;
+    --dim: #6b7c8c;
+    --green: #35e08a;
+    --red: #ff5470;
+    --amber: #f5b83d;
+    --blue: #4fb0ff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);}
+  body{
+    font-family: 'JetBrains Mono','Consolas',monospace;
+    padding: 18px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:16px;
+  }
+  .head h1{
+    font-size:15px; letter-spacing:2px; font-weight:600; margin:0;
+    color:var(--text); text-transform:uppercase;
+  }
+  .head span{ color:var(--dim); font-size:11px; letter-spacing:1px; }
+
+  .tabs{ display:flex; gap:6px; margin-bottom:14px; }
+  .tab{
+    flex:1; text-align:center; padding:9px 4px; font-size:11px; letter-spacing:1.5px;
+    text-transform:uppercase; color:var(--dim); background:var(--panel);
+    border:1px solid var(--line); cursor:pointer; user-select:none;
+    transition:.12s;
+  }
+  .tab:hover{ color:var(--text); }
+  .tab.active{ color:var(--bg); background:var(--blue); border-color:var(--blue); font-weight:700;}
+
+  .panel{ display:none; background:var(--panel); border:1px solid var(--line); padding:16px; }
+  .panel.active{ display:block; }
+
+  .row{ display:flex; gap:10px; margin-bottom:10px; }
+  .field{ flex:1; }
+  label{
+    display:block; font-size:10px; letter-spacing:1px; color:var(--dim);
+    text-transform:uppercase; margin-bottom:5px;
+  }
+  input, select{
+    width:100%; background:var(--panel-2); border:1px solid var(--line);
+    color:var(--text); font-family:inherit; font-size:14px; padding:9px 10px;
+    outline:none;
+  }
+  input:focus, select:focus{ border-color:var(--blue); }
+  select{ appearance:none; -webkit-appearance:none; }
+
+  .toggle{ display:flex; border:1px solid var(--line); }
+  .toggle div{
+    flex:1; text-align:center; padding:9px; font-size:12px; letter-spacing:1px;
+    cursor:pointer; color:var(--dim); background:var(--panel-2);
+  }
+  .toggle div.on.call{ background:var(--green); color:#06130d; font-weight:700; }
+  .toggle div.on.put{ background:var(--red); color:#1a0509; font-weight:700; }
+
+  .out{
+    margin-top:14px; border-top:1px dashed var(--line); padding-top:14px;
+  }
+  .out-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:7px 0; font-size:12.5px;
+  }
+  .out-row .k{ color:var(--dim); letter-spacing:.5px; }
+  .out-row .v{ font-size:15px; font-weight:700; }
+  .v.green{ color:var(--green); }
+  .v.red{ color:var(--red); }
+  .v.amber{ color:var(--amber); }
+  .v.blue{ color:var(--blue); }
+
+  .hero{
+    text-align:center; padding:14px 0 6px; border-top:1px solid var(--line); margin-top:8px;
+  }
+  .hero .big{ font-size:30px; font-weight:800; letter-spacing:1px; }
+  .hero .lbl{ font-size:10px; color:var(--dim); letter-spacing:2px; text-transform:uppercase; margin-top:2px;}
+
+  .note{
+    font-size:10.5px; color:var(--dim); line-height:1.5; margin-top:12px;
+    border-left:2px solid var(--line); padding-left:9px;
+  }
+  .note b{ color:var(--amber); }
+
+  .ladder{ margin-top:12px; }
+  .ladder-row{
+    display:flex; justify-content:space-between; padding:6px 8px; font-size:12px;
+    background:var(--panel-2); margin-bottom:3px; border-left:2px solid var(--line);
+  }
+  .ladder-row.mid{ border-left-color:var(--blue); }
+  .ladder-row .a{ color:var(--dim); }
+  .ladder-row .b{ font-weight:700; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>Premium Calc</h1>
+  <span>Compass&nbsp;→&nbsp;Trigger Toolkit</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="mid">Spread / Mid</div>
+  <div class="tab" data-tab="stop">$ Stop</div>
+  <div class="tab" data-tab="target">Target Premium</div>
+</div>
+
+<!-- ===== TAB 1: SPREAD / MID ===== -->
+<div class="panel active" id="mid">
+  <div class="row">
+    <div class="field">
+      <label>Bid</label>
+      <input type="number" id="m_bid" step="0.01" value="2.40">
+    </div>
+    <div class="field">
+      <label>Ask</label>
+      <input type="number" id="m_ask" step="0.01" value="2.60">
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="big v blue" id="m_mid">$2.50</div>
+    <div class="lbl">Midpoint — First Limit Try</div>
+  </div>
+
+  <div class="out">
+    <div class="out-row"><span class="k">Spread ($)</span><span class="v" id="m_spread">—</span></div>
+    <div class="out-row"><span class="k">Spread (% of ask)</span><span class="v" id="m_spreadpct">—</span></div>
+  </div>
+
+  <div class="ladder" id="m_ladder"></div>
+
+  <div class="note">Start your limit at <b>midpoint</b>. If it doesn't fill in a reasonable window, walk it up toward the ask in penny/nickel steps — never jump straight to the ask.</div>
+</div>
+
+<!-- ===== TAB 2: $ STOP ===== -->
+<div class="panel" id="stop">
+  <div class="row">
+    <div class="field">
+      <label>Fill Price (premium)</label>
+      <input type="number" id="s_fill" step="0.01" value="2.50">
+    </div>
+    <div class="field">
+      <label>Contracts</label>
+      <input type="number" id="s_contracts" step="1" min="1" value="1">
+    </div>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label>Max $ Loss</label>
+      <input type="number" id="s_maxloss" step="1" value="25">
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="big v red" id="s_stop">$2.25</div>
+    <div class="lbl">Stop Premium</div>
+  </div>
+
+  <div class="out">
+    <div class="out-row"><span class="k">Cost per contract</span><span class="v" id="s_cost">—</span></div>
+    <div class="out-row"><span class="k">Total position cost</span><span class="v" id="s_totalcost">—</span></div>
+    <div class="out-row"><span class="k">Move per contract</span><span class="v" id="s_move">—</span></div>
+    <div class="out-row"><span class="k">Actual $ loss at stop</span><span class="v" id="s_actualloss">—</span></div>
+  </div>
+
+  <div class="note">Formula: <b>Stop = Fill − (Max Loss ÷ (100 × Contracts))</b>. Rounded to the nearest cent in your favor. Excludes fees/slippage — a stop-market can overshoot slightly in a fast move.</div>
+</div>
+
+<!-- ===== TAB 3: TARGET PREMIUM ===== -->
+<div class="panel" id="target">
+  <div class="row">
+    <div class="field">
+      <label>Option Type</label>
+      <div class="toggle">
+        <div id="t_call" class="on call">CALL</div>
+        <div id="t_put" class="put">PUT</div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label>Current SPY</label>
+      <input type="number" id="t_spynow" step="0.01" value="740.00">
+    </div>
+    <div class="field">
+      <label>Target SPY</label>
+      <input type="number" id="t_spytarget" step="0.01" value="738.00">
+    </div>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label>Current Premium</label>
+      <input type="number" id="t_premnow" step="0.01" value="3.00">
+    </div>
+    <div class="field">
+      <label>Delta (0–1, sign auto)</label>
+      <input type="number" id="t_delta" step="0.01" min="0" max="1" value="0.60">
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="big v green" id="t_result">$1.80</div>
+    <div class="lbl">Estimated Limit Price</div>
+  </div>
+
+  <div class="out">
+    <div class="out-row"><span class="k">SPY move</span><span class="v" id="t_spymove">—</span></div>
+    <div class="out-row"><span class="k">Est. premium change</span><span class="v" id="t_premchange">—</span></div>
+  </div>
+
+  <div class="note">Estimate only — delta shifts with SPY (gamma), and theta/IV will pull the real fill off this number, especially the further SPY has to travel. Tightest near entry, loosest on big swings.</div>
+</div>
+
+<script>
+  // ---- tab switching ----
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById(t.dataset.tab).classList.add('active');
+    });
+  });
+
+  const $ = id => document.getElementById(id);
+  const money = n => isFinite(n) ? '$'+n.toFixed(2) : '—';
+  const money3 = n => isFinite(n) ? '$'+n.toFixed(3) : '—';
+
+  // ---- TAB 1: mid/spread ----
+  function calcMid(){
+    const bid = parseFloat($('m_bid').value);
+    const ask = parseFloat($('m_ask').value);
+    if(!isFinite(bid) || !isFinite(ask) || ask<=0){ return; }
+    const mid = (bid+ask)/2;
+    const spread = ask-bid;
+    const spreadPct = (spread/ask)*100;
+    $('m_mid').textContent = money(mid);
+    $('m_spread').textContent = money(spread);
+    $('m_spreadpct').textContent = spreadPct.toFixed(1)+'%';
+
+    // walk-up ladder: mid, +1c steps toward ask (up to 4 steps or ask)
+    const steps = [];
+    let cur = mid;
+    steps.push(cur);
+    const stepSize = Math.max(0.01, Math.round((spread/4)*100)/100);
+    for(let i=1;i<4;i++){
+      cur = Math.min(ask, +(mid + stepSize*i).toFixed(2));
+      if(cur < ask) steps.push(cur);
+    }
+    steps.push(ask);
+    let html = '';
+    steps.forEach((s,i)=>{
+      let lab = i===0 ? '1st try' : (i===steps.length-1 ? 'Max (ask)' : (i+1)+'nd/rd try');
+      html += `<div class="ladder-row ${i===0?'mid':''}"><span class="a">${lab}</span><span class="b">${money(s)}</span></div>`;
+    });
+    $('m_ladder').innerHTML = html;
+  }
+  ['m_bid','m_ask'].forEach(id=> $(id).addEventListener('input', calcMid));
+
+  // ---- TAB 2: stop ----
+  function calcStop(){
+    const fill = parseFloat($('s_fill').value);
+    const contracts = Math.max(1, parseInt($('s_contracts').value)||1);
+    const maxLoss = parseFloat($('s_maxloss').value);
+    if(!isFinite(fill) || !isFinite(maxLoss)){ return; }
+    const perContractMove = maxLoss / (100*contracts);
+    let stop = fill - perContractMove;
+    stop = Math.max(0, +stop.toFixed(2));
+    const cost = fill*100;
+    const totalCost = cost*contracts;
+    const actualLoss = (fill-stop)*100*contracts;
+
+    $('s_stop').textContent = money(stop);
+    $('s_cost').textContent = money(cost);
+    $('s_totalcost').textContent = money(totalCost);
+    $('s_move').textContent = money3(perContractMove);
+    $('s_actualloss').textContent = money(actualLoss);
+  }
+  ['s_fill','s_contracts','s_maxloss'].forEach(id=> $(id).addEventListener('input', calcStop));
+
+  // ---- TAB 3: target premium ----
+  let optType = 'call';
+  $('t_call').addEventListener('click', ()=>{
+    optType='call';
+    $('t_call').classList.add('on'); $('t_put').classList.remove('on');
+    calcTarget();
+  });
+  $('t_put').addEventListener('click', ()=>{
+    optType='put';
+    $('t_put').classList.add('on'); $('t_call').classList.remove('on');
+    calcTarget();
+  });
+
+  function calcTarget(){
+    const spyNow = parseFloat($('t_spynow').value);
+    const spyTarget = parseFloat($('t_spytarget').value);
+    const premNow = parseFloat($('t_premnow').value);
+    let delta = parseFloat($('t_delta').value);
+    if(!isFinite(spyNow)||!isFinite(spyTarget)||!isFinite(premNow)||!isFinite(delta)){ return; }
+    delta = Math.abs(delta) * (optType==='call' ? 1 : -1);
+    const spyMove = spyTarget - spyNow;
+    const premChange = delta * spyMove;
+    let result = premNow + premChange;
+    result = Math.max(0.01, +result.toFixed(2));
+
+    $('t_result').textContent = money(result);
+    $('t_result').className = 'big v ' + (premChange>=0 ? 'green' : 'red');
+    $('t_spymove').textContent = (spyMove>=0?'+':'') + spyMove.toFixed(2);
+    $('t_premchange').textContent = (premChange>=0?'+':'') + money(Math.abs(premChange)).replace('$', premChange>=0?'$':'-$');
+  }
+  ['t_spynow','t_spytarget','t_premnow','t_delta'].forEach(id=> $(id).addEventListener('input', calcTarget));
+
+  // init
+  calcMid();
+  calcStop();
+  calcTarget();
+</script>
+
+</body>
+</html>
